@@ -1,6 +1,101 @@
-﻿
-
+﻿@using DotNetCodeGenerator.Domain.Entities;
+@using DotNetCodeGenerator.Domain.Helpers;
+@model CodeGeneratorResult
 @{
     ViewBag.Title = "Home Page";
 }
- 
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>CodeGeneratorResult</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.ConnectionString, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ConnectionString, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.ConnectionString, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.SelectedTable,
+           htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                 
+                @Html.ValidationMessageFor(model => model.SelectedTable, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.StringCodePattern, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.StringCodePattern, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.StringCodePattern, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.IsMethodStatic, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <div class="checkbox">
+                    @Html.EditorFor(model => model.IsMethodStatic)
+                    @Html.ValidationMessageFor(model => model.IsMethodStatic, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.StoredProcExec, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <textarea class="form-control text-box multi-line"
+                          id="StoredProcExec"
+                          name="StoredProcExec">
+                    @Model.StoredProcExec
+                    </textarea>
+                @Html.ValidationMessageFor(model => model.StoredProcExec, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.StoredProcExecModel, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <textarea class="form-control text-box multi-line"
+                          id="StoredProcExecModel"
+                          name="StoredProcExecModel">
+                    @Model.StoredProcExecModel
+                    </textarea>
+
+                @Html.ValidationMessageFor(model => model.StoredProcExecModel, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.StoredProcExecModelDataReader, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <textarea 
+                          class="form-control text-box multi-line"
+                           id="StoredProcExecModelDataReader"
+                           name="StoredProcExecModelDataReader">@Model.StoredProcExecModelDataReader</textarea>
+                @Html.ValidationMessageFor(model => model.StoredProcExecModelDataReader, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Generate Code" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

@@ -16,7 +16,7 @@ using System.Globalization;
 using DotNetCodeGenerator.Domain.Entities;
 using DotNetCodeGenerator.Domain.Helpers;
 
-namespace DotNetCodeGenerator.Domain.DB
+namespace DotNetCodeGenerator.Domain.Repositories
 {
     public class TableRepository
     {

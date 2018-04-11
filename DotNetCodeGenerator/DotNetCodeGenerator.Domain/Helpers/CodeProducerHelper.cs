@@ -1,4 +1,4 @@
-﻿using DotNetCodeGenerator.Domain.DB;
+﻿using DotNetCodeGenerator.Domain.Repositories;
 using DotNetCodeGenerator.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -7,13 +7,15 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using DotNetCodeGenerator.Domain.Services;
+using Ninject;
 
 namespace DotNetCodeGenerator.Domain.Helpers
 {
     public class CodeProducerHelper
     {
-        public TableRepository TableRepository { get; set; }
-
+        [Inject]
+        public TableService TableService { get; set; }
         public void GenerateSPModel(CodeGeneratorResult codeGeneratorResult,
             DatabaseMetadata databaseMetadata)
         {
@@ -42,7 +44,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
                 sqlCommand = m.FirstOrDefault();
 
-                ds = TableRepository.GetDataSet(sqlCommand, databaseMetadata.ConnectionString);
+                ds = TableService.GetDataSet(sqlCommand, databaseMetadata.ConnectionString);
 
                 String tableNamesTxt = m.LastOrDefault();
 
