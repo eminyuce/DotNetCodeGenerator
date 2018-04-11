@@ -1,0 +1,59 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DotNetCodeGenerator.Domain.Entities
+{
+    public class TableRowMetaData
+    {
+        public String ColumnName { set; get; }
+        public String IsNull { set; get; }
+        public String DataType { set; get; }
+        public String MaxChar { set; get; }
+        public String DataTypeMaxChar { set; get; }
+        public String CssClass { set; get; }
+        public int Order { set; get; }
+        public bool Use { set; get; }
+        public int ID { set; get; }
+        public bool PrimaryKey { set; get; }
+        public bool GridViewFields { set; get; }
+        public bool Sql { set; get; }
+        public bool IfStatement { set; get; }
+        public String ControlID { set; get; }
+        public bool ForeignKey { get; set; }
+        public string columnDefaultValue
+        {
+            get
+            {
+
+                String m = "";
+
+                if (DataType.IndexOf("varchar") > -1)
+                {
+                    m = "''";
+                }
+                else if (DataType.IndexOf("int") > -1)
+                {
+                    m = "0";
+                }
+                else if (DataType.IndexOf("date") > -1)
+                {
+                    m = "null";
+                }
+                else if (DataType.IndexOf("bit") > -1)
+                {
+                    m = "true";
+                }
+                else if (DataType.IndexOf("float") > -1)
+                {
+                    m = "0";
+                }
+
+                return m;
+
+            }
+        }
+    }
+}

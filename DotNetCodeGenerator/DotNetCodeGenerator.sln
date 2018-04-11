@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCodeGenerator", "DotN
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCodeGenerator.Tests", "DotNetCodeGenerator.Tests\DotNetCodeGenerator.Tests.csproj", "{C7C9AA02-9988-460A-B462-D4AAB3E421E9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCodeGenerator.Domain", "DotNetCodeGenerator.Domain\DotNetCodeGenerator.Domain.csproj", "{A291917E-EFB7-4148-B917-89C56A845206}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C7C9AA02-9988-460A-B462-D4AAB3E421E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7C9AA02-9988-460A-B462-D4AAB3E421E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7C9AA02-9988-460A-B462-D4AAB3E421E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A291917E-EFB7-4148-B917-89C56A845206}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A291917E-EFB7-4148-B917-89C56A845206}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A291917E-EFB7-4148-B917-89C56A845206}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A291917E-EFB7-4148-B917-89C56A845206}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

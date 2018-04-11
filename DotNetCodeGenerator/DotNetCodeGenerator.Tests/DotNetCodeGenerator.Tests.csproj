@@ -92,6 +92,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DotNetCodeGenerator.Domain\DotNetCodeGenerator.Domain.csproj">
+      <Project>{a291917e-efb7-4148-b917-89c56a845206}</Project>
+      <Name>DotNetCodeGenerator.Domain</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DotNetCodeGenerator\DotNetCodeGenerator.csproj">
       <Project>{289D1F0A-49F2-49DD-810D-6D0E45B308B5}</Project>
       <Name>DotNetCodeGenerator</Name>

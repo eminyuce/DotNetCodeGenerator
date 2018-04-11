@@ -6,6 +6,10 @@ using System.Web.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DotNetCodeGenerator;
 using DotNetCodeGenerator.Controllers;
+using DotNetCodeGenerator.Domain.DB;
+using System.Configuration;
+using DotNetCodeGenerator.Domain.Helpers;
+using DotNetCodeGenerator.Domain.Entities;
 
 namespace DotNetCodeGenerator.Tests.Controllers
 {
@@ -15,14 +19,19 @@ namespace DotNetCodeGenerator.Tests.Controllers
         [TestMethod]
         public void Index()
         {
-            // Arrange
-            HomeController controller = new HomeController();
-
-            // Act
-            ViewResult result = controller.Index() as ViewResult;
-
-            // Assert
-            Assert.IsNotNull(result);
+            var tableRepository = new TableRepository();
+            string connectionString = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+            var databaseMetaData = tableRepository.GetAllTables(connectionString);
+            var selectedTable = databaseMetaData.Tables.Where(r => r.DatabaseTableName.Equals("dbo.Products"));
+            tableRepository.GetSelectedTableMetaData(databaseMetaData, "dbo.Products");
+            var t = new CodeProducerHelper();
+            t.TableRepository = tableRepository;
+            var codeGeneratorResult = new CodeGeneratorResult();
+            codeGeneratorResult.StoredProcExec = "dbo.test_SP @take=2 -NwmProduct";
+            t.GenerateSPModel(codeGeneratorResult,databaseMetaData);
+            Console.WriteLine(codeGeneratorResult.StoredProcExec);
+            Console.WriteLine(codeGeneratorResult.StoredProcExecModel);
+            Console.WriteLine(codeGeneratorResult.StoredProcExecModelDataReader);
         }
 
         [TestMethod]
