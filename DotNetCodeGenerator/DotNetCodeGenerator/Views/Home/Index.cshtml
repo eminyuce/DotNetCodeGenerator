@@ -3,6 +3,7 @@
 @model CodeGeneratorResult
 @{
     ViewBag.Title = "Home Page";
+    var emptyList = new List<SelectListItem>();
 }
 
 
@@ -24,9 +25,20 @@
         <div class="form-group">
             @Html.LabelFor(model => model.SelectedTable,
            htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                 
+            <div class="col-md-5">
+                @Html.DropDownList("SelectedTable", emptyList, htmlAttributes: new { @class = "form-control" }) 
                 @Html.ValidationMessageFor(model => model.SelectedTable, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-md-5">
+                <input type="button" id="RetrieveTables" value="Get Tables" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ModifiedTableName, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ModifiedTableName, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.ModifiedTableName, "", new { @class = "text-danger" })
             </div>
         </div>
 
@@ -98,4 +110,31 @@
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+      
+      $(document).ready(function () {
+
+          $("#RetrieveTables").click(function () {
+              fillTables();
+          });
+          fillTables();
+          function fillTables() {
+              var postData = JSON.stringify({ "connectionString": $("#ConnectionString").val() });
+              ajaxMethodCall(postData, "/Ajax/GetTables", function (data) {
+                  var listitems = '';
+                  $('#SelectedTable').find('option').remove();
+                  $.each(data, function (i, item) {
+                      listitems += '<option value=' + item.TableName + '>' + item.DatabaseTableName + '</option>';
+                  });
+                  $('#SelectedTable').append(listitems);
+              });
+          }
+          $('#SelectedTable').on('change', function () {
+              $('#ModifiedTableName').val(this.value);
+          });
+
+      });
+
+    </script>
 }

@@ -86,6 +86,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\TableRowMetaDataHelper.cs" />
     <Compile Include="Repositories\TableRepository.cs" />
     <Compile Include="Entities\CodeGeneratorResult.cs" />
     <Compile Include="Entities\DatabaseMetadata.cs" />

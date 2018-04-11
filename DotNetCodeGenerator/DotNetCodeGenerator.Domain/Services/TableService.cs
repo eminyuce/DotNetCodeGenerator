@@ -30,8 +30,12 @@ namespace DotNetCodeGenerator.Domain.Services
         public  void GenerateCode(CodeGeneratorResult codeGeneratorResult)
         {
             var databaseMetaData = TableRepository.GetAllTables(codeGeneratorResult.ConnectionString);
-            CodeProducerHelper.GenerateSPModel(codeGeneratorResult, databaseMetaData);
+            CodeProducerHelper.CodeGeneratorResult = codeGeneratorResult;
+            CodeProducerHelper.DatabaseMetadata = databaseMetaData;
+            CodeProducerHelper.GenerateSPModel();
 
+             codeGeneratorResult = CodeProducerHelper.CodeGeneratorResult;
+            // CodeProducerHelper.GenerateRepository(codeGeneratorResult, databaseMetaData);
             //var tasks = new List<Task>();
 
             //Task task = new Task(() => {  });

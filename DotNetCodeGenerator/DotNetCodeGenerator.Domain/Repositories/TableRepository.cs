@@ -54,7 +54,7 @@ namespace DotNetCodeGenerator.Domain.Repositories
                 con.Close();
 
                 result.ConnectionString = connectionString;
-                result.Tables = list;
+                result.Tables = list.OrderBy(t=>t.TableName).ToList();
             }
             catch (Exception e)
             {

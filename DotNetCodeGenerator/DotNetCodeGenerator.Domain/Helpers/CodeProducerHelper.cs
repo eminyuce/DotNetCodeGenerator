@@ -16,11 +16,34 @@ namespace DotNetCodeGenerator.Domain.Helpers
     {
         [Inject]
         public TableService TableService { get; set; }
-        public void GenerateSPModel(CodeGeneratorResult codeGeneratorResult,
-            DatabaseMetadata databaseMetadata)
+
+
+        public CodeGeneratorResult CodeGeneratorResult { get; set; }
+        public DatabaseMetadata DatabaseMetadata { get; set; }
+
+        private string GenereateSaveOrUpdateDatabaseUtility()
+        {
+            StringBuilder method = new StringBuilder();
+            String realEntityName = CodeGeneratorResult.SelectedTable;
+            String modelName = CodeGeneratorResult.ModifiedTableName;
+            String modifiedTableName = CodeGeneratorResult.ModifiedTableName;
+            String entityPrefix = GeneralHelper.GetEntityPrefixName(realEntityName);
+            entityPrefix = (String.IsNullOrEmpty(entityPrefix) ? "" : entityPrefix + "_");
+            String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(DatabaseMetadata.SelectedTable.TableRowMetaDataList);
+            String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
+            method.AppendLine("public " + staticText + " int SaveOrUpdate" + modelName + "( " + modelName + " item)");
+            method.AppendLine(" {");
+            //GetDatabaseUtilityParameters(kontrolList, method, entityPrefix + "SaveOrUpdate" + modifiedTableName, true);
+            method.AppendLine(" int id = DatabaseUtility.ExecuteScalar(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray()).ToInt();");
+            method.AppendLine(" return id;");
+            method.AppendLine(" }");
+            return method.ToString();
+        }
+
+        public void GenerateSPModel()
         {
             #region Execute SP to get tables so that we can generate code
-            string StoredProc_Exec = codeGeneratorResult.StoredProcExec;
+            string StoredProc_Exec = CodeGeneratorResult.StoredProcExec;
 
             if (String.IsNullOrEmpty(StoredProc_Exec))
             {
@@ -44,7 +67,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
                 sqlCommand = m.FirstOrDefault();
 
-                ds = TableService.GetDataSet(sqlCommand, databaseMetadata.ConnectionString);
+                ds = TableService.GetDataSet(sqlCommand, DatabaseMetadata.ConnectionString);
 
                 String tableNamesTxt = m.LastOrDefault();
 
@@ -107,7 +130,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
             catch (Exception ex)
             {
 
-                codeGeneratorResult.StoredProcExec = ex.StackTrace;
+                CodeGeneratorResult.StoredProcExec = ex.StackTrace;
 
 
             }
@@ -160,7 +183,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 }
                 if (ds.Tables.Count == 1)
                 {
-                    codeGeneratorResult.StoredProcExecModel = built2.ToString();
+                    CodeGeneratorResult.StoredProcExecModel = built2.ToString();
                 }
                 else
                 {
@@ -174,19 +197,19 @@ namespace DotNetCodeGenerator.Domain.Helpers
                         built2.AppendLine(String.Format("public List<{1}> {0}List ", tableNames[i], tableNames[i]) + "{ get; set;}");
                     }
                     built2.AppendLine("}");
-                    codeGeneratorResult.StoredProcExecModel = built2.ToString();
+                    CodeGeneratorResult.StoredProcExecModel = built2.ToString();
                 }
 
             }
             catch (Exception ex)
             {
-                codeGeneratorResult.StoredProcExecModel = ex.StackTrace;
+                CodeGeneratorResult.StoredProcExecModel = ex.StackTrace;
 
             }
             #endregion
 
             #region  Generating Table to Entity method code
-            String staticText = codeGeneratorResult.IsMethodStatic ? "static" : "";
+            String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
             try
             {
                 var built2 = new StringBuilder();
@@ -253,7 +276,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
                 }
 
-                codeGeneratorResult.StoredProcExecModelDataReader = built2.ToString();
+                CodeGeneratorResult.StoredProcExecModelDataReader = built2.ToString();
 
 
 
@@ -262,7 +285,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
             }
             catch (Exception ex)
             {
-                codeGeneratorResult.StoredProcExecModelDataReader = ex.StackTrace;
+                CodeGeneratorResult.StoredProcExecModelDataReader = ex.StackTrace;
 
             }
             #endregion
@@ -289,7 +312,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
                 String modelName = String.Format("{0}", tableNames.Any() ? tableNames.LastOrDefault() : "Table" + (ds.Tables.Count + 1));
                 String returnOfMethodName = tableNames.Any() && tableNames.Count > 1 ? returnResultClass : " List<" + modelName + ">";
-                String selectedTable = databaseMetadata.DatabaseName;
+                String selectedTable = DatabaseMetadata.DatabaseName;
                 string methodParameterBuiltText = "()";
                 if (queryParts2.Any())
                 {
@@ -440,11 +463,11 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
                 method.AppendLine(" }");
 
-                codeGeneratorResult.StoredProcExec = method.ToString();
+                CodeGeneratorResult.StoredProcExec = method.ToString();
             }
             catch (Exception ex)
             {
-                codeGeneratorResult.StoredProcExec = ex.StackTrace;
+                CodeGeneratorResult.StoredProcExec = ex.StackTrace;
             }
             #endregion
 

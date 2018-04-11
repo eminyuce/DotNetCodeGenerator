@@ -9,6 +9,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
 {
     public class GeneralHelper
     {
+     
         public static string ToTitleCase(string s)
         {
             return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(s.ToLower());

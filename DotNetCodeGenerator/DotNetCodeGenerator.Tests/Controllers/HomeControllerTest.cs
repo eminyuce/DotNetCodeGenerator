@@ -31,10 +31,10 @@ namespace DotNetCodeGenerator.Tests.Controllers
             t.TableService = tableService;
             var codeGeneratorResult = new CodeGeneratorResult();
             codeGeneratorResult.StoredProcExec = "dbo.test_SP @take=2 -NwmProduct";
-            t.GenerateSPModel(codeGeneratorResult,databaseMetaData);
-            Console.WriteLine(codeGeneratorResult.StoredProcExec);
-            Console.WriteLine(codeGeneratorResult.StoredProcExecModel);
-            Console.WriteLine(codeGeneratorResult.StoredProcExecModelDataReader);
+            //t.GenerateSPModel(codeGeneratorResult,databaseMetaData);
+            //Console.WriteLine(codeGeneratorResult.StoredProcExec);
+            //Console.WriteLine(codeGeneratorResult.StoredProcExecModel);
+            //Console.WriteLine(codeGeneratorResult.StoredProcExecModelDataReader);
         }
 
         [TestMethod]
