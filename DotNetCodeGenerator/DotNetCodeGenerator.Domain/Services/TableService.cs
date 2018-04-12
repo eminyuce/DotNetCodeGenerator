@@ -37,6 +37,8 @@ namespace DotNetCodeGenerator.Domain.Services
             return items;
         }
 
+
+
         public DatabaseMetadata GetAllTables(String connectionString)
         {
             return TableRepository.GetAllTables(connectionString);
@@ -45,13 +47,24 @@ namespace DotNetCodeGenerator.Domain.Services
         {
             return TableRepository.GetDataSet(sqlCommand, connectionString);
         }
+        public async Task FillGridView(CodeGeneratorResult codeGeneratorResult)
+        {
+            var task = Task.Factory.StartNew(() =>
+            {
+                var databaseMetaData = this.GetAllTablesFromCache(codeGeneratorResult.ConnectionString);
+                TableRepository.GetSelectedTableMetaData(databaseMetaData, codeGeneratorResult.SelectedTable);
+                codeGeneratorResult.DatabaseMetadata = databaseMetaData;
+            });
+            await task;
+
+        }
         public async Task GenerateCode(CodeGeneratorResult codeGeneratorResult)
         {
             var databaseMetaData = this.GetAllTablesFromCache(codeGeneratorResult.ConnectionString);
             TableRepository.GetSelectedTableMetaData(databaseMetaData, codeGeneratorResult.SelectedTable);
             CodeProducerHelper.CodeGeneratorResult = codeGeneratorResult;
             CodeProducerHelper.DatabaseMetadata = databaseMetaData;
-    
+
             var tasks = new List<Task>();
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateSPModel(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateTableRepository(); }));
@@ -61,7 +74,7 @@ namespace DotNetCodeGenerator.Domain.Services
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateAspMvcControllerClass(); }));
             await Task.WhenAll(tasks);
 
-          
+
             codeGeneratorResult = CodeProducerHelper.CodeGeneratorResult;
             codeGeneratorResult.DatabaseMetadata = databaseMetaData;
         }

@@ -22,10 +22,17 @@ namespace DotNetCodeGenerator.Controllers
             return View(codeGeneratorResult);
         }
         [HttpPost]
-        public async Task<ActionResult> Index(CodeGeneratorResult codeGeneratorResult)
+        public async Task<ActionResult> Index(CodeGeneratorResult codeGeneratorResult, string btnAction="")
         {
+            if (btnAction.Equals("Generate Code", StringComparison.InvariantCultureIgnoreCase))
+            {
+                await TableService.GenerateCode(codeGeneratorResult);
+            }
+            else if (btnAction.Equals("Fill GridView", StringComparison.InvariantCultureIgnoreCase))
+            {
+                await TableService.FillGridView(codeGeneratorResult);
+            }
 
-            await TableService.GenerateCode(codeGeneratorResult);
             return View(codeGeneratorResult);
         }
         public ActionResult About()
