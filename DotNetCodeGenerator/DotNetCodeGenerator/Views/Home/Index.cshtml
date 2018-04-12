@@ -21,7 +21,7 @@
         <h4>CodeGeneratorResult</h4>
         <hr />
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-       
+        <input type="hidden" value="@Model.SelectedTable.ToStr()" id="SelectedTableValue" />
         <div>
 
 
@@ -38,6 +38,9 @@
                 <div class="col-md-5">
                     @Html.DropDownList("SelectedTable", emptyList, htmlAttributes: new { @class = "form-control" })
                     @Html.ValidationMessageFor(model => model.SelectedTable, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-5">
+                    <input type="button" id="RetrieveTables" value="Get Tables" />
                 </div>
             </div>
 
@@ -301,7 +304,9 @@
           $("#ConnectionString")
        .blur(fillTables)
        .keyup(fillTables)
-       .change(fillTables);
+       .change(fillTables);          $("#RetrieveTables").click(function () {
+              fillTables();
+          });
           fillTables();
           function fillTables() {
               if (!isEmpty($("#ConnectionString").val())) {
@@ -309,8 +314,11 @@
                   ajaxMethodCall(postData, "/Ajax/GetTables", function (data) {
                       var listitems = '';
                       $('#SelectedTable').find('option').remove();
+                      var SelectedTableValue = $("#SelectedTableValue").val();
                       $.each(data, function (i, item) {
-                          listitems += '<option value=' + item.DatabaseTableName + '>'
+
+                          var isSelected= SelectedTableValue == item.DatabaseTableName ? "selected='true'":"";
+                          listitems += '<option ' + isSelected + ' value=' + item.DatabaseTableName + '>'
                               + item.TableNameWithSchema + '</option>';
                       });
                       $('#SelectedTable').append(listitems);

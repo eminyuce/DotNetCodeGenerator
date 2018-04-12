@@ -13,7 +13,9 @@ namespace DotNetCodeGenerator.Domain.Entities
         public DatabaseMetadata DatabaseMetadata { get; set; }
         public string ConnectionString { get; set; }
         public string SelectedTable { get; set; }
+        [AllowHtml]
         public string ModifiedTableName { get; set; }
+        [AllowHtml]
         public string StringCodePattern { get; set; }
         public bool IsMethodStatic { get;  set; }
        
