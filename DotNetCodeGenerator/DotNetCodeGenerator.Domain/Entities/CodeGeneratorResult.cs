@@ -10,14 +10,13 @@ namespace DotNetCodeGenerator.Domain.Entities
 {
     public class CodeGeneratorResult
     {
-    
-
+        public DatabaseMetadata DatabaseMetadata { get; set; }
         public string ConnectionString { get; set; }
         public string SelectedTable { get; set; }
         public string ModifiedTableName { get; set; }
         public string StringCodePattern { get; set; }
         public bool IsMethodStatic { get;  set; }
-
+       
 
         [Display(Name = "StoredProcExec")]
         [AllowHtml]

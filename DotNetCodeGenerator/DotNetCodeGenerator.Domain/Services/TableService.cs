@@ -9,6 +9,7 @@ using System.Data;
 using System.Linq;
 using System.Runtime.Caching;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DotNetCodeGenerator.Domain.Services
@@ -50,7 +51,7 @@ namespace DotNetCodeGenerator.Domain.Services
             TableRepository.GetSelectedTableMetaData(databaseMetaData, codeGeneratorResult.SelectedTable);
             CodeProducerHelper.CodeGeneratorResult = codeGeneratorResult;
             CodeProducerHelper.DatabaseMetadata = databaseMetaData;
-
+    
             var tasks = new List<Task>();
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateSPModel(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateTableRepository(); }));
@@ -58,10 +59,11 @@ namespace DotNetCodeGenerator.Domain.Services
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateNewInstance(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenereateSqlDatabaseOperation(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateAspMvcControllerClass(); }));
-
             await Task.WhenAll(tasks);
 
+          
             codeGeneratorResult = CodeProducerHelper.CodeGeneratorResult;
+            codeGeneratorResult.DatabaseMetadata = databaseMetaData;
         }
     }
 }

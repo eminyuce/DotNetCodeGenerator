@@ -18,6 +18,7 @@ namespace DotNetCodeGenerator.Controllers
         public ActionResult Index()
         {
             var codeGeneratorResult = new CodeGeneratorResult();
+            codeGeneratorResult.DatabaseMetadata = null;
             return View(codeGeneratorResult);
         }
         [HttpPost]
@@ -25,7 +26,6 @@ namespace DotNetCodeGenerator.Controllers
         {
 
             await TableService.GenerateCode(codeGeneratorResult);
-
             return View(codeGeneratorResult);
         }
         public ActionResult About()
