@@ -22,6 +22,133 @@ namespace DotNetCodeGenerator.Domain.Helpers
         public CodeGeneratorResult CodeGeneratorResult { get; set; }
         public DatabaseMetadata DatabaseMetadata { get; set; }
 
+
+
+        public void GenereateSqlDatabaseOperation()
+        {
+            List<TableRowMetaData> kontrolList = DatabaseMetadata.SelectedTable.TableRowMetaDataList;
+            StringBuilder method = new StringBuilder();
+
+
+            try
+            {
+
+                String realEntityName = CodeGeneratorResult.SelectedTable;
+                String modelName = CodeGeneratorResult.ModifiedTableName;
+                String modifiedTableName = CodeGeneratorResult.ModifiedTableName;
+                string selectedTable = DatabaseMetadata.SelectedTable.TableNameWithSchema;
+                String entityPrefix = GeneralHelper.GetEntityPrefixName(realEntityName);
+                String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(kontrolList);
+                string primaryKeyOrginal = primaryKey;
+                String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
+                method.AppendLine("public " + staticText + " List<" + modelName + "> Get" + modelName + "s()");
+                method.AppendLine(" {");
+                method.AppendLine(" var list = new List<" + modelName + ">();");
+                String commandText = "SELECT * FROM " + selectedTable + " ORDER BY " + primaryKey + " DESC";
+                // GetDatabaseUtilityParameters(kontrolList, method, commandText, false);
+                method.AppendLine(String.Format(" String commandText = @\"{0}\";", commandText));
+                method.AppendLine(" var parameterList = new List<SqlParameter>();");
+                method.AppendLine(" string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
+                method.AppendLine(" var commandType = CommandType.Text;");
+                GetDataSetCodeText(method);
+
+
+                foreach (var ki in kontrolList)
+                {
+                    if (ki.ForeignKey)
+                    {
+                        String dataType = TableRowMetaDataHelper.GetSqlDataTypeFromColumnDataType(ki);
+                        String cSharpType = TableRowMetaDataHelper.GetCSharpDataType(ki);
+                        method.AppendLine("//" + ki.ColumnName);
+                        method.AppendLine("public " + staticText + "  List<" + modelName + "> Get" + modelName + "By" + ki.ColumnName + "(" + cSharpType + " " + GeneralHelper.FirstCharacterToLower(ki.ColumnName) + ")");
+                        method.AppendLine(" {");
+                        method.AppendLine(" var list = new List<" + modelName + ">();");
+                        commandText = "SELECT * FROM " + selectedTable + " WHERE " + ki.ColumnName + "=@" + ki.ColumnName + " ORDER BY " + primaryKey + " DESC";
+                        method.AppendLine(" string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
+                        method.AppendLine(String.Format(" String commandText = @\"{0}\";", commandText));
+                        method.AppendLine(" var parameterList = new List<SqlParameter>();");
+                        method.AppendLine(" var commandType = CommandType.Text;");
+                        method.AppendLine(" parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + ki.ColumnName + "\", " + GeneralHelper.FirstCharacterToLower(ki.ColumnName) + "," + dataType + "));");
+                        GetDataSetCodeText(method);
+                        method.AppendLine("");
+                    }
+                }
+                method.AppendLine("public " + staticText + " void Delete" + modelName + "(int " + GeneralHelper.FirstCharacterToLower(primaryKey) + ")");
+                method.AppendLine(" {");
+                commandText = "DELETE FROM " + selectedTable + " WHERE " + primaryKey + "=@" + primaryKey;
+                method.AppendLine(" string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
+                method.AppendLine(String.Format(" String commandText = @\"{0}\";", commandText));
+                method.AppendLine(" var parameterList = new List<SqlParameter>();");
+                method.AppendLine(" var commandType = CommandType.Text;");
+                method.AppendLine(" parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + primaryKey + "\", " + GeneralHelper.FirstCharacterToLower(primaryKey) + ",SqlDbType.Int));");
+                method.AppendLine(" DatabaseUtility.ExecuteNonQuery(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray());");
+                method.AppendLine(" }");
+                method.AppendLine("");
+                method.AppendLine(" public " + staticText + " " + modelName + " Get" + modelName + "(int " + primaryKey + ")");
+                method.AppendLine(" {");
+                commandText = "SELECT * FROM " + selectedTable + " WHERE " + primaryKey + "=@" + primaryKey;
+                method.AppendLine(" string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
+                method.AppendLine(String.Format("String commandText = @\"{0}\";", commandText));
+                method.AppendLine(" var parameterList = new List<SqlParameter>();");
+                method.AppendLine(" var commandType = CommandType.Text;");
+                method.AppendLine(" parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + primaryKey + "\", " + primaryKey + ",SqlDbType.Int));");
+                method.AppendLine(" DataSet dataSet = DatabaseUtility.ExecuteDataSet(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray());");
+                method.AppendLine(" if (dataSet.Tables.Count > 0)");
+                method.AppendLine(" {");
+                method.AppendLine(" using (DataTable dt = dataSet.Tables[0])");
+                method.AppendLine(" {");
+                method.AppendLine(" foreach (DataRow dr in dt.Rows)");
+                method.AppendLine(" {");
+                method.AppendLine(" var e = Get" + modifiedTableName + "FromDataRow(dr);");
+                method.AppendLine(" return e;");
+                method.AppendLine(" }");
+                method.AppendLine(" }");
+                method.AppendLine(" }");
+                method.AppendLine(" return null;");
+                method.AppendLine(" }");
+
+                entityPrefix = (String.IsNullOrEmpty(entityPrefix) ? "" : entityPrefix + "_");
+                method.AppendLine("public " + staticText + " int SaveOrUpdate" + modelName + "( " + modelName + " item)");
+                method.AppendLine(" {");
+                GetDatabaseUtilityParameters(DatabaseMetadata.SelectedTable.TableRowMetaDataList, method, entityPrefix + "SaveOrUpdate" + modifiedTableName, true);
+                method.AppendLine(" int id = DatabaseUtility.ExecuteScalar(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray()).ToInt();");
+                method.AppendLine(" return id;");
+                method.AppendLine(" }");
+                CodeGeneratorResult.SqlDatabaseOperation = method.ToString();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, ex.Message);
+                CodeGeneratorResult.SqlDatabaseOperation = ex.Message;
+            }
+
+            CodeGeneratorResult.SqlDatabaseOperation = method.ToString();
+        }
+        private void GetDataSetCodeText(StringBuilder method)
+        {
+            method.AppendLine(
+                " DataSet dataSet = DatabaseUtility.ExecuteDataSet(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray());");
+            ConvertToDataTableToEntity(method);
+        }
+
+        private void ConvertToDataTableToEntity(StringBuilder method)
+        {
+            String modifiedTableName = CodeGeneratorResult.ModifiedTableName;
+            method.AppendLine(" if (dataSet.Tables.Count > 0)");
+            method.AppendLine(" {");
+            method.AppendLine(" using (DataTable dt = dataSet.Tables[0])");
+            method.AppendLine(" {");
+            method.AppendLine(" foreach (DataRow dr in dt.Rows)");
+            method.AppendLine(" {");
+            method.AppendLine(" var e = Get" + modifiedTableName + "FromDataRow(dr);");
+            method.AppendLine(" list.Add(e);");
+            method.AppendLine(" }");
+            method.AppendLine(" }");
+            method.AppendLine(" }");
+            method.AppendLine(" return list;");
+            method.AppendLine(" }");
+        }
+
         public void GenerateTableItem()
         {
             List<TableRowMetaData> linkedList = DatabaseMetadata.SelectedTable.TableRowMetaDataList;
@@ -107,11 +234,10 @@ namespace DotNetCodeGenerator.Domain.Helpers
                         method.AppendLine("public char " + item.ColumnName + " { get; set; }");
                         method2.AppendLine("public char " + item.ColumnName + " { get; set; }");
                     }
-                } 
+                }
                 catch (Exception ex)
                 {
-
-
+                    Logger.Error(ex, ex.Message);
                 }
             }
 
@@ -195,7 +321,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
             CodeGeneratorResult.TableClassItem = method2.ToString();
         }
-      
+
         public string GenerateNewInstance()
         {
             List<TableRowMetaData> kontrolList = DatabaseMetadata.SelectedTable.TableRowMetaDataList;
@@ -301,9 +427,9 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
             method.AppendLine(method11.ToString());
             method.AppendLine(method12.ToString());
- 
 
-             CodeGeneratorResult.TableClassInstance = method.ToString();
+
+            CodeGeneratorResult.TableClassInstance = method.ToString();
 
             return method.ToString();
 
@@ -321,7 +447,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
             string primaryKeyOrginal = primaryKey;
             primaryKey = GeneralHelper.FirstCharacterToLower(primaryKey);
             String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
-           
+
 
             method.AppendLine(String.Format("public class {0}Repository", modelName.Replace("Nwm", "")));
             method.AppendLine("{");
@@ -414,34 +540,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
         }
 
 
-        public void GenereateSaveOrUpdateDatabaseUtility()
-        {
-            try
-            {
-                StringBuilder method = new StringBuilder();
-                String realEntityName = CodeGeneratorResult.SelectedTable;
-                String modelName = CodeGeneratorResult.ModifiedTableName;
-                String modifiedTableName = CodeGeneratorResult.ModifiedTableName;
-                String entityPrefix = GeneralHelper.GetEntityPrefixName(realEntityName);
-                entityPrefix = (String.IsNullOrEmpty(entityPrefix) ? "" : entityPrefix + "_");
-                String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(DatabaseMetadata.SelectedTable.TableRowMetaDataList);
-                String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
-                method.AppendLine("public " + staticText + " int SaveOrUpdate" + modelName + "( " + modelName + " item)");
-                method.AppendLine(" {");
-                GetDatabaseUtilityParameters(DatabaseMetadata.SelectedTable.TableRowMetaDataList, method, entityPrefix + "SaveOrUpdate" + modifiedTableName, true);
-                method.AppendLine(" int id = DatabaseUtility.ExecuteScalar(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray()).ToInt();");
-                method.AppendLine(" return id;");
-                method.AppendLine(" }");
-                CodeGeneratorResult.SaveOrUpdateDatabaseUtility = method.ToString();
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex, ex.Message);
-                CodeGeneratorResult.SaveOrUpdateDatabaseUtility = ex.Message;
-            }
-          
 
-        }
         private void GetDatabaseUtilityParameters(List<TableRowMetaData> kontrolList, StringBuilder method, String commandText = "", bool isSp = false)
         {
             String realEntityName = CodeGeneratorResult.SelectedTable;
@@ -498,284 +597,329 @@ namespace DotNetCodeGenerator.Domain.Helpers
         public void GenerateSPModel()
         {
 
-            try { 
-            #region Execute SP to get tables so that we can generate code
-            string StoredProc_Exec = CodeGeneratorResult.StoredProcExec.ToStr();
-
-            if (String.IsNullOrEmpty(StoredProc_Exec))
-            {
-                return;
-            }
-            StoredProc_Exec = StoredProc_Exec.Replace("\r\n", " ").Trim();
-            string returnResultClass = "NwmResultItem";
-            string storedProcName = "";
-            DataSet ds = null;
-            String sqlCommand = "";
-            List<string> tableNames = new List<string>();
             try
             {
-                storedProcName = Regex.Split(StoredProc_Exec, @"\s+").Select(r => r.Trim()).FirstOrDefault();
-                String[] storedProcNameParts = Regex.Split(storedProcName, @"_").Select(r => r.Trim()).ToArray();
-                storedProcName = storedProcNameParts != null && storedProcNameParts.Any() ? storedProcNameParts[1] : storedProcName;
-                storedProcName = GeneralHelper.ToTitleCase(storedProcName);
-                //  storedProcName = StoredProc_Exec.Split("-".ToCharArray());
-                StoredProc_Exec = StoredProc_Exec.Replace("]", "").Replace("[", "").Trim();
-                string[] m = StoredProc_Exec.Split("-".ToCharArray());
+                #region Execute SP to get tables so that we can generate code
+                string StoredProc_Exec = CodeGeneratorResult.StoredProcExec.ToStr();
 
-                sqlCommand = m.FirstOrDefault();
-
-                ds = TableService.GetDataSet(sqlCommand, DatabaseMetadata.ConnectionString);
-
-                String tableNamesTxt = m.LastOrDefault();
-
-                #region Entity names are coming from user input
-                // If no entity names are defined, we will generate table names
-                if (m.Length > 1)
+                if (String.IsNullOrEmpty(StoredProc_Exec))
                 {
-                    if (!String.IsNullOrEmpty(tableNamesTxt))
+                    return;
+                }
+                StoredProc_Exec = StoredProc_Exec.Replace("\r\n", " ").Trim();
+                string returnResultClass = "NwmResultItem";
+                string storedProcName = "";
+                DataSet ds = null;
+                String sqlCommand = "";
+                List<string> tableNames = new List<string>();
+                try
+                {
+                    storedProcName = Regex.Split(StoredProc_Exec, @"\s+").Select(r => r.Trim()).FirstOrDefault();
+                    String[] storedProcNameParts = Regex.Split(storedProcName, @"_").Select(r => r.Trim()).ToArray();
+                    storedProcName = storedProcNameParts != null && storedProcNameParts.Any() ? storedProcNameParts[1] : storedProcName;
+                    storedProcName = GeneralHelper.ToTitleCase(storedProcName);
+                    //  storedProcName = StoredProc_Exec.Split("-".ToCharArray());
+                    StoredProc_Exec = StoredProc_Exec.Replace("]", "").Replace("[", "").Trim();
+                    string[] m = StoredProc_Exec.Split("-".ToCharArray());
+
+                    sqlCommand = m.FirstOrDefault();
+
+                    ds = TableService.GetDataSet(sqlCommand, DatabaseMetadata.ConnectionString);
+
+                    String tableNamesTxt = m.LastOrDefault();
+
+                    #region Entity names are coming from user input
+                    // If no entity names are defined, we will generate table names
+                    if (m.Length > 1)
                     {
-                        tableNames = Regex.Split(tableNamesTxt, @"\s+").Select(r => r.Trim()).Where(s => !String.IsNullOrEmpty(s)).ToList();
+                        if (!String.IsNullOrEmpty(tableNamesTxt))
+                        {
+                            tableNames = Regex.Split(tableNamesTxt, @"\s+").Select(r => r.Trim()).Where(s => !String.IsNullOrEmpty(s)).ToList();
+                        }
+
+                        // we have more than one tables coming from SP
+                        if (ds.Tables.Count > 1)
+                        {
+                            // The last table names is the result of that method.
+                            // Table names should be more than number of returned table
+                            // 
+                            if (ds.Tables.Count + 1 == tableNames.Count)
+                            {
+                                returnResultClass = tableNames.LastOrDefault();
+                            }
+                            else if (ds.Tables.Count == tableNames.Count)
+                            {
+
+                            }
+                            else if (ds.Tables.Count > tableNames.Count)
+                            {
+                                int diff = ds.Tables.Count - tableNames.Count;
+                                for (int i = 0; i < diff; i++)
+                                {
+                                    tableNames.Add("Tablo" + i);
+                                }
+                            }
+                            else if (ds.Tables.Count < tableNames.Count)
+                            {
+                                // number to remove is the difference between the current length
+                                // and the maximum length you want to allow.
+                                var count = tableNames.Count - ds.Tables.Count;
+                                if (count > 0)
+                                {
+                                    // remove that number of items from the start of the list
+                                    tableNames.RemoveRange(0, count);
+                                }
+                            }
+                        }
+
                     }
-
-                    // we have more than one tables coming from SP
-                    if (ds.Tables.Count > 1)
+                    else
                     {
-                        // The last table names is the result of that method.
-                        // Table names should be more than number of returned table
-                        // 
-                        if (ds.Tables.Count + 1 == tableNames.Count)
+                        for (int i = 0; i < ds.Tables.Count; i++)
                         {
-                            returnResultClass = tableNames.LastOrDefault();
+                            tableNames.Add("Tablo" + i);
                         }
-                        else if (ds.Tables.Count == tableNames.Count)
+
+                    }
+                    #endregion
+
+                }
+                catch (Exception ex)
+                {
+
+                    CodeGeneratorResult.StoredProcExec = ex.StackTrace;
+
+
+                }
+                if (ds == null)
+                {
+                    return;
+                }
+                #endregion
+                #region Generating ENTITY FROM datable coming from SP
+                try
+                {
+
+                    var built2 = new StringBuilder();
+                    for (int i = 0; i < ds.Tables.Count; i++)
+                    {
+                        DataTable table = ds.Tables[i];
+
+                        var built = new StringBuilder();
+                        built.AppendLine(String.Format("public class {0} ", tableNames.Any() ? tableNames[i] : "Tablo" + i) + "{");
+                        foreach (DataColumn column in table.Columns)
                         {
+                            try
+                            {
+                                String dataType = "string";
+                                DataRow firstRow = table.Rows.Cast<DataRow>().ToArray().Take(1).FirstOrDefault();
+                                if (firstRow != null)
+                                {
+
+                                    dataType = firstRow[column].GetType().Name.ToLower()
+                                        .Replace("32", "")
+                                        .Replace("boolean", "bool")
+                                        .Replace("datetime", "DateTime");
+                                    if (firstRow[column].GetType().Name.Equals("DBNull"))
+                                    {
+                                        dataType = "string";
+                                    }
+                                }
+
+                                built.AppendLine(String.Format("public {1} {0} ", column.ColumnName, dataType) + "{ get; set;}");
+                            }
+                            catch (Exception ee)
+                            {
+
+                            }
 
                         }
-                        else if (ds.Tables.Count > tableNames.Count)
+                        built.AppendLine("}");
+                        built2.AppendLine(built.ToString());
+
+                    }
+                    if (ds.Tables.Count == 1)
+                    {
+                        CodeGeneratorResult.StoredProcExecModel = built2.ToString();
+                    }
+                    else
+                    {
+                        built2.AppendLine("");
+                        //Generating the return result class and its related list classess 
+                        built2.AppendLine(String.Format("public class {0} ", returnResultClass) + "{");
+                        for (int i = 0; i < tableNames.Count; i++)
                         {
-                            int diff = ds.Tables.Count - tableNames.Count;
-                            for (int i = 0; i < diff; i++)
-                            {
-                                tableNames.Add("Tablo" + i);
-                            }
+                            if (tableNames[i].Equals(returnResultClass, StringComparison.InvariantCultureIgnoreCase))
+                                continue;
+                            built2.AppendLine(String.Format("public List<{1}> {0}List ", tableNames[i], tableNames[i]) + "{ get; set;}");
                         }
-                        else if (ds.Tables.Count < tableNames.Count)
-                        {
-                            // number to remove is the difference between the current length
-                            // and the maximum length you want to allow.
-                            var count = tableNames.Count - ds.Tables.Count;
-                            if (count > 0)
-                            {
-                                // remove that number of items from the start of the list
-                                tableNames.RemoveRange(0, count);
-                            }
-                        }
+                        built2.AppendLine("}");
+                        CodeGeneratorResult.StoredProcExecModel = built2.ToString();
                     }
 
                 }
-                else
+                catch (Exception ex)
                 {
-                    for (int i = 0; i < ds.Tables.Count; i++)
-                    {
-                        tableNames.Add("Tablo" + i);
-                    }
+                    CodeGeneratorResult.StoredProcExecModel = ex.StackTrace;
 
                 }
                 #endregion
 
-            }
-            catch (Exception ex)
-            {
-
-                CodeGeneratorResult.StoredProcExec = ex.StackTrace;
-
-
-            }
-            if (ds == null)
-            {
-                return;
-            }
-            #endregion
-            #region Generating ENTITY FROM datable coming from SP
-            try
-            {
-
-                var built2 = new StringBuilder();
-                for (int i = 0; i < ds.Tables.Count; i++)
+                #region  Generating Table to Entity method code
+                String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
+                try
                 {
-                    DataTable table = ds.Tables[i];
-
-                    var built = new StringBuilder();
-                    built.AppendLine(String.Format("public class {0} ", tableNames.Any() ? tableNames[i] : "Tablo" + i) + "{");
-                    foreach (DataColumn column in table.Columns)
+                    var built2 = new StringBuilder();
+                    // generating entities from data row classes 
+                    for (int i = 0; i < ds.Tables.Count; i++)
                     {
-                        try
+                        DataTable table = ds.Tables[i];
+                        String modelName = String.Format("{0}", tableNames.Any() ? tableNames[i] : "Tablo" + i);
+                        var method = new StringBuilder();
+                        method.AppendLine("private " + staticText + " " + modelName + " Get" + modelName + "FromDataRow(DataRow dr)");
+                        method.AppendLine("{");
+                        method.AppendLine("var item = new " + modelName + "();");
+                        method.AppendLine("");
+
+                        foreach (DataColumn column in table.Columns)
                         {
                             String dataType = "string";
                             DataRow firstRow = table.Rows.Cast<DataRow>().ToArray().Take(1).FirstOrDefault();
                             if (firstRow != null)
                             {
 
-                                dataType = firstRow[column].GetType().Name.ToLower()
-                                    .Replace("32", "")
-                                    .Replace("boolean", "bool")
-                                    .Replace("datetime", "DateTime");
+                                dataType = firstRow[column].GetType().Name.ToLower().Replace("32", "").Replace("boolean", "bool").Replace("datetime", "DateTime");
                                 if (firstRow[column].GetType().Name.Equals("DBNull"))
                                 {
                                     dataType = "string";
                                 }
                             }
 
-                            built.AppendLine(String.Format("public {1} {0} ", column.ColumnName, dataType) + "{ get; set;}");
-                        }
-                        catch (Exception ee)
-                        {
+                            dataType = dataType.ToLower();
+                            // method.AppendLine("item." + column.ColumnName + " = dr[\"" + column.ColumnName + "\"].ToStr();");
 
-                        }
 
-                    }
-                    built.AppendLine("}");
-                    built2.AppendLine(built.ToString());
-
-                }
-                if (ds.Tables.Count == 1)
-                {
-                    CodeGeneratorResult.StoredProcExecModel = built2.ToString();
-                }
-                else
-                {
-                    built2.AppendLine("");
-                    //Generating the return result class and its related list classess 
-                    built2.AppendLine(String.Format("public class {0} ", returnResultClass) + "{");
-                    for (int i = 0; i < tableNames.Count; i++)
-                    {
-                        if (tableNames[i].Equals(returnResultClass, StringComparison.InvariantCultureIgnoreCase))
-                            continue;
-                        built2.AppendLine(String.Format("public List<{1}> {0}List ", tableNames[i], tableNames[i]) + "{ get; set;}");
-                    }
-                    built2.AppendLine("}");
-                    CodeGeneratorResult.StoredProcExecModel = built2.ToString();
-                }
-
-            }
-            catch (Exception ex)
-            {
-                CodeGeneratorResult.StoredProcExecModel = ex.StackTrace;
-
-            }
-            #endregion
-
-            #region  Generating Table to Entity method code
-            String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
-            try
-            {
-                var built2 = new StringBuilder();
-                // generating entities from data row classes 
-                for (int i = 0; i < ds.Tables.Count; i++)
-                {
-                    DataTable table = ds.Tables[i];
-                    String modelName = String.Format("{0}", tableNames.Any() ? tableNames[i] : "Tablo" + i);
-                    var method = new StringBuilder();
-                    method.AppendLine("private " + staticText + " " + modelName + " Get" + modelName + "FromDataRow(DataRow dr)");
-                    method.AppendLine("{");
-                    method.AppendLine("var item = new " + modelName + "();");
-                    method.AppendLine("");
-
-                    foreach (DataColumn column in table.Columns)
-                    {
-                        String dataType = "string";
-                        DataRow firstRow = table.Rows.Cast<DataRow>().ToArray().Take(1).FirstOrDefault();
-                        if (firstRow != null)
-                        {
-
-                            dataType = firstRow[column].GetType().Name.ToLower().Replace("32", "").Replace("boolean", "bool").Replace("datetime", "DateTime");
-                            if (firstRow[column].GetType().Name.Equals("DBNull"))
+                            if (dataType.IndexOf("string") > -1)
                             {
-                                dataType = "string";
+                                // method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? \"\" : read[\"" + item.ColumnName + "\"].ToString();");
+                                method.AppendLine("item." + column.ColumnName + " = dr[\"" + column.ColumnName + "\"].ToStr();");
                             }
-                        }
+                            else if (dataType.IndexOf("int") > -1)
+                            {
+                                //method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? -1 : Convert.ToInt32(read[\"" + item.ColumnName + "\"].ToString());");
+                                method.AppendLine("item." + column.ColumnName + " = dr[\"" + column.ColumnName + "\"].ToInt();");
+                            }
+                            else if (dataType.IndexOf("date") > -1)
+                            {
+                                //method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? DateTime.Now : DateTime.Parse(read[\"" + item.ColumnName + "\"].ToString());");
+                                method.AppendLine("item." + column.ColumnName + " = dr[\"" + column.ColumnName + "\"].ToDateTime();");
 
-                        dataType = dataType.ToLower();
-                        // method.AppendLine("item." + column.ColumnName + " = dr[\"" + column.ColumnName + "\"].ToStr();");
-
-
-                        if (dataType.IndexOf("string") > -1)
-                        {
-                            // method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? \"\" : read[\"" + item.ColumnName + "\"].ToString();");
-                            method.AppendLine("item." + column.ColumnName + " = dr[\"" + column.ColumnName + "\"].ToStr();");
-                        }
-                        else if (dataType.IndexOf("int") > -1)
-                        {
-                            //method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? -1 : Convert.ToInt32(read[\"" + item.ColumnName + "\"].ToString());");
-                            method.AppendLine("item." + column.ColumnName + " = dr[\"" + column.ColumnName + "\"].ToInt();");
-                        }
-                        else if (dataType.IndexOf("date") > -1)
-                        {
-                            //method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? DateTime.Now : DateTime.Parse(read[\"" + item.ColumnName + "\"].ToString());");
-                            method.AppendLine("item." + column.ColumnName + " = dr[\"" + column.ColumnName + "\"].ToDateTime();");
+                            }
+                            else if (dataType.IndexOf("bool") > -1)
+                            {
+                                //method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? false : Boolean.Parse(read[\"" + item.ColumnName + "\"].ToString());");
+                                method.AppendLine("item." + column.ColumnName + " = dr[\"" + column.ColumnName + "\"].ToBool();");
+                            }
+                            else if (dataType.IndexOf("float") > -1)
+                            {
+                                //method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? -1 : float.Parse(read[\"" + item.ColumnName + "\"].ToString());");
+                                method.AppendLine("item." + column.ColumnName + " = dr[\"" + column.ColumnName + "\"].ToFloat();");
+                            }
 
                         }
-                        else if (dataType.IndexOf("bool") > -1)
-                        {
-                            //method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? false : Boolean.Parse(read[\"" + item.ColumnName + "\"].ToString());");
-                            method.AppendLine("item." + column.ColumnName + " = dr[\"" + column.ColumnName + "\"].ToBool();");
-                        }
-                        else if (dataType.IndexOf("float") > -1)
-                        {
-                            //method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? -1 : float.Parse(read[\"" + item.ColumnName + "\"].ToString());");
-                            method.AppendLine("item." + column.ColumnName + " = dr[\"" + column.ColumnName + "\"].ToFloat();");
-                        }
+                        method.AppendLine("return item;");
+                        method.AppendLine("}");
+                        built2.AppendLine(method.ToString());
 
                     }
-                    method.AppendLine("return item;");
-                    method.AppendLine("}");
-                    built2.AppendLine(method.ToString());
+
+                    CodeGeneratorResult.StoredProcExecModelDataReader = built2.ToString();
+
+
+
+
 
                 }
-
-                CodeGeneratorResult.StoredProcExecModelDataReader = built2.ToString();
-
-
-
-
-
-            }
-            catch (Exception ex)
-            {
-                CodeGeneratorResult.StoredProcExecModelDataReader = ex.StackTrace;
-
-            }
-            #endregion
-            #region Generationg  calling SP method, main functionality
-
-            try
-            {
-                String modelName2 = "";
-                string returnTypeText = "";
-                if (ds.Tables.Count > 1)
+                catch (Exception ex)
                 {
-                    returnTypeText = "dbSpResult";
+                    CodeGeneratorResult.StoredProcExecModelDataReader = ex.StackTrace;
+
                 }
+                #endregion
+                #region Generationg  calling SP method, main functionality
 
-                var method = new StringBuilder();
-                method.AppendLine("//" + StoredProc_Exec);
-                var queryParts = Regex.Split(sqlCommand, @"\s+").Select(r => r.Trim()).Where(s => !String.IsNullOrEmpty(s)).ToList();
-                String sp = queryParts.FirstOrDefault();
-                sqlCommand = sqlCommand.Replace(sp, "");
-
-                var queryParts2 = Regex.Split(sqlCommand, @",").Select(r => r.Trim()).Where(s => !String.IsNullOrEmpty(s)).ToList();
-
-
-
-                String modelName = String.Format("{0}", tableNames.Any() ? tableNames.LastOrDefault() : "Table" + (ds.Tables.Count + 1));
-                String returnOfMethodName = tableNames.Any() && tableNames.Count > 1 ? returnResultClass : " List<" + modelName + ">";
-                String selectedTable = DatabaseMetadata.DatabaseName;
-                string methodParameterBuiltText = "()";
-                if (queryParts2.Any())
+                try
                 {
-                    StringBuilder methodParameterBuilt = new StringBuilder();
+                    String modelName2 = "";
+                    string returnTypeText = "";
+                    if (ds.Tables.Count > 1)
+                    {
+                        returnTypeText = "dbSpResult";
+                    }
 
-                    methodParameterBuilt.Append("(");
+                    var method = new StringBuilder();
+                    method.AppendLine("//" + StoredProc_Exec);
+                    var queryParts = Regex.Split(sqlCommand, @"\s+").Select(r => r.Trim()).Where(s => !String.IsNullOrEmpty(s)).ToList();
+                    String sp = queryParts.FirstOrDefault();
+                    sqlCommand = sqlCommand.Replace(sp, "");
+
+                    var queryParts2 = Regex.Split(sqlCommand, @",").Select(r => r.Trim()).Where(s => !String.IsNullOrEmpty(s)).ToList();
+
+
+
+                    String modelName = String.Format("{0}", tableNames.Any() ? tableNames.LastOrDefault() : "Table" + (ds.Tables.Count + 1));
+                    String returnOfMethodName = tableNames.Any() && tableNames.Count > 1 ? returnResultClass : " List<" + modelName + ">";
+                    String selectedTable = DatabaseMetadata.DatabaseName;
+                    string methodParameterBuiltText = "()";
+                    if (queryParts2.Any())
+                    {
+                        StringBuilder methodParameterBuilt = new StringBuilder();
+
+                        methodParameterBuilt.Append("(");
+                        foreach (var item in queryParts2)
+                        {
+                            try
+                            {
+                                var parameterParts = Regex.Split(item, @"=").Select(r => r.Trim()).Where(s => !String.IsNullOrEmpty(s)).ToList();
+                                var paraterValue = parameterParts.LastOrDefault();
+                                var paramterName = parameterParts.FirstOrDefault().Replace("@", "");
+                                var parameterName2 = paramterName.ToLower();
+                                if (paramterName.ToLower().Contains("date"))
+                                {
+                                    methodParameterBuilt.Append("DateTime ? " + parameterName2 + " =null,");
+                                }
+                                else if (paraterValue.Contains("'"))
+                                {
+                                    paraterValue = paraterValue.Replace("'", "\"");
+                                    methodParameterBuilt.Append("string " + parameterName2 + " = " + paraterValue + ",");
+                                }
+                                else
+                                {
+                                    methodParameterBuilt.Append("int " + parameterName2 + " = " + paraterValue + ",");
+                                }
+
+
+                            }
+                            catch (Exception)
+                            {
+
+
+                            }
+
+                        }
+                        methodParameterBuiltText = methodParameterBuilt.ToString().Trim().TrimEnd(",".ToCharArray());
+                        methodParameterBuiltText = methodParameterBuiltText + ")";
+                    }
+
+                    method.AppendLine(" public " + staticText + " " + returnOfMethodName + " Get" + storedProcName + methodParameterBuiltText.ToString());
+                    method.AppendLine(" {");
+                    String commandText = sp;
+                    method.AppendLine(" string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
+                    method.AppendLine(String.Format(" String commandText = @\"{0}\";", commandText));
+                    method.AppendLine(" var parameterList = new List<SqlParameter>();");
+                    method.AppendLine(" var commandType = CommandType.StoredProcedure;");
+
+
                     foreach (var item in queryParts2)
                     {
                         try
@@ -784,20 +928,23 @@ namespace DotNetCodeGenerator.Domain.Helpers
                             var paraterValue = parameterParts.LastOrDefault();
                             var paramterName = parameterParts.FirstOrDefault().Replace("@", "");
                             var parameterName2 = paramterName.ToLower();
+                            string sqlDbType = "SqlDbType.Int";
                             if (paramterName.ToLower().Contains("date"))
                             {
-                                methodParameterBuilt.Append("DateTime ? " + parameterName2 + " =null,");
+                                method.AppendLine("if(" + parameterName2 + ".HasValue)");
+                                sqlDbType = "SqlDbType.DateTime";
                             }
                             else if (paraterValue.Contains("'"))
                             {
-                                paraterValue = paraterValue.Replace("'", "\"");
-                                methodParameterBuilt.Append("string " + parameterName2 + " = " + paraterValue + ",");
+                                sqlDbType = "SqlDbType.NVarChar";
+                                parameterName2 = parameterName2 + ".ToStr()";
                             }
                             else
                             {
-                                methodParameterBuilt.Append("int " + parameterName2 + " = " + paraterValue + ",");
+                                //    parameterName2 = parameterName2;
                             }
 
+                            method.AppendLine(" parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + paramterName + "\", " + parameterName2 + "," + sqlDbType + "));");
 
                         }
                         catch (Exception)
@@ -807,125 +954,78 @@ namespace DotNetCodeGenerator.Domain.Helpers
                         }
 
                     }
-                    methodParameterBuiltText = methodParameterBuilt.ToString().Trim().TrimEnd(",".ToCharArray());
-                    methodParameterBuiltText = methodParameterBuiltText + ")";
-                }
-
-                method.AppendLine(" public " + staticText + " " + returnOfMethodName + " Get" + storedProcName + methodParameterBuiltText.ToString());
-                method.AppendLine(" {");
-                String commandText = sp;
-                method.AppendLine(" string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
-                method.AppendLine(String.Format(" String commandText = @\"{0}\";", commandText));
-                method.AppendLine(" var parameterList = new List<SqlParameter>();");
-                method.AppendLine(" var commandType = CommandType.StoredProcedure;");
-
-
-                foreach (var item in queryParts2)
-                {
-                    try
+                    if (ds.Tables.Count == 1)
                     {
-                        var parameterParts = Regex.Split(item, @"=").Select(r => r.Trim()).Where(s => !String.IsNullOrEmpty(s)).ToList();
-                        var paraterValue = parameterParts.LastOrDefault();
-                        var paramterName = parameterParts.FirstOrDefault().Replace("@", "");
-                        var parameterName2 = paramterName.ToLower();
-                        string sqlDbType = "SqlDbType.Int";
-                        if (paramterName.ToLower().Contains("date"))
-                        {
-                            method.AppendLine("if(" + parameterName2 + ".HasValue)");
-                            sqlDbType = "SqlDbType.DateTime";
-                        }
-                        else if (paraterValue.Contains("'"))
-                        {
-                            sqlDbType = "SqlDbType.NVarChar";
-                            parameterName2 = parameterName2 + ".ToStr()";
-                        }
-                        else
-                        {
-                            //    parameterName2 = parameterName2;
-                        }
-
-                        method.AppendLine(" parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + paramterName + "\", " + parameterName2 + "," + sqlDbType + "));");
-
+                        method.AppendLine(String.Format("[return_type]"));
                     }
-                    catch (Exception)
+                    else
                     {
-
-
+                        method.AppendLine(String.Format("var dbSpResult=new {0}();", returnResultClass));
                     }
 
-                }
-                if (ds.Tables.Count == 1)
-                {
-                    method.AppendLine(String.Format("[return_type]"));
-                }
-                else
-                {
-                    method.AppendLine(String.Format("var dbSpResult=new {0}();", returnResultClass));
-                }
+                    method.AppendLine(" DataSet dataSet = DatabaseUtility.ExecuteDataSet(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray());");
+                    method.AppendLine(" if (dataSet.Tables.Count > 0)");
+                    method.AppendLine(" {");
 
-                method.AppendLine(" DataSet dataSet = DatabaseUtility.ExecuteDataSet(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray());");
-                method.AppendLine(" if (dataSet.Tables.Count > 0)");
-                method.AppendLine(" {");
-
-                for (int i = 0; i < ds.Tables.Count; i++)
-                {
-                    try
+                    for (int i = 0; i < ds.Tables.Count; i++)
                     {
-                        modelName2 = String.Format("{0}", tableNames.Any() ? tableNames[i] : "Tablo" + i);
-                        if (ds.Tables.Count != 1)
+                        try
                         {
-                            method.AppendLine(String.Format("var list{0}=new List<{1}>();", i, modelName2));
+                            modelName2 = String.Format("{0}", tableNames.Any() ? tableNames[i] : "Tablo" + i);
+                            if (ds.Tables.Count != 1)
+                            {
+                                method.AppendLine(String.Format("var list{0}=new List<{1}>();", i, modelName2));
+                            }
+                            else
+                            {
+
+                            }
+                            method.AppendLine(String.Format(" using (DataTable dt = dataSet.Tables[{0}])", i));
+                            method.AppendLine(" {");
+                            method.AppendLine(" foreach (DataRow dr in dt.Rows)");
+                            method.AppendLine(" {");
+                            method.AppendLine(String.Format(" var e = Get{0}FromDataRow(dr);", modelName2));
+                            method.AppendLine(String.Format(" list{0}.Add(e);", i));
+                            method.AppendLine(" }");
+                            if (ds.Tables.Count > 1)
+                            {
+                                method.AppendLine(" dbSpResult." + modelName2 + "List=list" + i + ";");
+                            }
+
+                            method.AppendLine(" }");
+                            method.AppendLine(" ");
+                            method.AppendLine(" ");
                         }
-                        else
+                        catch (Exception)
                         {
 
-                        }
-                        method.AppendLine(String.Format(" using (DataTable dt = dataSet.Tables[{0}])", i));
-                        method.AppendLine(" {");
-                        method.AppendLine(" foreach (DataRow dr in dt.Rows)");
-                        method.AppendLine(" {");
-                        method.AppendLine(String.Format(" var e = Get{0}FromDataRow(dr);", modelName2));
-                        method.AppendLine(String.Format(" list{0}.Add(e);", i));
-                        method.AppendLine(" }");
-                        if (ds.Tables.Count > 1)
-                        {
-                            method.AppendLine(" dbSpResult." + modelName2 + "List=list" + i + ";");
-                        }
 
-                        method.AppendLine(" }");
-                        method.AppendLine(" ");
-                        method.AppendLine(" ");
-                    }
-                    catch (Exception)
-                    {
-
+                        }
 
                     }
+                    returnTypeText = String.Format("var list{0}=new List<{1}>();", 0, modelName2);
 
+                    method.Replace("[return_type]", returnTypeText);
+                    method.AppendLine(" }");
+                    if (ds.Tables.Count > 1)
+                    {
+                        method.AppendLine(" return dbSpResult;");
+                    }
+                    else
+                    {
+                        method.AppendLine(" return list0;");
+                    }
+
+
+
+                    method.AppendLine(" }");
+
+                    CodeGeneratorResult.StoredProcExec = method.ToString();
                 }
-                returnTypeText = String.Format("var list{0}=new List<{1}>();", 0, modelName2);
-
-                method.Replace("[return_type]", returnTypeText);
-                method.AppendLine(" }");
-                if (ds.Tables.Count > 1)
+                catch (Exception ex)
                 {
-                    method.AppendLine(" return dbSpResult;");
+                    CodeGeneratorResult.StoredProcExec = ex.StackTrace;
                 }
-                else
-                {
-                    method.AppendLine(" return list0;");
-                }
-
-
-
-                method.AppendLine(" }");
-
-                CodeGeneratorResult.StoredProcExec = method.ToString();
-            }
-            catch (Exception ex)
-            {
-                CodeGeneratorResult.StoredProcExec = ex.StackTrace;
-            }
                 #endregion
             }
             catch (Exception ex)
@@ -934,5 +1034,66 @@ namespace DotNetCodeGenerator.Domain.Helpers
             }
         }
 
+        public void GenerateAspMvcControllerClass()
+        {
+            List<TableRowMetaData> kontrolList = DatabaseMetadata.SelectedTable.TableRowMetaDataList;
+            String realEntityName = CodeGeneratorResult.SelectedTable;
+            String modelName = CodeGeneratorResult.ModifiedTableName;
+            String modifiedTableName = CodeGeneratorResult.ModifiedTableName;
+            string selectedTable = DatabaseMetadata.SelectedTable.TableNameWithSchema;
+            String entityPrefix = GeneralHelper.GetEntityPrefixName(realEntityName);
+            String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(kontrolList);
+            string primaryKeyOrginal = primaryKey;
+            String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
+
+            var built = new StringBuilder();
+
+            built.AppendLine("//[OutputCache(CacheProfile = \"Cache1Hour\")]");
+            built.AppendLine("public ActionResult Index()");
+            built.AppendLine("{");
+            built.AppendLine(String.Format("var items = {0}Repository.Get{1}s();", modelName.Replace("Nwm", ""), modelName));
+            built.AppendLine("return View(items);");
+            built.AppendLine("}");
+
+            built.AppendLine("//[OutputCache(CacheProfile = \"Cache1Hour\")]");
+            built.AppendLine(String.Format("public ActionResult {0}Detail(String id)", modelName));
+            built.AppendLine("{");
+            built.AppendLine(String.Format("int {0} = id.Split('-').Last().ToInt();", primaryKey.ToLower()));
+            built.AppendLine(String.Format("var {0} = {1}Repository.Get{3}({2});", modelName.ToLower(), modelName.Replace("Nwm", ""), primaryKey.ToLower(), modelName));
+            built.AppendLine(String.Format("return View({0});", modelName.ToLower()));
+            built.AppendLine("}");
+
+
+            built.AppendLine(String.Format("public ActionResult SaveOrUpdate{0}(int id)", modelName));
+            built.AppendLine("{");
+            built.AppendLine(String.Format("int {0} = id;", primaryKey.ToLower()));
+            built.AppendLine(String.Format("var {0} = new {1}();", modelName.ToLower(), modelName));
+            built.AppendLine(String.Format("if({0} == 0)", primaryKey.ToLower()));
+            built.AppendLine("{");
+            built.AppendLine("}else{");
+            built.AppendLine(String.Format("{0} = {1}Repository.Get{3}({2});", modelName.ToLower(), modelName.Replace("Nwm", ""),
+                primaryKey.ToLower(), modelName));
+            built.AppendLine("}");
+            built.AppendLine(String.Format("return View({0});", modelName.ToLower()));
+            built.AppendLine("}");
+
+            built.AppendLine("[HttpPost]");
+            built.AppendLine(String.Format("public ActionResult SaveOrUpdate{0}({0} {1})", modelName, modelName.ToLower()));
+            built.AppendLine("{");
+            built.AppendLine(String.Format("int {0} = {1}Repository.SaveOrUpdate{3}({2});", primaryKey.ToLower(), modelName.Replace("Nwm", ""), modelName.ToLower(), modelName));
+            built.AppendLine(String.Format("return RedirectToAction(\"Index\");"));
+            built.AppendLine("}");
+
+            built.AppendLine(String.Format("public ActionResult Delete{0}(int id)", modelName));
+            built.AppendLine("{");
+            built.AppendLine(String.Format("int {0} = id;", GeneralHelper.FirstCharacterToLower(primaryKey)));
+            built.AppendLine(String.Format("{0}Repository.Delete{2}({1});", modelName.Replace("Nwm", ""), GeneralHelper.FirstCharacterToLower(primaryKey), modelName));
+            built.AppendLine(String.Format("return RedirectToAction(\"Index\");"));
+            built.AppendLine("}");
+
+
+
+            CodeGeneratorResult.AspMvcControllerClass = built.ToString();
+        }
     }
 }

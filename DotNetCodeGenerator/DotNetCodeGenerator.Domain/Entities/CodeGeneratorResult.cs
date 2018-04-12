@@ -10,7 +10,7 @@ namespace DotNetCodeGenerator.Domain.Entities
 {
     public class CodeGeneratorResult
     {
-     
+    
 
         public string ConnectionString { get; set; }
         public string SelectedTable { get; set; }
@@ -31,12 +31,7 @@ namespace DotNetCodeGenerator.Domain.Entities
         [AllowHtml]
         [DataType(DataType.MultilineText)]
         public string StoredProcExecModelDataReader { get; set; }
-
-
-        [Display(Name = "SaveOrUpdateDatabaseUtility")]
-        [AllowHtml]
-        [DataType(DataType.MultilineText)]
-        public string SaveOrUpdateDatabaseUtility { get; set; }
+ 
         [Display(Name = "TableRepository")]
         [AllowHtml]
         [DataType(DataType.MultilineText)]
@@ -44,6 +39,7 @@ namespace DotNetCodeGenerator.Domain.Entities
         public bool IsModelAttributesVisible { get; set; }
         public string TableClassItem { get; set; }
         public string TableClassInstance { get; set; }
-
+        public string SqlDatabaseOperation { get;  set; }
+        public string AspMvcControllerClass { get; set; }
     }
 }

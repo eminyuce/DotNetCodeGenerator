@@ -53,10 +53,12 @@ namespace DotNetCodeGenerator.Domain.Services
 
             var tasks = new List<Task>();
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateSPModel(); }));
-            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenereateSaveOrUpdateDatabaseUtility(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateTableRepository(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateTableItem(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateNewInstance(); }));
+            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenereateSqlDatabaseOperation(); }));
+            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateAspMvcControllerClass(); }));
+
             await Task.WhenAll(tasks);
 
             codeGeneratorResult = CodeProducerHelper.CodeGeneratorResult;
