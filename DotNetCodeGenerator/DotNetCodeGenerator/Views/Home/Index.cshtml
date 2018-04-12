@@ -109,6 +109,42 @@
             </div>
 
         <div class="form-group">
+            @Html.LabelFor(model => model.TableRepository, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <textarea class="form-control text-box multi-line"
+                          id="TableRepository"
+                          name="TableRepository">
+                    @Model.TableRepository
+                </textarea>
+                @Html.ValidationMessageFor(model => model.TableRepository, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.TableClassItem, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <textarea class="form-control text-box multi-line"
+                          id="TableClassItem"
+                          name="TableClassItem">
+                    @Model.TableClassItem
+                </textarea>
+                @Html.ValidationMessageFor(model => model.TableClassItem, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.TableClassInstance, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <textarea class="form-control text-box multi-line"
+                          id="TableClassInstance"
+                          name="TableClassInstance">
+                    @Model.TableClassItem
+                </textarea>
+                @Html.ValidationMessageFor(model => model.TableClassItem, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
                 <input type="submit" value="Generate Code" class="btn btn-default" />
             </div>

@@ -22,6 +22,398 @@ namespace DotNetCodeGenerator.Domain.Helpers
         public CodeGeneratorResult CodeGeneratorResult { get; set; }
         public DatabaseMetadata DatabaseMetadata { get; set; }
 
+        public void GenerateTableItem()
+        {
+            List<TableRowMetaData> linkedList = DatabaseMetadata.SelectedTable.TableRowMetaDataList;
+            StringBuilder method = new StringBuilder();
+            String realEntityName = CodeGeneratorResult.SelectedTable;
+            String modelName = CodeGeneratorResult.ModifiedTableName;
+            String modifiedTableName = CodeGeneratorResult.ModifiedTableName;
+            string selectedTable = DatabaseMetadata.SelectedTable.TableNameWithSchema;
+            String entityPrefix = GeneralHelper.GetEntityPrefixName(realEntityName);
+            String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(linkedList);
+            string primaryKeyOrginal = primaryKey;
+            StringBuilder method2 = new StringBuilder();
+            if (CodeGeneratorResult.IsMethodStatic)
+            {
+                method2.AppendLine("[Table(\"" + selectedTable + "\")]");
+            }
+            method2.AppendLine("public class " + modelName + "");
+            method2.AppendLine("{");
+
+
+
+            foreach (TableRowMetaData item in linkedList)
+            {
+                try
+                {
+
+                    if (item.PrimaryKey && CodeGeneratorResult.IsModelAttributesVisible)
+                    {
+                        method2.AppendLine("[Key]");
+                    }
+                    if (CodeGeneratorResult.IsModelAttributesVisible)
+                    {
+                        //method2.AppendLine("[Required]");
+                        method2.AppendLine(string.Format("[Display(Name =\"{0}\")]", item.ColumnName));
+                        method2.AppendLine(string.Format("[Column(\"{0}\")]", item.ColumnName));
+
+                        method2.AppendLine(string.Format("[Required(ErrorMessage =\"{0}\")]", item.ColumnName));
+                    }
+
+
+
+                    if (item.DataType.IndexOf("varchar") > -1 || item.DataType.IndexOf("text") > -1 || item.DataType.IndexOf("xml") > -1)
+                    {
+                        if (CodeGeneratorResult.IsModelAttributesVisible)
+                        {
+                            method2.AppendLine(string.Format("[DataType(DataType.Text)]"));
+                            method2.AppendLine(string.Format("[StringLength({0}, ErrorMessage = \"{1} cannot be longer than {0} characters.\")]", item.DataTypeMaxChar, item.ColumnName));
+                        }
+
+                        method.AppendLine("public string " + item.ColumnName + " { get; set; }");
+                        method2.AppendLine("public string " + item.ColumnName + " { get; set; }");
+                    }
+                    else if (item.DataType.IndexOf("int") > -1)
+                    {
+                        method.AppendLine("public int " + item.ColumnName + " { get; set; }");
+                        method2.AppendLine("public int " + item.ColumnName + " { get; set; }");
+                    }
+                    else if (item.DataType.IndexOf("date") > -1)
+                    {
+                        if (CodeGeneratorResult.IsModelAttributesVisible)
+                        {
+                            method2.AppendLine(string.Format("[DataType(DataType.Date)]"));
+                            method2.AppendLine(
+                                string.Format(
+                                    " [DisplayFormat(DataFormatString = \"{{0:yyyy/MM/dd}}\", ApplyFormatInEditMode = true)]"));
+
+                        }
+                        method.AppendLine("public DateTime " + item.ColumnName + " { get; set; }");
+                        method2.AppendLine("public DateTime " + item.ColumnName + " { get; set; }");
+                    }
+                    else if (item.DataType.IndexOf("bit") > -1)
+                    {
+                        method.AppendLine("public Boolean " + item.ColumnName + " { get; set; }");
+                        method2.AppendLine("public Boolean " + item.ColumnName + " { get; set; }");
+                    }
+                    else if (item.DataType.IndexOf("float") > -1)
+                    {
+                        method.AppendLine("public float " + item.ColumnName + " { get; set; }");
+                        method2.AppendLine("public float " + item.ColumnName + " { get; set; }");
+                    }
+                    else if (item.DataType.IndexOf("char") > -1)
+                    {
+                        method.AppendLine("public char " + item.ColumnName + " { get; set; }");
+                        method2.AppendLine("public char " + item.ColumnName + " { get; set; }");
+                    }
+                } 
+                catch (Exception ex)
+                {
+
+
+                }
+            }
+
+            method2.AppendLine("public  " + modelName + "(){");
+            method2.AppendLine("");
+            method2.AppendLine("}");
+            StringBuilder method555 = new StringBuilder();
+            foreach (TableRowMetaData item in linkedList)
+            {
+                var fColumnName = GeneralHelper.FirstCharacterToLower(item.ColumnName);
+                if (item.DataType.IndexOf("varchar") > -1 || item.DataType.IndexOf("text") > -1 || item.DataType.IndexOf("xml") > -1)
+                {
+                    method555.Append("string " + fColumnName + ",");
+                }
+                else if (item.DataType.IndexOf("int") > -1)
+                {
+                    method555.Append("int " + fColumnName + ",");
+                }
+                else if (item.DataType.IndexOf("date") > -1)
+                {
+                    method555.Append("DateTime " + fColumnName + ",");
+                }
+                else if (item.DataType.IndexOf("bit") > -1)
+                {
+                    method555.Append("Boolean " + fColumnName + ",");
+                }
+                else if (item.DataType.IndexOf("float") > -1)
+                {
+                    method555.Append("float " + fColumnName + ",");
+                }
+                else if (item.DataType.IndexOf("char") > -1)
+                {
+                    method555.Append("char " + fColumnName + ",");
+                }
+            }
+            string m = String.Format("public {0} ({1})", modelName, method555.ToString().Trim().TrimEnd(','));
+            method2.AppendLine(m + "{");
+            method2.AppendLine("");
+            foreach (TableRowMetaData item in linkedList)
+            {
+                method2.AppendLine("this." + item.ColumnName + "=" + GeneralHelper.FirstCharacterToLower(item.ColumnName) + ";");
+            }
+            method2.AppendLine("");
+            method2.AppendLine("}");
+
+
+            var fks = linkedList.Where(r => r.ForeignKey).ToList();
+            foreach (var item in fks)
+            {
+                var columnObj = GeneralHelper.getObject(item.ColumnName);
+                method2.AppendLine("private " + columnObj + " _" + columnObj.ToLower() + "=new " + columnObj + "();");
+                method2.AppendLine("public " + columnObj + " " + columnObj + "");
+                method2.AppendLine("{ ");
+                method2.AppendLine(" get {  return _" + columnObj.ToLower() + "; } ");
+                method2.AppendLine(" set {  _" + columnObj.ToLower() + "=value; } ");
+                method2.AppendLine("} ");
+            }
+            method.AppendLine("");
+            method.AppendLine("");
+            method.AppendLine("");
+            method2.AppendLine("");
+            method2.AppendLine("");
+            method2.AppendLine("public override string ToString() {");
+            method2.AppendLine("return String.Format(");
+            int i = 0;
+            var method322 = new StringBuilder();
+            var method32 = new StringBuilder();
+            foreach (TableRowMetaData item in linkedList)
+            {
+                method32.Append(String.Format("{0} ", item.ColumnName + ":{" + i + "}"));
+                method322.Append(String.Format("{0}, ", item.ColumnName));
+                i++;
+            }
+            method2.AppendLine(String.Format("\"{0}\",{1});", method32.ToString(), method322.ToString().Trim().TrimEnd(',')));
+            method2.AppendLine("}");
+
+
+
+            method2.AppendLine("}");
+
+
+            CodeGeneratorResult.TableClassItem = method2.ToString();
+        }
+      
+        public string GenerateNewInstance()
+        {
+            List<TableRowMetaData> kontrolList = DatabaseMetadata.SelectedTable.TableRowMetaDataList;
+            //GetBrouwerCollectionFromReader
+            StringBuilder method = new StringBuilder();
+            String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
+            string databaseName = DatabaseMetadata.DatabaseName;
+            String realEntityName = CodeGeneratorResult.SelectedTable;
+            String modelName = CodeGeneratorResult.ModifiedTableName;
+            String modifiedTableName = CodeGeneratorResult.ModifiedTableName;
+            string selectedTable = DatabaseMetadata.SelectedTable.TableNameWithSchema;
+            String entityPrefix = GeneralHelper.GetEntityPrefixName(realEntityName);
+            String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(kontrolList);
+            string primaryKeyOrginal = primaryKey;
+
+            method.AppendLine("var item = new " + modelName + "();");
+            method.AppendLine("");
+            foreach (TableRowMetaData item in kontrolList)
+            {
+
+                if (item.DataType.IndexOf("varchar") > -1)
+                {
+                    // method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? \"\" : read[\"" + item.ColumnName + "\"].ToString();");
+                    method.AppendLine("item." + item.ColumnName + " = \"\";");
+                }
+                else if (item.DataType.IndexOf("int") > -1)
+                {
+                    //method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? -1 : Convert.ToInt32(read[\"" + item.ColumnName + "\"].ToString());");
+                    method.AppendLine("item." + item.ColumnName + " = 1;");
+                }
+                else if (item.DataType.IndexOf("date") > -1)
+                {
+                    //method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? DateTime.Now : DateTime.Parse(read[\"" + item.ColumnName + "\"].ToString());");
+                    method.AppendLine("item." + item.ColumnName + " = DateTime.Now;");
+                }
+                else if (item.DataType.IndexOf("bit") > -1)
+                {
+                    //method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? false : Boolean.Parse(read[\"" + item.ColumnName + "\"].ToString());");
+                    method.AppendLine("item." + item.ColumnName + " = true;");
+                }
+                else if (item.DataType.IndexOf("float") > -1)
+                {
+                    //method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? -1 : float.Parse(read[\"" + item.ColumnName + "\"].ToString());");
+                    method.AppendLine("item." + item.ColumnName + " = 1;");
+                }
+                else
+                {
+                    // method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? \"\" : read[\"" + item.ColumnName + "\"].ToString();");
+                    method.AppendLine("item." + item.ColumnName + " = \"\";");
+                }
+            }
+
+
+            method.AppendLine("");
+            method.AppendLine("");
+            method.AppendLine("");
+
+            method.AppendLine(String.Format("public  class {0}Repository : GenericRepository<{2}Entities, {1}>, I{0}Repository", modelName, selectedTable, databaseName));
+            method.AppendLine("{");
+            method.AppendLine("}");
+
+            method.AppendLine("");
+            method.AppendLine("");
+
+            method.AppendLine(String.Format("public interface I{0}Repository : IGenericRepository<{1}>", modelName, selectedTable));
+            method.AppendLine("{");
+            method.AppendLine("}");
+
+            method.AppendLine("");
+            method.AppendLine("");
+            method.AppendLine("");
+
+            StringBuilder method12 = new StringBuilder();
+
+
+            method12.AppendLine("using GenericRepository.EntityFramework;");
+            method12.AppendLine("namespace MyProject.Service.Repositories");
+            method12.AppendLine("{");
+            method12.AppendLine(String.Format("public  class {0}Repository : EntityRepository<{0}, int>, I{0}Repository", modelName));
+            method12.AppendLine("{");
+            method12.AppendLine(String.Format("private I{0}Context dbContext;", databaseName));
+            method12.AppendLine(String.Format("public {1}Repository(I{0}Context dbContext) : base(dbContext)", databaseName, modelName));
+            method12.AppendLine("{");
+            method12.AppendLine("    this.dbContext = dbContext;");
+            method12.AppendLine("}");
+            method12.AppendLine("}");
+            method12.AppendLine("}");
+
+            method12.AppendLine("");
+            method12.AppendLine("");
+
+
+            StringBuilder method11 = new StringBuilder();
+            method11.AppendLine("using GenericRepository.EntityFramework;");
+            method11.AppendLine("namespace MyProject.Service.Repositories.Interfaces");
+            method11.AppendLine("{");
+            method11.AppendLine(String.Format("public interface I{0}Repository : IEntityRepository<{0}, int>", modelName));
+            method11.AppendLine("{");
+            method11.AppendLine("}");
+            method11.AppendLine("}");
+
+            // createFile(method, String.Format("{0}Repository", modelName));
+
+            method.AppendLine(method11.ToString());
+            method.AppendLine(method12.ToString());
+ 
+
+             CodeGeneratorResult.TableClassInstance = method.ToString();
+
+            return method.ToString();
+
+        }
+
+        public void GenerateTableRepository()
+        {
+            List<TableRowMetaData> linkedList = DatabaseMetadata.SelectedTable.TableRowMetaDataList;
+            StringBuilder method = new StringBuilder();
+            String realEntityName = CodeGeneratorResult.SelectedTable;
+            String modelName = CodeGeneratorResult.ModifiedTableName;
+            String modifiedTableName = CodeGeneratorResult.ModifiedTableName;
+            String entityPrefix = GeneralHelper.GetEntityPrefixName(realEntityName);
+            String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(linkedList);
+            string primaryKeyOrginal = primaryKey;
+            primaryKey = GeneralHelper.FirstCharacterToLower(primaryKey);
+            String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
+           
+
+            method.AppendLine(String.Format("public class {0}Repository", modelName.Replace("Nwm", "")));
+            method.AppendLine("{");
+            method.AppendLine("private static readonly Logger Logger = LogManager.GetCurrentClassLogger();");
+            method.AppendLine("private static string CacheKeyAllItems = \"" + modelName + "Cache\";");
+            method.AppendLine("");
+            method.AppendLine("public " + staticText + " List<" + modelName + "> Get" + modelName + "sFromCache()");
+            method.AppendLine("{");
+            method.AppendLine("var items = (List<" + modelName + ">)MemoryCache.Default.Get(CacheKeyAllItems);");
+            method.AppendLine("if (items == null)");
+            method.AppendLine("{");
+            method.AppendLine("items = Get" + modelName + "s();");
+            method.AppendLine(" CacheItemPolicy policy = null;");
+            method.AppendLine("policy = new CacheItemPolicy();");
+            method.AppendLine("policy.Priority = CacheItemPriority.Default;");
+            method.AppendLine(" policy.AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(Settings.CacheMediumSeconds);");
+            method.AppendLine("MemoryCache.Default.Set(CacheKeyAllItems, items, policy);");
+            method.AppendLine("}");
+            method.AppendLine(" return items;");
+            method.AppendLine("}");
+            method.AppendLine("");
+            method.AppendLine("public " + staticText + " List<" + modelName + "> Get" + modelName + "s()");
+            method.AppendLine("{");
+            method.AppendLine("      var " + modelName.ToLower() + "Result = new  List <" + modelName + ">();");
+            method.AppendLine("try");
+            method.AppendLine("{");
+            method.AppendLine("      " + modelName.ToLower() + "Result = DBDirectory.Get" + modelName + "s();");
+            method.AppendLine("}catch(Exception ex)");
+            method.AppendLine("{");
+            method.AppendLine("Logger.Error(ex, ex.Message);");
+            method.AppendLine("}");
+            method.AppendLine("      return " + modelName.ToLower() + "Result;");
+            method.AppendLine("}");
+            method.AppendLine("public " + staticText + " int SaveOrUpdate" + modelName + "( " + modelName + " item)");
+            method.AppendLine("{");
+            method.AppendLine("try");
+            method.AppendLine("{");
+            method.AppendLine("     RemoveCache();");
+            method.AppendLine("     return DBDirectory.SaveOrUpdate" + modelName + "(item);");
+            method.AppendLine("}catch(Exception ex)");
+            method.AppendLine("{");
+            method.AppendLine("Logger.Error(ex, ex.Message);");
+            method.AppendLine("}");
+            method.AppendLine("      return -1;");
+            method.AppendLine("}");
+            method.AppendLine("public " + staticText + " " + modelName + " Get" + modelName + "(int " + primaryKey + ")");
+            method.AppendLine("{");
+            method.AppendLine("      var item = new  " + modelName + "();");
+            method.AppendLine("try");
+            method.AppendLine("{");
+            method.AppendLine("item = Get" + modelName + "sFromCache().FirstOrDefault(r => r." + primaryKeyOrginal + " == " + primaryKey + ");");
+            method.AppendLine("if (item != null) return item;");
+            method.AppendLine("     item = DBDirectory.Get" + modelName + "(" + primaryKey + ");");
+            method.AppendLine("}catch(Exception ex)");
+            method.AppendLine("{");
+            method.AppendLine("Logger.Error(ex, ex.Message);");
+            method.AppendLine("}");
+            method.AppendLine("      return item;");
+            method.AppendLine("}");
+            method.AppendLine("public " + staticText + " void Delete" + modelName + "(int " + primaryKey + ")");
+            method.AppendLine("{");
+            method.AppendLine("try");
+            method.AppendLine("{");
+            method.AppendLine("     RemoveCache();");
+            method.AppendLine("     DBDirectory.Delete" + modelName + "(" + primaryKey + ");");
+            method.AppendLine("}catch(Exception ex)");
+            method.AppendLine("{");
+            method.AppendLine("Logger.Error(ex, ex.Message);");
+            method.AppendLine("}");
+            method.AppendLine("}");
+            method.AppendLine("public " + staticText + " void RemoveCache()");
+            method.AppendLine("{");
+            method.AppendLine("     MemoryCache.Default.Remove(CacheKeyAllItems);");
+            method.AppendLine("}");
+            foreach (var ki in linkedList)
+            {
+                if (ki.ForeignKey)
+                {
+                    //String dataType = GetSqlDataTypeFromColumnDataType(ki);
+                    String cSharpType = TableRowMetaDataHelper.GetCSharpDataType(ki);
+                    method.AppendLine("//" + ki.ColumnName);
+                    method.AppendLine("public " + staticText + "  List<" + modelName + "> Get" + modelName + "By" + ki.ColumnName + "(" + cSharpType + " " + GeneralHelper.FirstCharacterToLower(ki.ColumnName) + ")");
+                    method.AppendLine("{");
+                    method.AppendLine("   return  DBDirectory.Get" + modelName + "By" + ki.ColumnName + "(" + GeneralHelper.FirstCharacterToLower(ki.ColumnName) + ");");
+                    method.AppendLine("}");
+                }
+            }
+            method.AppendLine("}");
+            CodeGeneratorResult.TableRepository = method.ToString();
+        }
+
+
         public void GenereateSaveOrUpdateDatabaseUtility()
         {
             try

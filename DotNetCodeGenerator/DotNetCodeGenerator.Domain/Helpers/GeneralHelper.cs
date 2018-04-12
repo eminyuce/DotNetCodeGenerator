@@ -10,6 +10,18 @@ namespace DotNetCodeGenerator.Domain.Helpers
 {
     public class GeneralHelper
     {
+        public static String getObject(String name)
+        {
+            return name.Replace("id", "").Replace("Id", "");
+        }
+        public static string FirstCharacterToLower(string str)
+        {
+            if (String.IsNullOrEmpty(str) || Char.IsLower(str, 0))
+                return str;
+
+            return Char.ToLowerInvariant(str[0]).ToString() + str.Substring(1);
+        }
+
         public static readonly Regex CarriageRegex = new Regex(@"(\r\n|\r|\n)+");
         //remove carriage returns from the header name
         public static string RemoveCarriage(string text)
