@@ -29,5 +29,12 @@ namespace DotNetCodeGenerator.Domain.Entities
         [AllowHtml]
         [DataType(DataType.MultilineText)]
         public string StoredProcExecModelDataReader { get; set; }
+
+
+        [Display(Name = "StoredProcExec")]
+        [AllowHtml]
+        [DataType(DataType.MultilineText)]
+        public string SaveOrUpdateDatabaseUtility { get; set; }
+
     }
 }

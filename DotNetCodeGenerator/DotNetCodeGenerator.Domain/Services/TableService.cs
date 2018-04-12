@@ -2,6 +2,7 @@
 using DotNetCodeGenerator.Domain.Helpers;
 using DotNetCodeGenerator.Domain.Repositories;
 using Ninject;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -15,7 +16,7 @@ namespace DotNetCodeGenerator.Domain.Services
     {
         [Inject]
         public TableRepository TableRepository { get; set; }
-
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         [Inject]
         public CodeProducerHelper CodeProducerHelper { get; set; }
 
@@ -30,12 +31,12 @@ namespace DotNetCodeGenerator.Domain.Services
         public  void GenerateCode(CodeGeneratorResult codeGeneratorResult)
         {
             var databaseMetaData = TableRepository.GetAllTables(codeGeneratorResult.ConnectionString);
+            TableRepository.GetSelectedTableMetaData(databaseMetaData, codeGeneratorResult.SelectedTable);
+
             CodeProducerHelper.CodeGeneratorResult = codeGeneratorResult;
             CodeProducerHelper.DatabaseMetadata = databaseMetaData;
             CodeProducerHelper.GenerateSPModel();
-
-             codeGeneratorResult = CodeProducerHelper.CodeGeneratorResult;
-            // CodeProducerHelper.GenerateRepository(codeGeneratorResult, databaseMetaData);
+            CodeProducerHelper.GenereateSaveOrUpdateDatabaseUtility();
             //var tasks = new List<Task>();
 
             //Task task = new Task(() => {  });
@@ -44,6 +45,8 @@ namespace DotNetCodeGenerator.Domain.Services
 
             //tasks.Add(task);
             //await Task.WhenAll(tasks);
+
+            codeGeneratorResult = CodeProducerHelper.CodeGeneratorResult;
         }
     }
 }

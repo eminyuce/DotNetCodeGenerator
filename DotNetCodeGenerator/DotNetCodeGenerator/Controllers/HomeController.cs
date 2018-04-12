@@ -8,13 +8,13 @@ using DotNetCodeGenerator.Domain.Helpers;
 using Ninject;
 using DotNetCodeGenerator.Domain.Services;
 using System.Threading.Tasks;
+using NLog;
 
 namespace DotNetCodeGenerator.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
-        [Inject]
-        public TableService TableService { get; set; }
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public ActionResult Index()
         {
             var codeGeneratorResult = new CodeGeneratorResult();

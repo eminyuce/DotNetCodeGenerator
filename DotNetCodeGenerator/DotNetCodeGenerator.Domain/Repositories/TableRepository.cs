@@ -72,7 +72,12 @@ namespace DotNetCodeGenerator.Domain.Repositories
             con.Open();
 
             string[] objArrRestrict;
-            objArrRestrict = new string[] { null, null, selectedTable, null };
+            var tParts = selectedTable.Split(".".ToCharArray());
+            objArrRestrict = new string[] {
+                tParts[0],
+                tParts[1],
+                tParts[2],
+                null };
             DataTable tbl = con.GetSchema(SqlClientMetaDataCollectionNames.Columns, objArrRestrict);
 
             SqlDataAdapter da = new SqlDataAdapter();

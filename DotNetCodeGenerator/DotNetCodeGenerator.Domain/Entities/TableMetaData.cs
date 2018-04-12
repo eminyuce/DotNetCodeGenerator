@@ -17,7 +17,14 @@ namespace DotNetCodeGenerator.Domain.Entities
         {
             get
             {
-                return String.Format("{0}.{1}", TableSchema, TableName);
+                return String.Format("{0}.{1}.{2}", TableCatalog, TableSchema, TableName);
+            }
+        }
+        public string TableNameWithSchema
+        {
+            get
+            {
+                return String.Format("{0}.{1}",  TableSchema, TableName);
             }
         }
 

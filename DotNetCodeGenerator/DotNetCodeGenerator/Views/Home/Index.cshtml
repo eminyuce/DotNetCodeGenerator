@@ -97,6 +97,18 @@
         </div>
 
         <div class="form-group">
+            @Html.LabelFor(model => model.SaveOrUpdateDatabaseUtility, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <textarea class="form-control text-box multi-line"
+                          id="SaveOrUpdateDatabaseUtility"
+                          name="SaveOrUpdateDatabaseUtility">
+                    @Model.SaveOrUpdateDatabaseUtility
+                    </textarea>
+                    @Html.ValidationMessageFor(model => model.SaveOrUpdateDatabaseUtility, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+        <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
                 <input type="submit" value="Generate Code" class="btn btn-default" />
             </div>
@@ -125,7 +137,8 @@
                   var listitems = '';
                   $('#SelectedTable').find('option').remove();
                   $.each(data, function (i, item) {
-                      listitems += '<option value=' + item.TableName + '>' + item.DatabaseTableName + '</option>';
+                      listitems += '<option value=' + item.DatabaseTableName + '>'
+                          + item.TableNameWithSchema + '</option>';
                   });
                   $('#SelectedTable').append(listitems);
               });

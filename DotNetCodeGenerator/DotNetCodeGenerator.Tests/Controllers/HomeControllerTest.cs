@@ -25,12 +25,13 @@ namespace DotNetCodeGenerator.Tests.Controllers
             tableService.TableRepository = tableRepository;
             string connectionString = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
             var databaseMetaData = tableRepository.GetAllTables(connectionString);
-            var selectedTable = databaseMetaData.Tables.Where(r => r.DatabaseTableName.Equals("dbo.Products"));
-            tableRepository.GetSelectedTableMetaData(databaseMetaData, "dbo.Products");
-            var t = new CodeProducerHelper();
-            t.TableService = tableService;
-            var codeGeneratorResult = new CodeGeneratorResult();
-            codeGeneratorResult.StoredProcExec = "dbo.test_SP @take=2 -NwmProduct";
+            tableRepository.GetSelectedTableMetaData(databaseMetaData, "TestEY_2.dbo.Products");
+
+            //var selectedTable = databaseMetaData.Tables.Where(r => r.DatabaseTableName.Equals("dbo.Products"));
+            //var t = new CodeProducerHelper();
+            //t.TableService = tableService;
+            //var codeGeneratorResult = new CodeGeneratorResult();
+            //codeGeneratorResult.StoredProcExec = "dbo.test_SP @take=2 -NwmProduct";
             //t.GenerateSPModel(codeGeneratorResult,databaseMetaData);
             //Console.WriteLine(codeGeneratorResult.StoredProcExec);
             //Console.WriteLine(codeGeneratorResult.StoredProcExecModel);

@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DotNetCodeGenerator.Domain.Services;
 using Ninject;
+using NLog;
 
 namespace DotNetCodeGenerator.Domain.Helpers
 {
@@ -17,33 +18,44 @@ namespace DotNetCodeGenerator.Domain.Helpers
         [Inject]
         public TableService TableService { get; set; }
 
-
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public CodeGeneratorResult CodeGeneratorResult { get; set; }
         public DatabaseMetadata DatabaseMetadata { get; set; }
 
-        private string GenereateSaveOrUpdateDatabaseUtility()
+        public void GenereateSaveOrUpdateDatabaseUtility()
         {
-            StringBuilder method = new StringBuilder();
-            String realEntityName = CodeGeneratorResult.SelectedTable;
-            String modelName = CodeGeneratorResult.ModifiedTableName;
-            String modifiedTableName = CodeGeneratorResult.ModifiedTableName;
-            String entityPrefix = GeneralHelper.GetEntityPrefixName(realEntityName);
-            entityPrefix = (String.IsNullOrEmpty(entityPrefix) ? "" : entityPrefix + "_");
-            String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(DatabaseMetadata.SelectedTable.TableRowMetaDataList);
-            String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
-            method.AppendLine("public " + staticText + " int SaveOrUpdate" + modelName + "( " + modelName + " item)");
-            method.AppendLine(" {");
-            //GetDatabaseUtilityParameters(kontrolList, method, entityPrefix + "SaveOrUpdate" + modifiedTableName, true);
-            method.AppendLine(" int id = DatabaseUtility.ExecuteScalar(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray()).ToInt();");
-            method.AppendLine(" return id;");
-            method.AppendLine(" }");
-            return method.ToString();
+            try
+            {
+                StringBuilder method = new StringBuilder();
+                String realEntityName = CodeGeneratorResult.SelectedTable;
+                String modelName = CodeGeneratorResult.ModifiedTableName;
+                String modifiedTableName = CodeGeneratorResult.ModifiedTableName;
+                String entityPrefix = GeneralHelper.GetEntityPrefixName(realEntityName);
+                entityPrefix = (String.IsNullOrEmpty(entityPrefix) ? "" : entityPrefix + "_");
+                String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(DatabaseMetadata.SelectedTable.TableRowMetaDataList);
+                String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
+                method.AppendLine("public " + staticText + " int SaveOrUpdate" + modelName + "( " + modelName + " item)");
+                method.AppendLine(" {");
+                //GetDatabaseUtilityParameters(kontrolList, method, entityPrefix + "SaveOrUpdate" + modifiedTableName, true);
+                method.AppendLine(" int id = DatabaseUtility.ExecuteScalar(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray()).ToInt();");
+                method.AppendLine(" return id;");
+                method.AppendLine(" }");
+                CodeGeneratorResult.SaveOrUpdateDatabaseUtility = method.ToString();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, ex.Message);
+                CodeGeneratorResult.SaveOrUpdateDatabaseUtility = ex.Message;
+            }
+          
+
         }
 
         public void GenerateSPModel()
         {
+            try { 
             #region Execute SP to get tables so that we can generate code
-            string StoredProc_Exec = CodeGeneratorResult.StoredProcExec;
+            string StoredProc_Exec = CodeGeneratorResult.StoredProcExec.ToStr();
 
             if (String.IsNullOrEmpty(StoredProc_Exec))
             {
@@ -469,8 +481,12 @@ namespace DotNetCodeGenerator.Domain.Helpers
             {
                 CodeGeneratorResult.StoredProcExec = ex.StackTrace;
             }
-            #endregion
-
+                #endregion
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, ex.Message);
+            }
         }
 
     }
