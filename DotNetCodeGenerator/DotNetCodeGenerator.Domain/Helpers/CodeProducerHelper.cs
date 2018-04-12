@@ -36,7 +36,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
                 method.AppendLine("public " + staticText + " int SaveOrUpdate" + modelName + "( " + modelName + " item)");
                 method.AppendLine(" {");
-                //GetDatabaseUtilityParameters(kontrolList, method, entityPrefix + "SaveOrUpdate" + modifiedTableName, true);
+                GetDatabaseUtilityParameters(DatabaseMetadata.SelectedTable.TableRowMetaDataList, method, entityPrefix + "SaveOrUpdate" + modifiedTableName, true);
                 method.AppendLine(" int id = DatabaseUtility.ExecuteScalar(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray()).ToInt();");
                 method.AppendLine(" return id;");
                 method.AppendLine(" }");
@@ -50,7 +50,59 @@ namespace DotNetCodeGenerator.Domain.Helpers
           
 
         }
-       
+        private void GetDatabaseUtilityParameters(List<TableRowMetaData> kontrolList, StringBuilder method, String commandText = "", bool isSp = false)
+        {
+            String realEntityName = CodeGeneratorResult.SelectedTable;
+            method.AppendLine(
+                " string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
+            method.AppendLine(String.Format(" String commandText = @\"{0}\";", commandText));
+            method.AppendLine(" var parameterList = new List<SqlParameter>();");
+            method.AppendLine(!isSp ? "var commandType = CommandType.Text;" : "var commandType = CommandType.StoredProcedure;");
+
+
+            foreach (TableRowMetaData item in kontrolList)
+            {
+                var sqlParameter = GeneralHelper.GetUrlString(item.ColumnName);
+                if (item.DataType.IndexOf("xml") > -1)
+                {
+                    method.AppendLine("parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + sqlParameter + "\", item." +
+                                      item.ColumnName + ".ToStr(),SqlDbType.Xml));");
+                }
+                else if (item.DataType.IndexOf("varchar") > -1)
+                {
+                    method.AppendLine("parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + sqlParameter + "\", item." +
+                                      item.ColumnName + ".ToStr(),SqlDbType.NVarChar));");
+                }
+                else if (item.DataType.IndexOf("int") > -1)
+                {
+                    method.AppendLine("parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + sqlParameter + "\", item." +
+                                      item.ColumnName + ",SqlDbType.Int));");
+                }
+                else if (item.DataType.IndexOf("date") > -1)
+                {
+                    method.AppendLine("parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + sqlParameter + "\", item." +
+                                      item.ColumnName + ",SqlDbType.DateTime));");
+                }
+                else if (item.DataType.IndexOf("bit") > -1)
+                {
+                    method.AppendLine("parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + sqlParameter + "\", item." +
+                                      item.ColumnName + ",SqlDbType.Bit));");
+                }
+                else if (item.DataType.IndexOf("float") > -1)
+                {
+                    method.AppendLine("parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + sqlParameter + "\", item." +
+                                      item.ColumnName + ",SqlDbType.Float));");
+                }
+                else
+                {
+                    method.AppendLine("parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + sqlParameter + "\", item." +
+                                      item.ColumnName + ",SqlDbType.NVarChar));");
+                }
+
+            }
+        }
+
+
         public void GenerateSPModel()
         {
 
@@ -257,28 +309,28 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
                         if (dataType.IndexOf("string") > -1)
                         {
-                            // method.AppendLine("item." + item.columnName + " = (read[\"" + item.columnName + "\"] is DBNull) ? \"\" : read[\"" + item.columnName + "\"].ToString();");
+                            // method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? \"\" : read[\"" + item.ColumnName + "\"].ToString();");
                             method.AppendLine("item." + column.ColumnName + " = dr[\"" + column.ColumnName + "\"].ToStr();");
                         }
                         else if (dataType.IndexOf("int") > -1)
                         {
-                            //method.AppendLine("item." + item.columnName + " = (read[\"" + item.columnName + "\"] is DBNull) ? -1 : Convert.ToInt32(read[\"" + item.columnName + "\"].ToString());");
+                            //method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? -1 : Convert.ToInt32(read[\"" + item.ColumnName + "\"].ToString());");
                             method.AppendLine("item." + column.ColumnName + " = dr[\"" + column.ColumnName + "\"].ToInt();");
                         }
                         else if (dataType.IndexOf("date") > -1)
                         {
-                            //method.AppendLine("item." + item.columnName + " = (read[\"" + item.columnName + "\"] is DBNull) ? DateTime.Now : DateTime.Parse(read[\"" + item.columnName + "\"].ToString());");
+                            //method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? DateTime.Now : DateTime.Parse(read[\"" + item.ColumnName + "\"].ToString());");
                             method.AppendLine("item." + column.ColumnName + " = dr[\"" + column.ColumnName + "\"].ToDateTime();");
 
                         }
                         else if (dataType.IndexOf("bool") > -1)
                         {
-                            //method.AppendLine("item." + item.columnName + " = (read[\"" + item.columnName + "\"] is DBNull) ? false : Boolean.Parse(read[\"" + item.columnName + "\"].ToString());");
+                            //method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? false : Boolean.Parse(read[\"" + item.ColumnName + "\"].ToString());");
                             method.AppendLine("item." + column.ColumnName + " = dr[\"" + column.ColumnName + "\"].ToBool();");
                         }
                         else if (dataType.IndexOf("float") > -1)
                         {
-                            //method.AppendLine("item." + item.columnName + " = (read[\"" + item.columnName + "\"] is DBNull) ? -1 : float.Parse(read[\"" + item.columnName + "\"].ToString());");
+                            //method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? -1 : float.Parse(read[\"" + item.ColumnName + "\"].ToString());");
                             method.AppendLine("item." + column.ColumnName + " = dr[\"" + column.ColumnName + "\"].ToFloat();");
                         }
 

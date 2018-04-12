@@ -18,7 +18,7 @@ namespace DotNetCodeGenerator.Controllers
             {
                 return Json("", JsonRequestBehavior.AllowGet);
             }
-            var allTablesMetaData = TableService.GetAllTables(connectionString);
+            var allTablesMetaData = TableService.GetAllTablesFromCache(connectionString);
             var resultHtml = from t in allTablesMetaData.Tables
                     select new
                     {

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Runtime.Caching;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,6 +21,21 @@ namespace DotNetCodeGenerator.Domain.Services
         [Inject]
         public CodeProducerHelper CodeProducerHelper { get; set; }
 
+        public DatabaseMetadata GetAllTablesFromCache(String connectionString)
+        {
+            var items = (DatabaseMetadata)MemoryCache.Default.Get(connectionString);
+            if (items == null)
+            {
+                items = GetAllTables(connectionString);
+                CacheItemPolicy policy = null;
+                policy = new CacheItemPolicy();
+                policy.Priority = CacheItemPriority.Default;
+                policy.AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(Settings.CacheMediumSeconds);
+                MemoryCache.Default.Set(connectionString, items, policy);
+            }
+            return items;
+        }
+
         public DatabaseMetadata GetAllTables(String connectionString)
         {
             return TableRepository.GetAllTables(connectionString);
@@ -30,7 +46,7 @@ namespace DotNetCodeGenerator.Domain.Services
         }
         public async Task GenerateCode(CodeGeneratorResult codeGeneratorResult)
         {
-            var databaseMetaData = TableRepository.GetAllTables(codeGeneratorResult.ConnectionString);
+            var databaseMetaData = this.GetAllTablesFromCache(codeGeneratorResult.ConnectionString);
             TableRepository.GetSelectedTableMetaData(databaseMetaData, codeGeneratorResult.SelectedTable);
             CodeProducerHelper.CodeGeneratorResult = codeGeneratorResult;
             CodeProducerHelper.DatabaseMetadata = databaseMetaData;

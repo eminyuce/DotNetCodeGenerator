@@ -3,13 +3,40 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace DotNetCodeGenerator.Domain.Helpers
 {
     public class GeneralHelper
     {
-     
+        public static readonly Regex CarriageRegex = new Regex(@"(\r\n|\r|\n)+");
+        //remove carriage returns from the header name
+        public static string RemoveCarriage(string text)
+        {
+            if (String.IsNullOrEmpty(text))
+            {
+                return "";
+            }
+            return CarriageRegex.Replace(text, string.Empty).Trim();
+        }
+        public static string GetUrlString(string strIn)
+        {
+            // Replace invalid characters with empty strings. 
+            strIn = strIn.ToLower();
+            strIn = RemoveCarriage(strIn);
+            char[] szArr = strIn.ToCharArray();
+            var list = new List<char>();
+            foreach (char c in szArr)
+            {
+                int ci = c;
+                if ((ci >= 'a' && ci <= 'z') || (ci >= '0' && ci <= '9') || ci <= ' ')
+                {
+                    list.Add(c);
+                }
+            }
+            return new String(list.ToArray()).Replace(" ", "_");
+        }
         public static string ToTitleCase(string s)
         {
             return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(s.ToLower());
