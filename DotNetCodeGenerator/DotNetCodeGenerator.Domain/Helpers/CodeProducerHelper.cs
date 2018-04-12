@@ -50,9 +50,10 @@ namespace DotNetCodeGenerator.Domain.Helpers
           
 
         }
-
+       
         public void GenerateSPModel()
         {
+
             try { 
             #region Execute SP to get tables so that we can generate code
             string StoredProc_Exec = CodeGeneratorResult.StoredProcExec.ToStr();

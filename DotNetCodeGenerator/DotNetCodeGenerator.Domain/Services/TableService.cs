@@ -28,23 +28,17 @@ namespace DotNetCodeGenerator.Domain.Services
         {
             return TableRepository.GetDataSet(sqlCommand, connectionString);
         }
-        public  void GenerateCode(CodeGeneratorResult codeGeneratorResult)
+        public async Task GenerateCode(CodeGeneratorResult codeGeneratorResult)
         {
             var databaseMetaData = TableRepository.GetAllTables(codeGeneratorResult.ConnectionString);
             TableRepository.GetSelectedTableMetaData(databaseMetaData, codeGeneratorResult.SelectedTable);
-
             CodeProducerHelper.CodeGeneratorResult = codeGeneratorResult;
             CodeProducerHelper.DatabaseMetadata = databaseMetaData;
-            CodeProducerHelper.GenerateSPModel();
-            CodeProducerHelper.GenereateSaveOrUpdateDatabaseUtility();
-            //var tasks = new List<Task>();
 
-            //Task task = new Task(() => {  });
-            //task.Start();
-
-
-            //tasks.Add(task);
-            //await Task.WhenAll(tasks);
+            var tasks = new List<Task>();
+            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateSPModel(); }));
+            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenereateSaveOrUpdateDatabaseUtility(); }));
+            await Task.WhenAll(tasks);
 
             codeGeneratorResult = CodeProducerHelper.CodeGeneratorResult;
         }

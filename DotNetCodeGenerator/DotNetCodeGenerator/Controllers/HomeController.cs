@@ -21,9 +21,11 @@ namespace DotNetCodeGenerator.Controllers
             return View(codeGeneratorResult);
         }
         [HttpPost]
-        public ActionResult Index(CodeGeneratorResult codeGeneratorResult)
+        public async Task<ActionResult> Index(CodeGeneratorResult codeGeneratorResult)
         {
-            TableService.GenerateCode(codeGeneratorResult);
+
+            await TableService.GenerateCode(codeGeneratorResult);
+
             return View(codeGeneratorResult);
         }
         public ActionResult About()
@@ -32,7 +34,7 @@ namespace DotNetCodeGenerator.Controllers
 
             return View();
         }
- 
+
         public ActionResult Contact()
         {
             ViewBag.Message = "Your contact page.";
