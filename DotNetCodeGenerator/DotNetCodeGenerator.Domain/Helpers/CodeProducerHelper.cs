@@ -442,13 +442,23 @@ namespace DotNetCodeGenerator.Domain.Helpers
             String realEntityName = CodeGeneratorResult.SelectedTable;
             String modelName = CodeGeneratorResult.ModifiedTableName;
             String modifiedTableName = CodeGeneratorResult.ModifiedTableName;
+            String nameSpace = CodeGeneratorResult.NameSpace.ToStr("Test");
             String entityPrefix = GeneralHelper.GetEntityPrefixName(realEntityName);
             String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(linkedList);
             string primaryKeyOrginal = primaryKey;
             primaryKey = GeneralHelper.FirstCharacterToLower(primaryKey);
             String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
 
-
+            method.AppendLine(String.Format("using {0}.Domain.DB;", nameSpace));
+            method.AppendLine(String.Format("using {0}.Domain.Entities;", nameSpace));
+            method.AppendLine("using System;");
+            method.AppendLine("using System.Linq;");
+            method.AppendLine("using System.Runtime.Caching;");
+            method.AppendLine("using System.Text;");
+            method.AppendLine("using System.Threading.Tasks;");
+            method.AppendLine("");
+            method.AppendLine(String.Format("namespace {0}.Repositories", nameSpace));
+            method.AppendLine("{");
             method.AppendLine(String.Format("public class {0}Repository", modelName.Replace("Nwm", "")));
             method.AppendLine("{");
             method.AppendLine("private static readonly Logger Logger = LogManager.GetCurrentClassLogger();");
@@ -536,6 +546,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 }
             }
             method.AppendLine("}");
+            method.AppendLine("}");
             CodeGeneratorResult.TableRepository = method.ToString();
         }
 
@@ -600,7 +611,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
             try
             {
                 #region Execute SP to get tables so that we can generate code
-                string StoredProc_Exec = CodeGeneratorResult.StoredProcExec.ToStr();
+                string StoredProc_Exec = CodeGeneratorResult.StoredProcExec.ToStr().Trim();
 
                 if (String.IsNullOrEmpty(StoredProc_Exec))
                 {

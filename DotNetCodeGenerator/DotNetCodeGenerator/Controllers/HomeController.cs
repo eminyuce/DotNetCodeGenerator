@@ -9,6 +9,7 @@ using Ninject;
 using DotNetCodeGenerator.Domain.Services;
 using System.Threading.Tasks;
 using NLog;
+using DotNetCodeGenerator.Domain.Entities.Enums;
 
 namespace DotNetCodeGenerator.Controllers
 {
@@ -19,6 +20,8 @@ namespace DotNetCodeGenerator.Controllers
         {
             var codeGeneratorResult = new CodeGeneratorResult();
             codeGeneratorResult.DatabaseMetadata = null;
+            codeGeneratorResult.UserMessage = "Hi, dude, Generate the code of selected table \"Controller, Service, Repository and the SQL\" :)";
+            codeGeneratorResult.UserMessageState = UserMessageState.Welcome;
             return View(codeGeneratorResult);
         }
         [HttpPost]

@@ -23,7 +23,12 @@
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         <input type="hidden" value="@Model.SelectedTable.ToStr()" id="SelectedTableValue" />
         <div>
-
+            <div class="bs-example">
+                <div class="alert alert-success fade in">
+                    <a href="#" class="close" data-dismiss="alert">&times;</a>
+                    <strong>@Model.UserMessageState.ToString()!</strong> @Model.UserMessage.ToStr()
+                </div>
+            </div>
 
             <div class="form-group">
                 @Html.LabelFor(model => model.ConnectionString, htmlAttributes: new { @class = "control-label col-md-2" })
@@ -51,7 +56,13 @@
                     @Html.ValidationMessageFor(model => model.ModifiedTableName, "", new { @class = "text-danger" })
                 </div>
             </div>
-
+            <div class="form-group">
+                @Html.LabelFor(model => model.NameSpace, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.NameSpace, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.NameSpace, "", new { @class = "text-danger" })
+                </div>
+            </div>
             <div class="form-group">
                 @Html.LabelFor(model => model.StringCodePattern, htmlAttributes: new { @class = "control-label col-md-2" })
                 <div class="col-md-10">
@@ -75,7 +86,7 @@
                     <input type="submit" name="btnAction" value="Generate Code" class="btn btn-default" />
                 </div>
             </div>
-
+            
         </div>
   
 

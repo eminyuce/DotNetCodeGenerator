@@ -1,4 +1,5 @@
 ﻿using DotNetCodeGenerator.Domain.Entities;
+using DotNetCodeGenerator.Domain.Entities.Enums;
 using DotNetCodeGenerator.Domain.Helpers;
 using DotNetCodeGenerator.Domain.Repositories;
 using Ninject;
@@ -55,6 +56,8 @@ namespace DotNetCodeGenerator.Domain.Services
                 TableRepository.GetSelectedTableMetaData(databaseMetaData, codeGeneratorResult.SelectedTable);
                 codeGeneratorResult.DatabaseMetadata = databaseMetaData;
             });
+            codeGeneratorResult.UserMessage = codeGeneratorResult.SelectedTable + " table metadata is populated to GridView. You are so close, Do not give up until you make it, dude :)";
+            codeGeneratorResult.UserMessageState = UserMessageState.Success;
             await task;
 
         }
@@ -77,6 +80,8 @@ namespace DotNetCodeGenerator.Domain.Services
 
             codeGeneratorResult = CodeProducerHelper.CodeGeneratorResult;
             codeGeneratorResult.DatabaseMetadata = databaseMetaData;
+            codeGeneratorResult.UserMessage = codeGeneratorResult.SelectedTable+" table codes are created. You made it dude, Congratulation :)";
+            codeGeneratorResult.UserMessageState = UserMessageState.Success;
         }
     }
 }
