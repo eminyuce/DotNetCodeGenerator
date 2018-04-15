@@ -547,7 +547,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
             }
             method.AppendLine("}");
             method.AppendLine("}");
-            CodeGeneratorResult.TableRepository = method.ToString();
+            CodeGeneratorResult.TableRepository = method.ToStr().TrimStart().TrimEnd();
         }
 
 
@@ -611,7 +611,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
             try
             {
                 #region Execute SP to get tables so that we can generate code
-                string StoredProc_Exec = CodeGeneratorResult.StoredProcExec.ToStr().Trim();
+                string StoredProc_Exec = CodeGeneratorResult.StoredProcExecCode.ToStr().Trim();
 
                 if (String.IsNullOrEmpty(StoredProc_Exec))
                 {

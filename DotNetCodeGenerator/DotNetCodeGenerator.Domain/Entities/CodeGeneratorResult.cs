@@ -28,10 +28,12 @@ namespace DotNetCodeGenerator.Domain.Entities
         public bool IsMethodStatic { get;  set; }
        
 
-        [Display(Name = "StoredProcExec")]
-        [AllowHtml]
+   
         [DataType(DataType.MultilineText)]
         public string StoredProcExec { get; set; }
+        [Display(Name = "Stored Proc Exec Code")]
+        [AllowHtml]
+        public string StoredProcExecCode { get; set; }
         [Display(Name = "StoredProcExecModel")]
         [AllowHtml]
         [DataType(DataType.MultilineText)]
