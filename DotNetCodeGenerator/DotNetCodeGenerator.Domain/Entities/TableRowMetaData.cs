@@ -15,15 +15,11 @@ namespace DotNetCodeGenerator.Domain.Entities
         public String DataTypeMaxChar { set; get; }
         public String CssClass { set; get; }
         public int Order { set; get; }
-        public bool Use { set; get; }
         public int ID { set; get; }
         public bool PrimaryKey { set; get; }
-        public bool GridViewFields { set; get; }
-        public bool Sql { set; get; }
-        public bool IfStatement { set; get; }
         public String ControlID { set; get; }
         public bool ForeignKey { get; set; }
-        public string columnDefaultValue
+        public string ColumnDefaultValue
         {
             get
             {

@@ -122,15 +122,30 @@
                                   .Titled("ColumnName")
                                   .Filterable(true);
 
+
+                        columns.Add(o => o.ForeignKey)
+                           .Encoded(false).
+                                Sanitized(false).
+                                SetWidth(10).
+                                RenderValueAs(o => String.Format("<input   value='{0}-{1}'  name='ForeignKey' type='checkbox'>", o.ID, o.ForeignKey));
+
+
+
+                   
                         columns.Add(c => c.DataType)
                            .Titled("DataType")
                            .Filterable(true);
+
+                        columns.Add(c => c.IsNull);
+                        columns.Add(c => c.MaxChar);
+                        columns.Add(c => c.DataTypeMaxChar);
+
 
                         columns.Add(o => o.Order)
                            .Encoded(false).
                                 Sanitized(false).
                                 SetWidth(10).
-                                RenderValueAs(o => String.Format("<input   gridkey-id='{0}' value='{1}'   class='GridOrderingTextbox input-xs' name='gridOrdering' type='type'>", o.ControlID, o.Order));
+                                RenderValueAs(o => String.Format("<input   value='{1}'   class='input-xs' name='gridOrdering' type='type'>", o.ID, o.Order));
 
 
                     }).WithPaging(1000).Sortable().Filterable().WithMultipleFilters().Selectable(false)
