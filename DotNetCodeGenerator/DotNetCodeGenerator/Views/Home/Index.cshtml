@@ -1,7 +1,7 @@
 ﻿@using DotNetCodeGenerator.Domain.Entities;
 @using DotNetCodeGenerator.Domain.Helpers;
-@using NonFactors.Mvc.Grid;
-@using NonFactors.Mvc;
+@using GridMvc.Html
+@using GridMvc.Sorting
 
 @model CodeGeneratorResult
 @{
@@ -103,15 +103,38 @@
                         <div id="collapse1" class="panel-collapse collapse">
                             
                             <div class="panel-body">
-                                @(Html.Grid(gridModel)
-    .Build(columns =>
-    {
-        columns.Add(model => model.ColumnName).Titled("ColumnName");
-        columns.Add(model => model.DataType).Titled("DataType");
-    })
-    .Filterable()
-    .Sortable()
-    .Pageable())
+
+                         @Html.Grid(gridModel).Named("TableColumnsRowMetaData").Columns(columns =>
+                    {
+
+
+                        columns.Add(o => o.ID, true);
+
+                        columns.Add()
+               .Encoded(false)
+               .Sanitized(false)
+                .Css("gridButtons")
+               .RenderValueAs(d => Html.Partial("pGridCheckbox", new ViewDataDictionary(ViewData){
+            {"ItemId",d.ID}}));
+
+
+                        columns.Add(c => c.ColumnName)
+                                  .Titled("ColumnName")
+                                  .Filterable(true);
+
+                        columns.Add(c => c.DataType)
+                           .Titled("DataType")
+                           .Filterable(true);
+
+                        columns.Add(o => o.Order)
+                           .Encoded(false).
+                                Sanitized(false).
+                                SetWidth(10).
+                                RenderValueAs(o => String.Format("<input   gridkey-id='{0}' value='{1}'   class='GridOrderingTextbox input-xs' name='gridOrdering' type='type'>", o.ControlID, o.Order));
+
+
+                    }).WithPaging(1000).Sortable().Filterable().WithMultipleFilters().Selectable(false)
+
                              
 
                             </div>
@@ -297,7 +320,7 @@
     @Scripts.Render("~/bundles/jqueryval")
 
     <script>
-        $('.mvc-grid').mvcgrid();
+       
         $(function () {
             $(".expand").on("click", function () {
                 // $(this).next().slideToggle(200);
@@ -315,9 +338,12 @@
           $("#ConnectionString")
        .blur(fillTables)
        .keyup(fillTables)
-       .change(fillTables);          $("#RetrieveTables").click(function () {
+       .change(fillTables);
+
+          $("#RetrieveTables").click(function () {
               fillTables();
-          });
+          });
+
           fillTables();
           function fillTables() {
               if (!isEmpty($("#ConnectionString").val())) {

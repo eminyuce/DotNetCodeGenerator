@@ -1,0 +1,14 @@
+﻿@using DotNetCodeGenerator.Domain.Helpers;
+@{
+    string Id = ViewData["ItemId"].ToStr();
+}
+
+<div class="gridToolBox">
+    <div class='checkbox checkbox-success'>
+        <input gridkey-id='@Id' id="@String.Format("checkbox{0}",Id)" value="@String.Format("value{0}",Id)"
+               class='gridCheckboxes styled' name='checkboxGrid' type='checkbox'>
+        <label for="@String.Format("checkbox{0}",Id)">
+
+        </label>
+    </div>
+</div>
