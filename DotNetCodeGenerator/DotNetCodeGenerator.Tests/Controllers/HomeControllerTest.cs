@@ -43,23 +43,41 @@ namespace DotNetCodeGenerator.Tests.Controllers
         [TestMethod]
         public void About()
         {
-
+            var tableRepository = new TableRepository();
             //spring.datasource.url = jdbc:mysql://localhost:3306/polbot2?useSSL=false
             //spring.datasource.username = polbot
             //spring.datasource.password = 145145145 
 
             //CALL `polbot2`.`sp_test2`();
-            string conn = "Server=lo;Database=polbot2;Uid=polbot;Pwd=145145145;Port=3306";
+
+
+            //IP / Port	: 37.230.108.236 / 3306
+
+            MySqlConnectionStringBuilder conn_string = new MySqlConnectionStringBuilder();
+            conn_string.Server = "mysql06.trwww.com";
+            conn_string.UserID = "otokoduret";
+            conn_string.Password = "7mX^0XPW";
+            conn_string.Database = "test";
+            conn_string.Port = 3306;
+
+            string connectionString = "Server=174.128.194.106;Database=polbot2;Uid=emin;Pwd=145145145Aa;Port=3306";
+            connectionString = conn_string.ToStr();
             string cmdText = "call sp_test(@n, @f);";
-           // MySqlParameter[] parameters = new MySqlParameter[2];
-           // parameters[0] = new MySqlParameter("@n", "steve");
-           // parameters[1] = new MySqlParameter("@f", @"d:\temp\test.txt");
-           //// MySql.Data.MySqlClient.MySqlHelper.ExecuteNonQuery(conn, cmdText, parameters);
+            //var mySqlParameters = new List<MySqlParameter>();
+            //mySqlParameters.Add(new MySqlParameter("@n", "steve"));
+            //mySqlParameters.Add(new MySqlParameter("@f", @"d:\temp\test.txt"));
+            //MySqlHelper.ExecuteNonQuery(connectionString, cmdText, mySqlParameters.ToArray());
+
+            Console.WriteLine("connectionString:" + connectionString);
+            //cmdText = "select 1;";
+            //DataSet dataSetResult = MySqlHelper.ExecuteDataset(connectionString, cmdText, null);
+            //Console.WriteLine("total" + dataSetResult.Tables.Count);
+            var databaseMetaData = tableRepository.GetAllMySqlTables("server=mysql06.trwww.com;user id=otokoduret;password=7mX^0XPW;database=test;port=3306");
+            Console.WriteLine("total" + databaseMetaData.Tables.Count);
+            tableRepository.GetSelectedMysqlTableMetaData(databaseMetaData, "def.test.urunler");
 
 
-            cmdText = "call sp_test2();";
-            DataSet dataSetResult = MySql.Data.MySqlClient.MySqlHelper.ExecuteDataset(conn, cmdText, null);
-            Console.WriteLine("total" + dataSetResult.Tables.Count);
+       
 
         }
 

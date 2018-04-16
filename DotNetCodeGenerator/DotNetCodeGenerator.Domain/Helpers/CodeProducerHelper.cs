@@ -22,7 +22,105 @@ namespace DotNetCodeGenerator.Domain.Helpers
         public CodeGeneratorResult CodeGeneratorResult { get; set; }
         public DatabaseMetadata DatabaseMetadata { get; set; }
 
+        public void GenereateMySqlDatabaseOperation()
+        {
+            List<TableRowMetaData> kontrolList = DatabaseMetadata.SelectedTable.TableRowMetaDataList;
+            StringBuilder method = new StringBuilder();
 
+
+            try
+            {
+
+                String realEntityName = CodeGeneratorResult.SelectedTable;
+                String modelName = CodeGeneratorResult.ModifiedTableName;
+                String modifiedTableName = CodeGeneratorResult.ModifiedTableName;
+                string selectedTable = DatabaseMetadata.SelectedTable.TableNameWithSchema;
+                String entityPrefix = GeneralHelper.GetEntityPrefixName(realEntityName);
+                String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(kontrolList);
+                string primaryKeyOrginal = primaryKey;
+                String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
+                method.AppendLine("public " + staticText + " List<" + modelName + "> Get" + modelName + "s()");
+                method.AppendLine(" {");
+                method.AppendLine(" var list = new List<" + modelName + ">();");
+                String commandText = "SELECT * FROM " + selectedTable + " ORDER BY " + primaryKey + " DESC";
+                // GetDatabaseUtilityParameters(kontrolList, method, commandText, false);
+                method.AppendLine(String.Format(" String commandText = @\"{0}\";", commandText));
+                method.AppendLine(" var parameterList = new List<SqlParameter>();");
+                method.AppendLine(" string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
+                method.AppendLine(" var commandType = CommandType.Text;");
+                GetDataSetCodeText(method);
+
+
+                foreach (var ki in kontrolList)
+                {
+                    if (ki.ForeignKey)
+                    {
+                        String dataType = TableRowMetaDataHelper.GetSqlDataTypeFromColumnDataType(ki);
+                        String cSharpType = TableRowMetaDataHelper.GetCSharpDataType(ki);
+                        method.AppendLine("//" + ki.ColumnName);
+                        method.AppendLine("public " + staticText + "  List<" + modelName + "> Get" + modelName + "By" + ki.ColumnName + "(" + cSharpType + " " + GeneralHelper.FirstCharacterToLower(ki.ColumnName) + ")");
+                        method.AppendLine(" {");
+                        method.AppendLine(" var list = new List<" + modelName + ">();");
+                        commandText = "SELECT * FROM " + selectedTable + " WHERE " + ki.ColumnName + "=@" + ki.ColumnName + " ORDER BY " + primaryKey + " DESC";
+                        method.AppendLine(" string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
+                        method.AppendLine(String.Format(" String commandText = @\"{0}\";", commandText));
+                        method.AppendLine(" var parameterList = new List<SqlParameter>();");
+                        method.AppendLine(" var commandType = CommandType.Text;");
+                        method.AppendLine(" parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + ki.ColumnName + "\", " + GeneralHelper.FirstCharacterToLower(ki.ColumnName) + "," + dataType + "));");
+                        GetDataSetCodeText(method);
+                        method.AppendLine("");
+                    }
+                }
+                method.AppendLine("public " + staticText + " void Delete" + modelName + "(int " + GeneralHelper.FirstCharacterToLower(primaryKey) + ")");
+                method.AppendLine(" {");
+                commandText = "DELETE FROM " + selectedTable + " WHERE " + primaryKey + "=@" + primaryKey;
+                method.AppendLine(" string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
+                method.AppendLine(String.Format(" String commandText = @\"{0}\";", commandText));
+                method.AppendLine(" var parameterList = new List<SqlParameter>();");
+                method.AppendLine(" var commandType = CommandType.Text;");
+                method.AppendLine(" parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + primaryKey + "\", " + GeneralHelper.FirstCharacterToLower(primaryKey) + ",SqlDbType.Int));");
+                method.AppendLine(" DatabaseUtility.ExecuteNonQuery(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray());");
+                method.AppendLine(" }");
+                method.AppendLine("");
+                method.AppendLine(" public " + staticText + " " + modelName + " Get" + modelName + "(int " + primaryKey + ")");
+                method.AppendLine(" {");
+                commandText = "SELECT * FROM " + selectedTable + " WHERE " + primaryKey + "=@" + primaryKey;
+                method.AppendLine(" string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
+                method.AppendLine(String.Format("String commandText = @\"{0}\";", commandText));
+                method.AppendLine(" var parameterList = new List<SqlParameter>();");
+                method.AppendLine(" var commandType = CommandType.Text;");
+                method.AppendLine(" parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + primaryKey + "\", " + primaryKey + ",SqlDbType.Int));");
+                method.AppendLine(" DataSet dataSet = DatabaseUtility.ExecuteDataSet(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray());");
+                method.AppendLine(" if (dataSet.Tables.Count > 0)");
+                method.AppendLine(" {");
+                method.AppendLine(" using (DataTable dt = dataSet.Tables[0])");
+                method.AppendLine(" {");
+                method.AppendLine(" foreach (DataRow dr in dt.Rows)");
+                method.AppendLine(" {");
+                method.AppendLine(" var e = Get" + modifiedTableName + "FromDataRow(dr);");
+                method.AppendLine(" return e;");
+                method.AppendLine(" }");
+                method.AppendLine(" }");
+                method.AppendLine(" }");
+                method.AppendLine(" return null;");
+                method.AppendLine(" }");
+
+                entityPrefix = (String.IsNullOrEmpty(entityPrefix) ? "" : entityPrefix + "_");
+                method.AppendLine("public " + staticText + " int SaveOrUpdate" + modelName + "( " + modelName + " item)");
+                method.AppendLine(" {");
+                GetDatabaseUtilityParameters(DatabaseMetadata.SelectedTable.TableRowMetaDataList, method, entityPrefix + "SaveOrUpdate" + modifiedTableName, true);
+                method.AppendLine(" int id = DatabaseUtility.ExecuteScalar(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray()).ToInt();");
+                method.AppendLine(" return id;");
+                method.AppendLine(" }");
+                CodeGeneratorResult.MySqlDatabaseOperation = method.ToString();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, ex.Message);
+                CodeGeneratorResult.MySqlDatabaseOperation = ex.Message;
+            }
+
+        }
 
         public void GenereateSqlDatabaseOperation()
         {
@@ -122,7 +220,6 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 CodeGeneratorResult.SqlDatabaseOperation = ex.Message;
             }
 
-            CodeGeneratorResult.SqlDatabaseOperation = method.ToString();
         }
         private void GetDataSetCodeText(StringBuilder method)
         {

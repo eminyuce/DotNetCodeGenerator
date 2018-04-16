@@ -37,8 +37,10 @@ namespace DotNetCodeGenerator.Domain.Services
             }
             return items;
         }
-
-
+        public DatabaseMetadata GetAllMySqlTables(String connectionString)
+        {
+            return TableRepository.GetAllMySqlTables(connectionString);
+        }
 
         public DatabaseMetadata GetAllTables(String connectionString)
         {
@@ -69,6 +71,7 @@ namespace DotNetCodeGenerator.Domain.Services
             CodeProducerHelper.DatabaseMetadata = databaseMetaData;
 
             var tasks = new List<Task>();
+            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenereateMySqlDatabaseOperation(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateSPModel(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateTableRepository(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateTableItem(); }));

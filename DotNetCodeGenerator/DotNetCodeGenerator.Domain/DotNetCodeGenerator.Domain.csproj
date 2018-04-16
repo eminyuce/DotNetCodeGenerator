@@ -129,9 +129,9 @@
     <Reference Include="System.Xml.Serialization" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\Enums\DatabaseType.cs" />
     <Compile Include="Entities\Enums\UserMessageState.cs" />
     <Compile Include="Helpers\TableRowMetaDataHelper.cs" />
-    <Compile Include="Repositories\MySqlHelper.cs" />
     <Compile Include="Repositories\TableRepository.cs" />
     <Compile Include="Entities\CodeGeneratorResult.cs" />
     <Compile Include="Entities\DatabaseMetadata.cs" />

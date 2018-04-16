@@ -15,6 +15,9 @@ namespace DotNetCodeGenerator.Domain.Entities
         [Required]
         public string ConnectionString { get; set; }
         [Required]
+        public string MySqlConnectionString { get; set; }
+
+        [Required]
         public string SelectedTable { get; set; }
         [AllowHtml]
         [Required]
@@ -60,5 +63,9 @@ namespace DotNetCodeGenerator.Domain.Entities
 
         public string UserMessage { get; set; }
         public UserMessageState UserMessageState { get; set; }
+
+        [AllowHtml]
+        public string MySqlDatabaseOperation { get; set; }
+
     }
 }

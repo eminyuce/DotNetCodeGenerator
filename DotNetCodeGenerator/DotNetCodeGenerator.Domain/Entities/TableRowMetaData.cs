@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DotNetCodeGenerator.Domain.Entities.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ namespace DotNetCodeGenerator.Domain.Entities
 {
     public class TableRowMetaData
     {
+        public DatabaseType DatabaseType { set; get; }
         public String ColumnName { set; get; }
         public String IsNull { set; get; }
         public String DataType { set; get; }

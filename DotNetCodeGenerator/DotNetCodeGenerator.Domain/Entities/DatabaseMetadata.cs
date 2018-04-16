@@ -12,6 +12,6 @@ namespace DotNetCodeGenerator.Domain.Entities
         public string DatabaseName { get; set; }
         public List<TableMetaData> Tables { get; set; }
         public TableMetaData SelectedTable { get; set; }
-
+        public string MySqlConnectionString { get; set; }
     }
 }
