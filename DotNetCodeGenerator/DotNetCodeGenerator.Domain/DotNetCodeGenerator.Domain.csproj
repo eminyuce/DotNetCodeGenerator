@@ -11,6 +11,7 @@
     <AssemblyName>DotNetCodeGenerator.Domain</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,9 +31,33 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.SqlServer.Types, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.SqlServer.Types.11.0.2\lib\net20\Microsoft.SqlServer.Types.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="MySql.Data, Version=6.10.6.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\MySQL\MySQL Connector Net 6.10.6\Assemblies\v4.5.2\MySql.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="MySql.Data.Entity.EF6, Version=6.10.6.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\MySQL\MySQL Connector Net 6.10.6\Assemblies\v4.5.2\MySql.Data.Entity.EF6.dll</HintPath>
+    </Reference>
+    <Reference Include="MySQL.Data.EntityFrameworkCore, Version=6.10.6.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\MySQL\MySQL Connector Net 6.10.6\Assemblies\v4.5.2\MySQL.Data.EntityFrameworkCore.dll</HintPath>
+    </Reference>
+    <Reference Include="MySQL.Data.EntityFrameworkCore.Design, Version=6.10.6.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\MySQL\MySQL Connector Net 6.10.6\Assemblies\v4.5.2\MySQL.Data.EntityFrameworkCore.Design.dll</HintPath>
+    </Reference>
+    <Reference Include="MySql.Web, Version=6.10.6.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\MySQL\MySQL Connector Net 6.10.6\Assemblies\v4.5.2\MySql.Web.dll</HintPath>
     </Reference>
     <Reference Include="Ninject, Version=3.3.3.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
       <HintPath>..\packages\Ninject.3.3.3\lib\net45\Ninject.dll</HintPath>
@@ -55,11 +80,18 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
+    <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Design" />
     <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Runtime.DurableInstancing" />
+    <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Transactions" />
@@ -94,10 +126,12 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Serialization" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entities\Enums\UserMessageState.cs" />
     <Compile Include="Helpers\TableRowMetaDataHelper.cs" />
+    <Compile Include="Repositories\MySqlHelper.cs" />
     <Compile Include="Repositories\TableRepository.cs" />
     <Compile Include="Entities\CodeGeneratorResult.cs" />
     <Compile Include="Entities\DatabaseMetadata.cs" />
@@ -112,7 +146,35 @@
     <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
+    <None Include="mysqlAssembly\MySql.Data.InstallState" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="docs\MySqlCommand.xml" />
+    <Content Include="docs\MySqlCommandBuilder.xml" />
+    <Content Include="docs\MySqlConnection.xml" />
+    <Content Include="docs\MySqlConnectionStringBuilder.xml" />
+    <Content Include="docs\MySqlDataAdapter.xml" />
+    <Content Include="docs\MySqlDataReader.xml" />
+    <Content Include="docs\MySqlException.xml" />
+    <Content Include="docs\MySqlHelper.xml" />
+    <Content Include="docs\MySqlParameter.xml" />
+    <Content Include="docs\MySqlParameterCollection.xml" />
+    <Content Include="docs\MySqlTransaction.xml" />
+    <Content Include="mysqlAssembly\MySql.Data.dll" />
+    <Content Include="mysqlAssembly\MySql.Data.Entity.EF6.dll" />
+    <Content Include="mysqlAssembly\MySql.Data.Entity.EF6.xml" />
+    <Content Include="mysqlAssembly\MySQL.Data.EntityFrameworkCore.Design.dll" />
+    <Content Include="mysqlAssembly\MySQL.Data.EntityFrameworkCore.Design.xml" />
+    <Content Include="mysqlAssembly\MySQL.Data.EntityFrameworkCore.dll" />
+    <Content Include="mysqlAssembly\MySQL.Data.EntityFrameworkCore.xml" />
+    <Content Include="mysqlAssembly\MySql.Data.xml" />
+    <Content Include="mysqlAssembly\MySql.Web.dll" />
+    <Content Include="mysqlAssembly\MySql.Web.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

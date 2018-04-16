@@ -11,6 +11,8 @@ using DotNetCodeGenerator.Domain.Helpers;
 using DotNetCodeGenerator.Domain.Entities;
 using DotNetCodeGenerator.Domain.Repositories;
 using DotNetCodeGenerator.Domain.Services;
+using MySql.Data.MySqlClient;
+using System.Data;
 
 namespace DotNetCodeGenerator.Tests.Controllers
 {
@@ -41,14 +43,24 @@ namespace DotNetCodeGenerator.Tests.Controllers
         [TestMethod]
         public void About()
         {
-            // Arrange
-            HomeController controller = new HomeController();
 
-            // Act
-            ViewResult result = controller.About() as ViewResult;
+            //spring.datasource.url = jdbc:mysql://localhost:3306/polbot2?useSSL=false
+            //spring.datasource.username = polbot
+            //spring.datasource.password = 145145145 
 
-            // Assert
-            Assert.AreEqual("Your application description page.", result.ViewBag.Message);
+            //CALL `polbot2`.`sp_test2`();
+            string conn = "Server=174.128.194.106;Database=polbot2;Uid=polbot;Pwd=145145145;Port=3306";
+            string cmdText = "call sp_test(@n, @f);";
+           // MySqlParameter[] parameters = new MySqlParameter[2];
+           // parameters[0] = new MySqlParameter("@n", "steve");
+           // parameters[1] = new MySqlParameter("@f", @"d:\temp\test.txt");
+           //// MySql.Data.MySqlClient.MySqlHelper.ExecuteNonQuery(conn, cmdText, parameters);
+
+
+            cmdText = "call sp_test2();";
+            DataSet dataSetResult = MySql.Data.MySqlClient.MySqlHelper.ExecuteDataset(conn, cmdText, null);
+            Console.WriteLine("total" + dataSetResult.Tables.Count);
+
         }
 
         [TestMethod]
