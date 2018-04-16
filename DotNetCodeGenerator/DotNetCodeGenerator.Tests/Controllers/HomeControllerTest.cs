@@ -49,7 +49,7 @@ namespace DotNetCodeGenerator.Tests.Controllers
             //spring.datasource.password = 145145145 
 
             //CALL `polbot2`.`sp_test2`();
-            string conn = "Server=174.128.194.106;Database=polbot2;Uid=polbot;Pwd=145145145;Port=3306";
+            string conn = "Server=lo;Database=polbot2;Uid=polbot;Pwd=145145145;Port=3306";
             string cmdText = "call sp_test(@n, @f);";
            // MySqlParameter[] parameters = new MySqlParameter[2];
            // parameters[0] = new MySqlParameter("@n", "steve");
