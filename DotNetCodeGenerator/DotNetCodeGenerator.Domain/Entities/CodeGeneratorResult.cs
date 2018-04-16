@@ -12,9 +12,7 @@ namespace DotNetCodeGenerator.Domain.Entities
     public class CodeGeneratorResult
     {
         public DatabaseMetadata DatabaseMetadata { get; set; }
-        [Required]
         public string ConnectionString { get; set; }
-        [Required]
         public string MySqlConnectionString { get; set; }
 
         [Required]

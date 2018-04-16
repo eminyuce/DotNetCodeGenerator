@@ -67,15 +67,15 @@ namespace DotNetCodeGenerator.Domain.Repositories
                     String IS_NULLABLE = rowTable["IS_NULLABLE"].ToStr();
                     String DATA_TYPE = rowTable["DATA_TYPE"].ToStr();
                     String CHARACTER_MAXIMUM_LENGTH = rowTable["CHARACTER_MAXIMUM_LENGTH"].ToStr();
-                    String NUMERIC_PRECISION = rowTable["NUMERIC_PRECISION "].ToStr();
-                    String NUMERIC_SCALE = rowTable["NUMERIC_SCALE"].ToStr();
-                    String CHARACTER_SET_NAME = rowTable["CHARACTER_SET_NAME"].ToStr();
-                    String COLLATION_NAME = rowTable["COLLATION_NAME"].ToStr();
-                    String COLUMN_TYPE = rowTable["COLUMN_TYPE"].ToStr();
-                    String COLUMN_KEY = rowTable["COLUMN_KEY"].ToStr();
-                    String EXTRA = rowTable["EXTRA"].ToStr();
-                    String PRIVILEGES = rowTable["PRIVILEGES"].ToStr();
-                    String COLUMN_COMMENT = rowTable["COLUMN_COMMENT"].ToStr();
+                    //String NUMERIC_PRECISION = rowTable.Table.Columns.Contains("NUMERIC_PRECISION") ? rowTable["NUMERIC_PRECISION "].ToStr() : "";
+                    //String NUMERIC_SCALE = rowTable["NUMERIC_SCALE"].ToStr();
+                    //String CHARACTER_SET_NAME = rowTable["CHARACTER_SET_NAME"].ToStr();
+                    //String COLLATION_NAME = rowTable["COLLATION_NAME"].ToStr();
+                    //String COLUMN_TYPE = rowTable["COLUMN_TYPE"].ToStr();
+                    String COLUMN_KEY = DataTableHelper.GetValue(rowTable,"COLUMN_KEY").ToStr();
+                    //String EXTRA = rowTable["EXTRA"].ToStr();
+                    //String PRIVILEGES = rowTable["PRIVILEGES"].ToStr();
+                    //String COLUMN_COMMENT = rowTable["COLUMN_COMMENT"].ToStr();
 
 
                     var k = new TableRowMetaData();

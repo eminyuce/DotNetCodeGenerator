@@ -124,6 +124,8 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
         public void GenereateSqlDatabaseOperation()
         {
+            if (String.IsNullOrEmpty(DatabaseMetadata.ConnectionString))
+                return;
             List<TableRowMetaData> kontrolList = DatabaseMetadata.SelectedTable.TableRowMetaDataList;
             StringBuilder method = new StringBuilder();
 

@@ -9,6 +9,10 @@ namespace DotNetCodeGenerator.Domain.Helpers
 {
     public class DataTableHelper
     {
+        public static object GetValue(DataRow row, string column)
+        {
+            return row.Table.Columns.Contains(column) ? row[column] : null;
+        }
         public static string GetPrimaryKeys(DataTable myTable)
         {
             // Create the array for the columns.

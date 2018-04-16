@@ -65,12 +65,25 @@ namespace DotNetCodeGenerator.Domain.Services
         }
         public async Task GenerateCode(CodeGeneratorResult codeGeneratorResult)
         {
-            var databaseMetaData = this.GetAllTablesFromCache(codeGeneratorResult.ConnectionString);
-            TableRepository.GetSelectedTableMetaData(databaseMetaData, codeGeneratorResult.SelectedTable);
+            DatabaseMetadata databaseMetaData = new DatabaseMetadata();
+            var tasks = new List<Task>();
+
+
+
+            if (!String.IsNullOrEmpty(codeGeneratorResult.ConnectionString))
+            {
+                databaseMetaData = this.GetAllTablesFromCache(codeGeneratorResult.ConnectionString);
+                TableRepository.GetSelectedTableMetaData(databaseMetaData, codeGeneratorResult.SelectedTable);
+            }
+            else if (!String.IsNullOrEmpty(codeGeneratorResult.MySqlConnectionString))
+            {
+                databaseMetaData = this.GetAllMySqlTables(codeGeneratorResult.MySqlConnectionString);
+                TableRepository.GetSelectedMysqlTableMetaData(databaseMetaData, codeGeneratorResult.SelectedTable);
+            }
+
             CodeProducerHelper.CodeGeneratorResult = codeGeneratorResult;
             CodeProducerHelper.DatabaseMetadata = databaseMetaData;
 
-            var tasks = new List<Task>();
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenereateMySqlDatabaseOperation(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateSPModel(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateTableRepository(); }));
