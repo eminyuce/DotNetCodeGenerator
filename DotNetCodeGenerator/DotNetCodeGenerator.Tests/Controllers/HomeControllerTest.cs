@@ -19,15 +19,40 @@ namespace DotNetCodeGenerator.Tests.Controllers
     [TestClass]
     public class HomeControllerTest
     {
+
+        public string MySqlConnectionString = ConfigurationManager.ConnectionStrings["MysqlConnectionString"].ConnectionString;
+        public string ConnectionString = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+
+
+        [TestInitialize]
+        public void MyTestInitialize()
+        {
+            //var kernel = NinjectWebCommon.CreatePublicKernel();
+            //_sut = kernel.Resolve<HomeController>();
+        }
+
         [TestMethod]
         public void Index()
         {
+
             var tableRepository = new TableRepository();
             var tableService = new TableService();
             tableService.TableRepository = tableRepository;
-            string connectionString = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
-            var databaseMetaData = tableRepository.GetAllTables(connectionString);
-            tableRepository.GetSelectedTableMetaData(databaseMetaData, "TestEY_2.dbo.Products");
+            CodeProducerHelper CodeProducerHelper = new CodeProducerHelper();
+            //  var databaseMetaData = tableRepository.GetAllTables(ConnectionString);
+            //  tableRepository.GetSelectedTableMetaData(databaseMetaData, "TestEY_2.dbo.Products");
+            DatabaseMetadata databaseMetaData = tableRepository.GetAllMySqlTables(MySqlConnectionString);
+            tableRepository.GetSelectedMysqlTableMetaData(databaseMetaData, "def.polbot2.currency_config2");
+
+            CodeGeneratorResult codeGeneratorResult = new CodeGeneratorResult();
+            codeGeneratorResult.MySqlConnectionString = MySqlConnectionString;
+
+            codeGeneratorResult.ModifiedTableName = "NwmCurrencyConfig";
+            CodeProducerHelper.CodeGeneratorResult = codeGeneratorResult;
+            CodeProducerHelper.DatabaseMetadata = databaseMetaData;
+            CodeProducerHelper.GenerateMySqlSaveOrUpdateStoredProcedure();
+
+            Console.WriteLine(codeGeneratorResult.MySqlSaveOrUpdateStoredProc);
 
             //var selectedTable = databaseMetaData.Tables.Where(r => r.DatabaseTableName.Equals("dbo.Products"));
             //var t = new CodeProducerHelper();

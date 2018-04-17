@@ -158,48 +158,46 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 built.AppendLine("CREATE PROCEDURE  " + entityPrefix + "SaveOrUpdate" + modifiedTableName + "(");
                 foreach (var item in list)
                 {
-                    built.AppendLine("@" + GeneralHelper.GetUrlString(item.ColumnName) + " " + item.DataTypeMaxChar + " = " + (String.IsNullOrEmpty(item.ColumnDefaultValue) ? "NULL" : item.ColumnDefaultValue) + " ,");
+                    built.AppendLine("IN " + item.ColumnName + " " + item.DataTypeMaxChar  + " ,");
                 }
                 built = built.Remove(built.Length - 3, 3);
                 built.Append(")");
-                built.AppendLine("AS");
+                built.AppendLine("");
                 built.AppendLine("BEGIN");
-                built.AppendLine("IF NOT EXISTS(SELECT  " + prKey.ColumnName + " FROM " + selectedTable + " WHERE " + prKey.ColumnName + "=@" + prKey.ColumnName + ") ");
-                built.AppendLine("BEGIN");
+                built.AppendLine("START TRANSACTION;");
+                built.AppendLine("IF NOT EXISTS(SELECT  " + prKey.ColumnName + " FROM " + selectedTable + " WHERE " + prKey.ColumnName + "=@" + prKey.ColumnName + ") THEN ");
+                built.AppendLine("  SET SQL_MODE = '';");
                 built.AppendLine("INSERT INTO " + selectedTable + "(");
                 foreach (var item in list)
                 {
                     if (!item.PrimaryKey)
-                        built.Append(String.Format("[{0}],", item.ColumnName));
+                        built.Append(String.Format("`{0}`,", item.ColumnName));
                 }
                 built = built.Remove(built.Length - 1, 1);
                 built.AppendLine(") VALUES (");
                 foreach (var item in list)
                 {
                     if (!item.PrimaryKey)
-                        built.Append("@" + GeneralHelper.GetUrlString(item.ColumnName) + ",");
+                        built.Append("COALESCE(@" + item.ColumnName + ","+item.ColumnDefaultValue+"),");
                 }
                 built = built.Remove(built.Length - 1, 1);
-                built.AppendLine(")");
+                built.AppendLine(");");
                 built.AppendLine("");
-                built.AppendLine("SET @" + prKey.ColumnName + "=SCOPE_IDENTITY()");
-                built.AppendLine("END");
+                built.AppendLine(" SELECT LAST_INSERT_ID();");
                 built.AppendLine("ELSE");
-                built.AppendLine("BEGIN");
                 built.AppendLine("UPDATE " + selectedTable + " SET");
                 foreach (var item in list)
                 {
                     if (!item.PrimaryKey)
                     {
-                        built.AppendLine(String.Format("[{0}]", item.ColumnName) + " = @" + GeneralHelper.GetUrlString(item.ColumnName) + ",");
+                        built.AppendLine(String.Format("`{0}`", item.ColumnName) + " = COALESCE(@" + GeneralHelper.GetUrlString(item.ColumnName) + "," + item.ColumnDefaultValue + "),");
                     }
                 }
                 built = built.Remove(built.Length - 3, 2);
-                built.AppendLine("WHERE " + String.Format("[{0}]", prKey.ColumnName) + "=@" + prKey.ColumnName + ";");
+                built.AppendLine("WHERE " + String.Format("`{0}`", prKey.ColumnName) + "=@" + prKey.ColumnName + ";");
+                built.AppendLine(" END IF;");
+                built.AppendLine("COMMIT;");
                 built.AppendLine("END");
-                built.AppendLine("SELECT @" + prKey.ColumnName + " as " + prKey.ColumnName + "");
-                built.AppendLine("END");
-
                 CodeGeneratorResult.MySqlSaveOrUpdateStoredProc = built.ToString();
             }
             catch (Exception ex)

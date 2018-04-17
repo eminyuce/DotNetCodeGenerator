@@ -1,4 +1,4 @@
-CREATE PROCEDURE `sp_SaveOrUpdateCurrency_config`(
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_SaveOrUpdateCurrency_config`(
 
 
   IN currency_config_id INT,
@@ -21,30 +21,10 @@ START TRANSACTION;
  
  
   
- IF EXISTS (select * from `polbot2`.`currency_config` where `currency_config_id` = @currency_config_id) THEN
+ IF NOT EXISTS (select * from `polbot2`.`currency_config` where `currency_config_id` = @currency_config_id) THEN
   
   
- 
- UPDATE `polbot2`.`currency_config2`
-SET
-`buy_at_price` =  COALESCE(@buy_at_price, 0),
-`buy_on_percent` =  COALESCE(@buy_on_percent, 0),
-`order_timeout_in_hour` =  COALESCE(@order_timeout_in_hour, 0),
-`buyable` =  COALESCE(@buyable, 0),
-`currency_pair` =  COALESCE(@currency_pair, 'btc_xtz'),
-`sell_at_price` =  COALESCE(@sell_at_price, 0),
-`sell_on_percent` =  COALESCE(@sell_on_percent, 0),
-`sellable` =  COALESCE(@sellable, 0),
-`usable_balance_percent` =  COALESCE(@usable_balance_percent, 0),
-`bot_user` =  COALESCE(@bot_user, 0)
-WHERE `currency_config_id` =  COALESCE(@currency_config_id, 0);
 
-
-
-
-  
-  ELSE 
-  
   SET SQL_MODE = '';
 
   INSERT INTO `polbot2`.`currency_config2`
@@ -73,6 +53,30 @@ COALESCE(@usable_balance_percent,0),
 COALESCE(@bot_user,0));
 
   SELECT LAST_INSERT_ID();
+  
+
+  
+  ELSE 
+  
+  
+  
+   
+ UPDATE `polbot2`.`currency_config2`
+SET
+`buy_at_price` =  COALESCE(@buy_at_price, 0),
+`buy_on_percent` =  COALESCE(@buy_on_percent, 0),
+`order_timeout_in_hour` =  COALESCE(@order_timeout_in_hour, 0),
+`buyable` =  COALESCE(@buyable, 0),
+`currency_pair` =  COALESCE(@currency_pair, 'btc_xtz'),
+`sell_at_price` =  COALESCE(@sell_at_price, 0),
+`sell_on_percent` =  COALESCE(@sell_on_percent, 0),
+`sellable` =  COALESCE(@sellable, 0),
+`usable_balance_percent` =  COALESCE(@usable_balance_percent, 0),
+`bot_user` =  COALESCE(@bot_user, 0)
+WHERE `currency_config_id` =  COALESCE(@currency_config_id, 0);
+
+
+
  
    END IF;
    
@@ -80,22 +84,3 @@ COALESCE(@bot_user,0));
 COMMIT;
 		
 END
-
-
-
-
-CREATE TABLE `currency_config2` (
-  `currency_config_id` int(11) NOT NULL AUTO_INCREMENT,
-  `buy_at_price` float NOT NULL,
-  `buy_on_percent` float NOT NULL,
-  `order_timeout_in_hour` float DEFAULT NULL,
-  `buyable` bit(1) NOT NULL,
-  `currency_pair` varchar(255) DEFAULT NULL,
-  `sell_at_price` float NOT NULL,
-  `sell_on_percent` float NOT NULL,
-  `sellable` bit(1) NOT NULL,
-  `usable_balance_percent` float NOT NULL,
-  `bot_user` int(11) DEFAULT NULL,
-  PRIMARY KEY (`currency_config_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8;
-

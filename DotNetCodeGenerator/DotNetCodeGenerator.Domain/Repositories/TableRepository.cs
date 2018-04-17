@@ -54,7 +54,6 @@ namespace DotNetCodeGenerator.Domain.Repositories
                 selectedTableObj.TableRowMetaDataList = TableRowMetaDataList;
                 databaseMetaData.SelectedTable = selectedTableObj;
                 int i = 0;
-                DataTableHelper.ToPrintConsole(tbl);
                 foreach (DataRow rowTable in tbl.Rows)
                 {
 
