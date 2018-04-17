@@ -91,11 +91,8 @@ namespace DotNetCodeGenerator.Tests.Controllers
             //    Console.WriteLine("id:" + nwmFirmalar.id);
             //}
 
-            var CurrencyConfigs = testRepo.GetNwmCurrencyConfigs();
-            foreach (var product in CurrencyConfigs)
-            {
-                Console.WriteLine("id:" + product.currency_pair);
-            }
+            var CurrencyConfigs = testRepo.GetNwmCurrencyConfig(38);
+            Console.WriteLine("id:" + CurrencyConfigs.currency_pair);
         }
     }
 }

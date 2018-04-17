@@ -16,7 +16,7 @@ namespace DotNetCodeGenerator.Domain.Repositories
     {
 
         public static string ConnectionStringKey = "";
-        public string ConnectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;
+        public string ConnectionString = "Server=174.128.194.106;Database=polbot2;Uid=emin;Pwd=145145145Aa;Port=3306"; //ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;
 
 
         public List<NwmCurrencyConfig> GetNwmCurrencyConfigs()

@@ -1,0 +1,97 @@
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_SaveOrUpdateCurrency_config`(
+  currency_config_id INT,
+  buy_at_price float,
+  buy_on_percent float,
+  order_timeout_in_hour float,
+  buyable bit(1) ,
+  currency_pair varchar(255),
+  sell_at_price float,
+  sell_on_percent float,
+  sellable bit(1),
+  usable_balance_percent float,
+  bot_user int(11)
+)
+BEGIN   
+    DECLARE start  INT unsigned DEFAULT 1;  
+    DECLARE finish INT unsigned DEFAULT 10;
+
+    SELECT  var1, start, finish;
+
+ 
+ 
+  
+ IF EXISTS (select * from `polbot2`.`currency_config` where `currency_config_id` = 'something') THEN
+  
+  
+  
+ UPDATE `polbot2`.`currency_config`
+SET
+`buy_at_price` = @buy_at_price,
+`buy_on_percent` = @buy_on_percent,
+`order_timeout_in_hour` = @order_timeout_in_hour,
+`buyable` = @buyable,
+`currency_pair` = @currency_pair,
+`sell_at_price` = @sell_at_price,
+`sell_on_percent` = @sell_on_percent,
+`sellable` = @sellable,
+`usable_balance_percent` = @usable_balance_percent,
+`bot_user` = @bot_user
+WHERE `currency_config_id` = @currency_config_id;
+
+
+
+
+  
+  ELSE 
+  
+  
+
+  INSERT INTO `polbot2`.`currency_config`
+(`currency_config_id`,
+`buy_at_price`,
+`buy_on_percent`,
+`order_timeout_in_hour`,
+`buyable`,
+`currency_pair`,
+`sell_at_price`,
+`sell_on_percent`,
+`sellable`,
+`usable_balance_percent`,
+`bot_user`)
+VALUES
+(@currency_config_id,
+@buy_at_price,
+@buy_on_percent,
+@order_timeout_in_hour,
+@buyable,
+@currency_pair,
+@sell_at_price,
+@sell_on_percent,
+@sellable,
+@usable_balance_percent,
+@bot_user);
+
+  
+ 
+   END IF;
+   
+END
+
+
+
+ CREATE TABLE `currency_config` (
+  `currency_config_id` int(11) NOT NULL AUTO_INCREMENT,
+  `buy_at_price` float NOT NULL,
+  `buy_on_percent` float NOT NULL,
+  `order_timeout_in_hour` float DEFAULT NULL,
+  `buyable` bit(1) NOT NULL,
+  `currency_pair` varchar(255) DEFAULT NULL,
+  `sell_at_price` float NOT NULL,
+  `sell_on_percent` float NOT NULL,
+  `sellable` bit(1) NOT NULL,
+  `usable_balance_percent` float NOT NULL,
+  `bot_user` int(11) DEFAULT NULL,
+  PRIMARY KEY (`currency_config_id`),
+  UNIQUE KEY `UKi7chqnmjrfi0xmt46a7efn7hj` (`bot_user`,`currency_pair`),
+  CONSTRAINT `FK3ywcs9mqhdi4db7wqg6mpw3tl` FOREIGN KEY (`bot_user`) REFERENCES `bot_user` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8;
