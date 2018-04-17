@@ -1,42 +1,43 @@
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_SaveOrUpdateCurrency_config`(
-  currency_config_id INT,
-  buy_at_price float,
-  buy_on_percent float,
-  order_timeout_in_hour float,
-  buyable bit(1) ,
-  currency_pair varchar(255),
-  sell_at_price float,
-  sell_on_percent float,
-  sellable bit(1),
-  usable_balance_percent float,
-  bot_user int(11)
+
+
+  IN currency_config_id INT,
+  IN buy_at_price float,
+  IN buy_on_percent float,
+  IN order_timeout_in_hour float,
+  IN buyable bit(1),
+  IN currency_pair varchar(255) ,
+  IN sell_at_price float,
+  IN sell_on_percent float,
+  IN sellable bit(1),
+  IN usable_balance_percent float,
+  IN bot_user int(11)
+  
 )
-BEGIN   
-    DECLARE start  INT unsigned DEFAULT 1;  
-    DECLARE finish INT unsigned DEFAULT 10;
+BEGIN
 
-    SELECT  var1, start, finish;
-
+START TRANSACTION;
+ 
  
  
   
- IF EXISTS (select * from `polbot2`.`currency_config` where `currency_config_id` = 'something') THEN
+ IF EXISTS (select * from `polbot2`.`currency_config` where `currency_config_id` = @currency_config_id) THEN
   
   
-  
- UPDATE `polbot2`.`currency_config`
+ 
+ UPDATE `polbot2`.`currency_config2`
 SET
-`buy_at_price` = @buy_at_price,
-`buy_on_percent` = @buy_on_percent,
-`order_timeout_in_hour` = @order_timeout_in_hour,
-`buyable` = @buyable,
-`currency_pair` = @currency_pair,
-`sell_at_price` = @sell_at_price,
-`sell_on_percent` = @sell_on_percent,
-`sellable` = @sellable,
-`usable_balance_percent` = @usable_balance_percent,
-`bot_user` = @bot_user
-WHERE `currency_config_id` = @currency_config_id;
+`buy_at_price` =  COALESCE(@buy_at_price, 0),
+`buy_on_percent` =  COALESCE(@buy_on_percent, 0),
+`order_timeout_in_hour` =  COALESCE(@order_timeout_in_hour, 0),
+`buyable` =  COALESCE(@buyable, 0),
+`currency_pair` =  COALESCE(@currency_pair, 'btc_xtz'),
+`sell_at_price` =  COALESCE(@sell_at_price, 0),
+`sell_on_percent` =  COALESCE(@sell_on_percent, 0),
+`sellable` =  COALESCE(@sellable, 0),
+`usable_balance_percent` =  COALESCE(@usable_balance_percent, 0),
+`bot_user` =  COALESCE(@bot_user, 0)
+WHERE `currency_config_id` =  COALESCE(@currency_config_id, 0);
 
 
 
@@ -44,9 +45,9 @@ WHERE `currency_config_id` = @currency_config_id;
   
   ELSE 
   
-  
+  SET SQL_MODE = '';
 
-  INSERT INTO `polbot2`.`currency_config`
+  INSERT INTO `polbot2`.`currency_config2`
 (`currency_config_id`,
 `buy_at_price`,
 `buy_on_percent`,
@@ -60,26 +61,30 @@ WHERE `currency_config_id` = @currency_config_id;
 `bot_user`)
 VALUES
 (@currency_config_id,
-@buy_at_price,
-@buy_on_percent,
-@order_timeout_in_hour,
-@buyable,
-@currency_pair,
-@sell_at_price,
-@sell_on_percent,
-@sellable,
-@usable_balance_percent,
-@bot_user);
+COALESCE(@buy_at_price, 0),
+COALESCE(@buy_on_percent,0),
+COALESCE(@order_timeout_in_hour,0),
+COALESCE(@buyable,0),
+COALESCE(@currency_pair,'btc_xtz'),
+COALESCE(@sell_at_price,0),
+COALESCE(@sell_on_percent,0),
+COALESCE(@sellable,0),
+COALESCE(@usable_balance_percent,0),
+COALESCE(@bot_user,0));
 
-  
+  SELECT LAST_INSERT_ID();
  
    END IF;
    
+ 
+COMMIT;
+		
 END
 
 
 
- CREATE TABLE `currency_config` (
+
+CREATE TABLE `currency_config2` (
   `currency_config_id` int(11) NOT NULL AUTO_INCREMENT,
   `buy_at_price` float NOT NULL,
   `buy_on_percent` float NOT NULL,
@@ -91,7 +96,6 @@ END
   `sellable` bit(1) NOT NULL,
   `usable_balance_percent` float NOT NULL,
   `bot_user` int(11) DEFAULT NULL,
-  PRIMARY KEY (`currency_config_id`),
-  UNIQUE KEY `UKi7chqnmjrfi0xmt46a7efn7hj` (`bot_user`,`currency_pair`),
-  CONSTRAINT `FK3ywcs9mqhdi4db7wqg6mpw3tl` FOREIGN KEY (`bot_user`) REFERENCES `bot_user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`currency_config_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8;
+

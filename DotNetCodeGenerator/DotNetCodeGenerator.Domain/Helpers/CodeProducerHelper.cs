@@ -25,7 +25,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
         private void GetMySqlDatabaseUtilityParameters(List<TableRowMetaData> kontrolList, StringBuilder method, String commandText = "", bool isSp = false)
         {
             String realEntityName = CodeGeneratorResult.SelectedTable;
-            method.AppendLine(String.Format(" String commandText = @\"call {0}\";", commandText));
+            method.AppendLine(String.Format(" String commandText = @\"CALL {0}\";", commandText));
             method.AppendLine(" var parameterList = new List<MySqlParameter>();");
 
 

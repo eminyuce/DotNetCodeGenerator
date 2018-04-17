@@ -91,8 +91,21 @@ namespace DotNetCodeGenerator.Tests.Controllers
             //    Console.WriteLine("id:" + nwmFirmalar.id);
             //}
 
-            var CurrencyConfigs = testRepo.GetNwmCurrencyConfig(38);
-            Console.WriteLine("id:" + CurrencyConfigs.currency_pair);
+            var item = new NwmCurrencyConfig();
+            item.currency_config_id = 99;
+            item.buy_at_price = 1;
+            item.buy_on_percent = 1;
+            item.order_timeout_in_hour = 1;
+            item.buyable = false;
+            item.currency_pair = "";
+            item.sell_at_price = 1;
+            item.sell_on_percent = 1;
+            item.sellable = false;
+            item.usable_balance_percent = 1;
+            item.bot_user = 3;
+
+            var id =  testRepo.SaveOrUpdateNwmCurrencyConfig(item);
+            Console.WriteLine("id:" + id);
         }
     }
 }

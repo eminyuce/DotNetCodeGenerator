@@ -51,20 +51,45 @@ namespace DotNetCodeGenerator.Domain.Repositories
         }
         public int SaveOrUpdateNwmCurrencyConfig(NwmCurrencyConfig item)
         {
-            String commandText = @"call def.polbot2.currency_SaveOrUpdateNwmCurrencyConfig";
+
+            // CALL(<{ currency_config_id INT}>,
+            // <{ buy_at_price float}>,
+            // <{ buy_on_percent float}>,
+            // <{ order_timeout_in_hour float}>,
+            // <{ buyable bit(1)}>,
+            // <{ currency_pair varchar(255)}>, 
+            // <{ sell_at_price float}>,
+            // <{ sell_on_percent float}>, 
+            // <{ sellable bit(1)}>
+            //, <{ usable_balance_percent float}>,
+            // <{ bot_user int(11)}>);
+            // CALL `polbot2`.`sp_SaveOrUpdateCurrency_config`(<{currency_config_id INT}>, <{buy_at_price float}>, <{buy_on_percent float}>, <{order_timeout_in_hour float}>, <{buyable bit(1)}>, <{currency_pair varchar(255)}>, <{sell_at_price float}>, <{sell_on_percent float}>, <{sellable bit(1)}>, <{usable_balance_percent float}>, <{bot_user int(11)}>);
+            String commandText = @"CALL `polbot2`.`sp_SaveOrUpdateCurrency_config`(
+@currency_config_id,
+@buy_at_price,
+@buy_on_percent,
+@order_timeout_in_hour,
+@buyable,
+@currency_pair,
+@sell_at_price,
+@sell_on_percent,
+@sellable,
+@usable_balance_percent,
+@bot_user);";
+            commandText = commandText.Replace(Environment.NewLine, "");
             var parameterList = new List<MySqlParameter>();
-            parameterList.Add(new MySqlParameter("@currencyconfigid", item.currency_config_id));
-            parameterList.Add(new MySqlParameter("@buyatprice", item.buy_at_price));
-            parameterList.Add(new MySqlParameter("@buyonpercent", item.buy_on_percent));
-            parameterList.Add(new MySqlParameter("@ordertimeoutinhour", item.order_timeout_in_hour));
+            parameterList.Add(new MySqlParameter("@currency_config_id", item.currency_config_id));
+            parameterList.Add(new MySqlParameter("@buy_at_price", item.buy_at_price));
+            parameterList.Add(new MySqlParameter("@buy_on_percent", item.buy_on_percent));
+            parameterList.Add(new MySqlParameter("@order_timeout_in_hour", item.order_timeout_in_hour));
             parameterList.Add(new MySqlParameter("@buyable", item.buyable));
-            parameterList.Add(new MySqlParameter("@currencypair", item.currency_pair.ToStr()));
-            parameterList.Add(new MySqlParameter("@sellatprice", item.sell_at_price));
-            parameterList.Add(new MySqlParameter("@sellonpercent", item.sell_on_percent));
+            parameterList.Add(new MySqlParameter("@currency_pair", item.currency_pair.ToStr()));
+            parameterList.Add(new MySqlParameter("@sell_at_price", item.sell_at_price));
+            parameterList.Add(new MySqlParameter("@sell_on_percent", item.sell_on_percent));
             parameterList.Add(new MySqlParameter("@sellable", item.sellable));
-            parameterList.Add(new MySqlParameter("@usablebalancepercent", item.usable_balance_percent));
-            parameterList.Add(new MySqlParameter("@botuser", item.bot_user));
-            int id = MySqlHelper.ExecuteScalar(ConnectionString, commandText, parameterList.ToArray()).ToInt();
+            parameterList.Add(new MySqlParameter("@usable_balance_percent", item.usable_balance_percent));
+            parameterList.Add(new MySqlParameter("@bot_user", item.bot_user));
+            int id = MySqlHelper.ExecuteNonQuery(ConnectionString, commandText, parameterList.ToArray()).ToInt();
             return id;
         }
 
