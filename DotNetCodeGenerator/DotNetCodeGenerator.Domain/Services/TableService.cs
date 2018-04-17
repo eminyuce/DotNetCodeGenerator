@@ -54,8 +54,17 @@ namespace DotNetCodeGenerator.Domain.Services
         {
             var task = Task.Factory.StartNew(() =>
             {
-                var databaseMetaData = this.GetAllTablesFromCache(codeGeneratorResult.ConnectionString);
-                TableRepository.GetSelectedTableMetaData(databaseMetaData, codeGeneratorResult.SelectedTable);
+                var databaseMetaData = new DatabaseMetadata();
+                if (!String.IsNullOrEmpty(codeGeneratorResult.ConnectionString))
+                {
+                    databaseMetaData = this.GetAllTablesFromCache(codeGeneratorResult.ConnectionString);
+                    TableRepository.GetSelectedTableMetaData(databaseMetaData, codeGeneratorResult.SelectedTable);
+                }
+                else if (!String.IsNullOrEmpty(codeGeneratorResult.MySqlConnectionString))
+                {
+                    databaseMetaData = this.GetAllMySqlTables(codeGeneratorResult.MySqlConnectionString);
+                    TableRepository.GetSelectedMysqlTableMetaData(databaseMetaData, codeGeneratorResult.SelectedTable);
+                }
                 codeGeneratorResult.DatabaseMetadata = databaseMetaData;
             });
             codeGeneratorResult.UserMessage = codeGeneratorResult.SelectedTable + " table metadata is populated to GridView. You are so close, Do not give up until you make it, dude :)";

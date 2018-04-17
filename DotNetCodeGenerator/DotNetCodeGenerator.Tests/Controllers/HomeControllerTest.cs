@@ -84,14 +84,18 @@ namespace DotNetCodeGenerator.Tests.Controllers
         [TestMethod]
         public void Contact()
         {
-            // Arrange
-            HomeController controller = new HomeController();
+            var testRepo = new TestRepository();
+            //var nwmFirmalars = testRepo.GetNwmFirmalars();
+            //foreach (var nwmFirmalar in nwmFirmalars)
+            //{
+            //    Console.WriteLine("id:" + nwmFirmalar.id);
+            //}
 
-            // Act
-            ViewResult result = controller.Contact() as ViewResult;
-
-            // Assert
-            Assert.IsNotNull(result);
+            var CurrencyConfigs = testRepo.GetNwmCurrencyConfigs();
+            foreach (var product in CurrencyConfigs)
+            {
+                Console.WriteLine("id:" + product.currency_pair);
+            }
         }
     }
 }

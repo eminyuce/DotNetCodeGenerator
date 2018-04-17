@@ -22,6 +22,30 @@ namespace DotNetCodeGenerator.Domain.Helpers
         public CodeGeneratorResult CodeGeneratorResult { get; set; }
         public DatabaseMetadata DatabaseMetadata { get; set; }
 
+        private void GetMySqlDatabaseUtilityParameters(List<TableRowMetaData> kontrolList, StringBuilder method, String commandText = "", bool isSp = false)
+        {
+            String realEntityName = CodeGeneratorResult.SelectedTable;
+            method.AppendLine(String.Format(" String commandText = @\"call {0}\";", commandText));
+            method.AppendLine(" var parameterList = new List<MySqlParameter>();");
+
+
+            foreach (TableRowMetaData item in kontrolList)
+            {
+                var sqlParameter = GeneralHelper.GetUrlString(item.ColumnName);
+                if (item.DataType.IndexOf("xml") > -1 || item.DataType.IndexOf("varchar") > -1)
+                {
+                    method.AppendLine("parameterList.Add(new MySqlParameter(\"@" + sqlParameter + "\", item." +
+                                      item.ColumnName + ".ToStr()));");
+                }
+                else 
+                {
+                    method.AppendLine(" parameterList.Add(new MySqlParameter(\"@" + sqlParameter + "\", item." + item.ColumnName + "));");
+                }
+
+            }
+        }
+
+
         public void GenereateMySqlDatabaseOperation()
         {
             List<TableRowMetaData> kontrolList = DatabaseMetadata.SelectedTable.TableRowMetaDataList;
@@ -39,16 +63,18 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(kontrolList);
                 string primaryKeyOrginal = primaryKey;
                 String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
+                method.AppendLine(" public string ConnectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
+                method.AppendLine("");
+                method.AppendLine("");
+                method.AppendLine("");
                 method.AppendLine("public " + staticText + " List<" + modelName + "> Get" + modelName + "s()");
                 method.AppendLine(" {");
                 method.AppendLine(" var list = new List<" + modelName + ">();");
                 String commandText = "SELECT * FROM " + selectedTable + " ORDER BY " + primaryKey + " DESC";
-                // GetDatabaseUtilityParameters(kontrolList, method, commandText, false);
                 method.AppendLine(String.Format(" String commandText = @\"{0}\";", commandText));
-                method.AppendLine(" var parameterList = new List<SqlParameter>();");
-                method.AppendLine(" string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
-                method.AppendLine(" var commandType = CommandType.Text;");
-                GetDataSetCodeText(method);
+                method.AppendLine(" var parameterList = new List<MySqlParameter>();");
+
+                GetMySqlDataSetCodeText(method);
 
 
                 foreach (var ki in kontrolList)
@@ -62,54 +88,39 @@ namespace DotNetCodeGenerator.Domain.Helpers
                         method.AppendLine(" {");
                         method.AppendLine(" var list = new List<" + modelName + ">();");
                         commandText = "SELECT * FROM " + selectedTable + " WHERE " + ki.ColumnName + "=@" + ki.ColumnName + " ORDER BY " + primaryKey + " DESC";
-                        method.AppendLine(" string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
                         method.AppendLine(String.Format(" String commandText = @\"{0}\";", commandText));
-                        method.AppendLine(" var parameterList = new List<SqlParameter>();");
-                        method.AppendLine(" var commandType = CommandType.Text;");
-                        method.AppendLine(" parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + ki.ColumnName + "\", " + GeneralHelper.FirstCharacterToLower(ki.ColumnName) + "," + dataType + "));");
-                        GetDataSetCodeText(method);
+                        method.AppendLine(" var parameterList = new List<MySqlParameter>();");
+                        method.AppendLine(" parameterList.Add(new MySqlParameter(\"@" + ki.ColumnName + "\", " + GeneralHelper.FirstCharacterToLower(ki.ColumnName) + "));");
+                        GetMySqlDataSetCodeText(method);
                         method.AppendLine("");
                     }
                 }
                 method.AppendLine("public " + staticText + " void Delete" + modelName + "(int " + GeneralHelper.FirstCharacterToLower(primaryKey) + ")");
                 method.AppendLine(" {");
                 commandText = "DELETE FROM " + selectedTable + " WHERE " + primaryKey + "=@" + primaryKey;
-                method.AppendLine(" string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
                 method.AppendLine(String.Format(" String commandText = @\"{0}\";", commandText));
-                method.AppendLine(" var parameterList = new List<SqlParameter>();");
-                method.AppendLine(" var commandType = CommandType.Text;");
-                method.AppendLine(" parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + primaryKey + "\", " + GeneralHelper.FirstCharacterToLower(primaryKey) + ",SqlDbType.Int));");
-                method.AppendLine(" DatabaseUtility.ExecuteNonQuery(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray());");
+                method.AppendLine(" var parameterList = new List<MySqlParameter>();");
+                method.AppendLine(" parameterList.Add(new MySqlParameter(\"@" + primaryKey + "\", " + GeneralHelper.FirstCharacterToLower(primaryKey) + "));");
+                method.AppendLine(" MySqlHelper.ExecuteNonQuery(ConnectionString, commandText, parameterList.ToArray());");
                 method.AppendLine(" }");
                 method.AppendLine("");
                 method.AppendLine(" public " + staticText + " " + modelName + " Get" + modelName + "(int " + primaryKey + ")");
                 method.AppendLine(" {");
                 commandText = "SELECT * FROM " + selectedTable + " WHERE " + primaryKey + "=@" + primaryKey;
-                method.AppendLine(" string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
+                method.AppendLine(" var resultEntity = new "+ modifiedTableName + "();");
                 method.AppendLine(String.Format("String commandText = @\"{0}\";", commandText));
-                method.AppendLine(" var parameterList = new List<SqlParameter>();");
-                method.AppendLine(" var commandType = CommandType.Text;");
-                method.AppendLine(" parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + primaryKey + "\", " + primaryKey + ",SqlDbType.Int));");
-                method.AppendLine(" DataSet dataSet = DatabaseUtility.ExecuteDataSet(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray());");
-                method.AppendLine(" if (dataSet.Tables.Count > 0)");
-                method.AppendLine(" {");
-                method.AppendLine(" using (DataTable dt = dataSet.Tables[0])");
-                method.AppendLine(" {");
-                method.AppendLine(" foreach (DataRow dr in dt.Rows)");
-                method.AppendLine(" {");
-                method.AppendLine(" var e = Get" + modifiedTableName + "FromDataRow(dr);");
-                method.AppendLine(" return e;");
-                method.AppendLine(" }");
-                method.AppendLine(" }");
-                method.AppendLine(" }");
-                method.AppendLine(" return null;");
+                method.AppendLine(" var parameterList = new List<MySqlParameter>();");
+                method.AppendLine(" parameterList.Add(new MySqlParameter(\"@" + primaryKey + "\", " + primaryKey + "));");
+                method.AppendLine(" DataSet dataSet = MySqlHelper.ExecuteDataset(ConnectionString, commandText, parameterList.ToArray());");
+                method.AppendLine(" resultEntity = dataSet.Tables[0].ToList<" + modifiedTableName + ">().FirstOrDefault();");
+                method.AppendLine(" return resultEntity;");
                 method.AppendLine(" }");
 
                 entityPrefix = (String.IsNullOrEmpty(entityPrefix) ? "" : entityPrefix + "_");
                 method.AppendLine("public " + staticText + " int SaveOrUpdate" + modelName + "( " + modelName + " item)");
                 method.AppendLine(" {");
-                GetDatabaseUtilityParameters(DatabaseMetadata.SelectedTable.TableRowMetaDataList, method, entityPrefix + "SaveOrUpdate" + modifiedTableName, true);
-                method.AppendLine(" int id = DatabaseUtility.ExecuteScalar(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray()).ToInt();");
+                GetMySqlDatabaseUtilityParameters(DatabaseMetadata.SelectedTable.TableRowMetaDataList, method, entityPrefix + "SaveOrUpdate" + modifiedTableName, true);
+                method.AppendLine(" int id = MySqlHelper.ExecuteScalar(ConnectionString, commandText, parameterList.ToArray()).ToInt();");
                 method.AppendLine(" return id;");
                 method.AppendLine(" }");
                 CodeGeneratorResult.MySqlDatabaseOperation = method.ToString();
@@ -124,8 +135,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
         public void GenereateSqlDatabaseOperation()
         {
-            if (String.IsNullOrEmpty(DatabaseMetadata.ConnectionString))
-                return;
+
             List<TableRowMetaData> kontrolList = DatabaseMetadata.SelectedTable.TableRowMetaDataList;
             StringBuilder method = new StringBuilder();
 
@@ -223,6 +233,24 @@ namespace DotNetCodeGenerator.Domain.Helpers
             }
 
         }
+        private void GetMySqlDataSetCodeText(StringBuilder method)
+        {
+            method.AppendLine(
+                " DataSet dataSet = MySqlHelper.ExecuteDataset(ConnectionString, commandText, parameterList.ToArray());");
+            ConvertToDataMySqlTableToEntity(method);
+        }
+
+        private void ConvertToDataMySqlTableToEntity(StringBuilder method)
+        {
+            String modifiedTableName = CodeGeneratorResult.ModifiedTableName;
+            method.AppendLine(" if (dataSet.Tables.Count > 0)");
+            method.AppendLine(" {");
+            method.AppendLine(" list = dataSet.Tables[0].ToList<" + modifiedTableName + ">();");
+            method.AppendLine(" }");
+            method.AppendLine(" return list;");
+            method.AppendLine(" }");
+        }
+
         private void GetDataSetCodeText(StringBuilder method)
         {
             method.AppendLine(
