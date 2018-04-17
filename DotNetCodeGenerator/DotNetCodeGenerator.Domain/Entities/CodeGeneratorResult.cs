@@ -57,13 +57,16 @@ namespace DotNetCodeGenerator.Domain.Entities
         public string SqlDatabaseOperation { get;  set; }
         [AllowHtml]
         public string AspMvcControllerClass { get; set; }
-
+        [AllowHtml]
+        public string SqlSaveOrUpdateStoredProc { get; set; }
 
         public string UserMessage { get; set; }
         public UserMessageState UserMessageState { get; set; }
 
         [AllowHtml]
         public string MySqlDatabaseOperation { get; set; }
+        [AllowHtml]
+        public string MySqlSaveOrUpdateStoredProc { get; set; }
 
     }
 }

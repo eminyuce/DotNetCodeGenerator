@@ -37,7 +37,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                     method.AppendLine("parameterList.Add(new MySqlParameter(\"@" + sqlParameter + "\", item." +
                                       item.ColumnName + ".ToStr()));");
                 }
-                else 
+                else
                 {
                     method.AppendLine(" parameterList.Add(new MySqlParameter(\"@" + sqlParameter + "\", item." + item.ColumnName + "));");
                 }
@@ -107,7 +107,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 method.AppendLine(" public " + staticText + " " + modelName + " Get" + modelName + "(int " + primaryKey + ")");
                 method.AppendLine(" {");
                 commandText = "SELECT * FROM " + selectedTable + " WHERE " + primaryKey + "=@" + primaryKey;
-                method.AppendLine(" var resultEntity = new "+ modifiedTableName + "();");
+                method.AppendLine(" var resultEntity = new " + modifiedTableName + "();");
                 method.AppendLine(String.Format("String commandText = @\"{0}\";", commandText));
                 method.AppendLine(" var parameterList = new List<MySqlParameter>();");
                 method.AppendLine(" parameterList.Add(new MySqlParameter(\"@" + primaryKey + "\", " + primaryKey + "));");
@@ -131,6 +131,158 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 CodeGeneratorResult.MySqlDatabaseOperation = ex.Message;
             }
 
+        }
+        public void GenerateMySqlSaveOrUpdateStoredProcedure()
+        {
+
+            StringBuilder built = new StringBuilder();
+
+            List<TableRowMetaData> list = DatabaseMetadata.SelectedTable.TableRowMetaDataList;
+            TableRowMetaData prKey = TableRowMetaDataHelper.GetPrimaryKeysObj(list);
+            try
+            {
+                String realEntityName = CodeGeneratorResult.SelectedTable;
+                String modelName = CodeGeneratorResult.ModifiedTableName;
+                String modifiedTableName = CodeGeneratorResult.ModifiedTableName;
+                string selectedTable = DatabaseMetadata.SelectedTable.TableNameWithSchema;
+                String entityPrefix = GeneralHelper.GetEntityPrefixName(realEntityName);
+                String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(list);
+                string primaryKeyOrginal = primaryKey;
+                String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
+
+                entityPrefix = (String.IsNullOrEmpty(entityPrefix) ? "" : entityPrefix + "_");
+
+
+
+                built = new StringBuilder();
+                built.AppendLine("CREATE PROCEDURE  " + entityPrefix + "SaveOrUpdate" + modifiedTableName + "(");
+                foreach (var item in list)
+                {
+                    built.AppendLine("@" + GeneralHelper.GetUrlString(item.ColumnName) + " " + item.DataTypeMaxChar + " = " + (String.IsNullOrEmpty(item.ColumnDefaultValue) ? "NULL" : item.ColumnDefaultValue) + " ,");
+                }
+                built = built.Remove(built.Length - 3, 3);
+                built.Append(")");
+                built.AppendLine("AS");
+                built.AppendLine("BEGIN");
+                built.AppendLine("IF NOT EXISTS(SELECT  " + prKey.ColumnName + " FROM " + selectedTable + " WHERE " + prKey.ColumnName + "=@" + prKey.ColumnName + ") ");
+                built.AppendLine("BEGIN");
+                built.AppendLine("INSERT INTO " + selectedTable + "(");
+                foreach (var item in list)
+                {
+                    if (!item.PrimaryKey)
+                        built.Append(String.Format("[{0}],", item.ColumnName));
+                }
+                built = built.Remove(built.Length - 1, 1);
+                built.AppendLine(") VALUES (");
+                foreach (var item in list)
+                {
+                    if (!item.PrimaryKey)
+                        built.Append("@" + GeneralHelper.GetUrlString(item.ColumnName) + ",");
+                }
+                built = built.Remove(built.Length - 1, 1);
+                built.AppendLine(")");
+                built.AppendLine("");
+                built.AppendLine("SET @" + prKey.ColumnName + "=SCOPE_IDENTITY()");
+                built.AppendLine("END");
+                built.AppendLine("ELSE");
+                built.AppendLine("BEGIN");
+                built.AppendLine("UPDATE " + selectedTable + " SET");
+                foreach (var item in list)
+                {
+                    if (!item.PrimaryKey)
+                    {
+                        built.AppendLine(String.Format("[{0}]", item.ColumnName) + " = @" + GeneralHelper.GetUrlString(item.ColumnName) + ",");
+                    }
+                }
+                built = built.Remove(built.Length - 3, 2);
+                built.AppendLine("WHERE " + String.Format("[{0}]", prKey.ColumnName) + "=@" + prKey.ColumnName + ";");
+                built.AppendLine("END");
+                built.AppendLine("SELECT @" + prKey.ColumnName + " as " + prKey.ColumnName + "");
+                built.AppendLine("END");
+
+                CodeGeneratorResult.MySqlSaveOrUpdateStoredProc = built.ToString();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, ex.Message);
+                CodeGeneratorResult.MySqlSaveOrUpdateStoredProc = ex.Message;
+            }
+        }
+        public void GenerateSaveOrUpdateStoredProcedure()
+        {
+
+            StringBuilder built = new StringBuilder();
+
+            List<TableRowMetaData> list = DatabaseMetadata.SelectedTable.TableRowMetaDataList;
+            TableRowMetaData prKey = TableRowMetaDataHelper.GetPrimaryKeysObj(list);
+            try
+            {
+                String realEntityName = CodeGeneratorResult.SelectedTable;
+                String modelName = CodeGeneratorResult.ModifiedTableName;
+                String modifiedTableName = CodeGeneratorResult.ModifiedTableName;
+                string selectedTable = DatabaseMetadata.SelectedTable.TableNameWithSchema;
+                String entityPrefix = GeneralHelper.GetEntityPrefixName(realEntityName);
+                String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(list);
+                string primaryKeyOrginal = primaryKey;
+                String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
+
+                entityPrefix = (String.IsNullOrEmpty(entityPrefix) ? "" : entityPrefix + "_");
+
+
+
+                built = new StringBuilder();
+                built.AppendLine("CREATE PROCEDURE  " + entityPrefix + "SaveOrUpdate" + modifiedTableName + "(");
+                foreach (var item in list)
+                {
+                    built.AppendLine("@" + GeneralHelper.GetUrlString(item.ColumnName) + " " + item.DataTypeMaxChar + " = " + (String.IsNullOrEmpty(item.ColumnDefaultValue) ? "NULL" : item.ColumnDefaultValue) + " ,");
+                }
+                built = built.Remove(built.Length - 3, 3);
+                built.Append(")");
+                built.AppendLine("AS");
+                built.AppendLine("BEGIN");
+                built.AppendLine("IF NOT EXISTS(SELECT  " + prKey.ColumnName + " FROM " + selectedTable + " WHERE " + prKey.ColumnName + "=@" + prKey.ColumnName + ") ");
+                built.AppendLine("BEGIN");
+                built.AppendLine("INSERT INTO " + selectedTable + "(");
+                foreach (var item in list)
+                {
+                    if (!item.PrimaryKey)
+                        built.Append(String.Format("[{0}],", item.ColumnName));
+                }
+                built = built.Remove(built.Length - 1, 1);
+                built.AppendLine(") VALUES (");
+                foreach (var item in list)
+                {
+                    if (!item.PrimaryKey)
+                        built.Append("@" + GeneralHelper.GetUrlString(item.ColumnName) + ",");
+                }
+                built = built.Remove(built.Length - 1, 1);
+                built.AppendLine(")");
+                built.AppendLine("");
+                built.AppendLine("SET @" + prKey.ColumnName + "=SCOPE_IDENTITY()");
+                built.AppendLine("END");
+                built.AppendLine("ELSE");
+                built.AppendLine("BEGIN");
+                built.AppendLine("UPDATE " + selectedTable + " SET");
+                foreach (var item in list)
+                {
+                    if (!item.PrimaryKey)
+                    {
+                        built.AppendLine(String.Format("[{0}]", item.ColumnName) + " = @" + GeneralHelper.GetUrlString(item.ColumnName) + ",");
+                    }
+                }
+                built = built.Remove(built.Length - 3, 2);
+                built.AppendLine("WHERE " + String.Format("[{0}]", prKey.ColumnName) + "=@" + prKey.ColumnName + ";");
+                built.AppendLine("END");
+                built.AppendLine("SELECT @" + prKey.ColumnName + " as " + prKey.ColumnName + "");
+                built.AppendLine("END");
+
+                CodeGeneratorResult.SqlSaveOrUpdateStoredProc = built.ToString();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, ex.Message);
+                CodeGeneratorResult.SqlSaveOrUpdateStoredProc = ex.Message;
+            }
         }
 
         public void GenereateSqlDatabaseOperation()

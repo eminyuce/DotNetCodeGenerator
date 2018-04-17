@@ -79,18 +79,26 @@ namespace DotNetCodeGenerator.Domain.Helpers
         }
         public static string GetPrimaryKeys(List<TableRowMetaData> tableRowMetaDataList)
         {
-            foreach (var item in tableRowMetaDataList)
-            {
-                if (item.PrimaryKey)
-                {
-                    return item.ColumnName;
-                }
-            }
-            var firstOrDefault = tableRowMetaDataList.FirstOrDefault();
+            var firstOrDefault = GetPrimaryKeysObj(tableRowMetaDataList);
             if (firstOrDefault != null)
                 return firstOrDefault.ColumnName;
             else
                 return "";
+        }
+        public static TableRowMetaData GetPrimaryKeysObj(List<TableRowMetaData> tableRowMetaDataList)
+        {
+            foreach (var item in tableRowMetaDataList)
+            {
+                if (item.PrimaryKey)
+                {
+                    return item;
+                }
+            }
+            var firstOrDefault = tableRowMetaDataList.FirstOrDefault();
+            if (firstOrDefault != null)
+                return firstOrDefault;
+            else
+                return null;
         }
     }
 }
