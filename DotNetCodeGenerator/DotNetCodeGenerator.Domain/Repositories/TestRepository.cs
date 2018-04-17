@@ -11,11 +11,13 @@ using DotNetCodeGenerator.Domain.Helpers;
 
 namespace DotNetCodeGenerator.Domain.Repositories
 {
+
     public class TestRepository
     {
-        //public static string ConnectionStringKey = "MySqlTestDatabase";
-        //public string ConnectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;
-        public string ConnectionString = "";
+
+        public static string ConnectionStringKey = "";
+        public string ConnectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;
+
 
         public List<NwmCurrencyConfig> GetNwmCurrencyConfigs()
         {
@@ -65,7 +67,6 @@ namespace DotNetCodeGenerator.Domain.Repositories
             int id = MySqlHelper.ExecuteScalar(ConnectionString, commandText, parameterList.ToArray()).ToInt();
             return id;
         }
-
 
     }
 
