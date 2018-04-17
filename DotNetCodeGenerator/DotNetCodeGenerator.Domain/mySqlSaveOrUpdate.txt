@@ -1,4 +1,4 @@
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_SaveOrUpdateCurrency_config`(
+CREATE PROCEDURE `sp_SaveOrUpdateCurrency_config`(
 
 
   IN currency_config_id INT,

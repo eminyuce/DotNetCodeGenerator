@@ -16,7 +16,7 @@ namespace DotNetCodeGenerator.Domain.Repositories
     {
 
         public static string ConnectionStringKey = "";
-        public string ConnectionString = "Server=174.128.194.106;Database=polbot2;Uid=emin;Pwd=145145145Aa;Port=3306"; //ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;
+        public string ConnectionString = ""; //ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;
 
 
         public List<NwmCurrencyConfig> GetNwmCurrencyConfigs()
@@ -89,7 +89,7 @@ namespace DotNetCodeGenerator.Domain.Repositories
             parameterList.Add(new MySqlParameter("@sellable", item.sellable));
             parameterList.Add(new MySqlParameter("@usable_balance_percent", item.usable_balance_percent));
             parameterList.Add(new MySqlParameter("@bot_user", item.bot_user));
-            int id = MySqlHelper.ExecuteNonQuery(ConnectionString, commandText, parameterList.ToArray()).ToInt();
+            int id = MySqlHelper.ExecuteScalar(ConnectionString, commandText, parameterList.ToArray()).ToInt();
             return id;
         }
 
