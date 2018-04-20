@@ -84,3 +84,31 @@ WHERE `currency_config_id` =  COALESCE(@currency_config_id, 0);
 COMMIT;
 		
 END
+
+
+CREATE DEFINER=`otokoduret`@`%` PROCEDURE `SaveOrUpdateNwmTest`(
+ Id int,
+ Name_ nvarchar(45)
+)
+BEGIN
+START TRANSACTION;
+IF NOT EXISTS(SELECT  Id FROM `db_kodyazan`.`Test` WHERE Id=@Id) THEN 
+  SET SQL_MODE = '';
+INSERT INTO `db_kodyazan`.`Test`(
+`Name`
+) VALUES (
+Name_
+);
+
+ SELECT LAST_INSERT_ID();
+ELSE
+UPDATE `db_kodyazan`.`Test` SET
+`Name` = Name_
+WHERE `Id`=@Id;
+ END IF;
+ 
+ 
+COMMIT;
+
+select Name_;
+END

@@ -30,7 +30,49 @@ namespace DotNetCodeGenerator.Tests.Controllers
             //var kernel = NinjectWebCommon.CreatePublicKernel();
             //_sut = kernel.Resolve<HomeController>();
         }
+        [TestMethod]
+        public void Index222()
+        {
+            var pp = new TestRepository();
+            int id=pp.SaveOrUpdateNwmTest(new NwmTest { Id=100,Name="Test" });
 
+
+            var item = new NwmAyarlar();
+
+            item.id = 1;
+            item.siteBasligi = "siteBasligi";
+            item.anahtarKelimeler = "";
+            item.google = "";
+            item.siteAciklamasi = "";
+            item.firmaAdi = "";
+            item.telefon = "";
+            item.telefon2 = "";
+            item.faks = "";
+            item.eposta = "";
+            item.adres = "";
+            item.yetkili = "";
+            item.username = "";
+            item.password = "";
+            item.logKayit = 1;
+            item.durum = 10;
+            item.siteUrl = "";
+            item.panelUrl = "";
+            item.smtpSunucu = "";
+            item.smtpPort = "";
+            item.smtpKullanici = "";
+            item.smtpSifre = "";
+            item.smtpAd = "";
+            item.smtpMetod = "";
+            item.smtpDurum = "";
+            item.facebook = "";
+            item.twitter = "";
+            item.gplus = "";
+            item.foursquare = "";
+            item.map = "";
+            var result1= pp.SaveOrUpdateNwmAyarlar(item);
+
+            Console.WriteLine(result1.id);
+        }
         [TestMethod]
         public void Index()
         {

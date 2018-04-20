@@ -46,12 +46,15 @@
             <div class="form-group">
                 @Html.LabelFor(model => model.SelectedTable,
            htmlAttributes: new { @class = "control-label col-md-2" })
-                <div class="col-md-5">
+                <div class="col-md-4">
                     @Html.DropDownList("SelectedTable", emptyList, htmlAttributes: new { @class = "form-control" })
                     @Html.ValidationMessageFor(model => model.SelectedTable, "", new { @class = "text-danger" })
                 </div>
-                <div class="col-md-5">
+                <div class="col-md-3">
                     <input type="button" id="RetrieveTables" value="Get Tables" />
+                </div>
+                <div class="col-md-3">
+                    <input type="text" id="TextBox_Filter" placeholder="Filter Table Names" />
                 </div>
             </div>
 
@@ -352,7 +355,7 @@
         </div>
     </div>
 </div>
-
+<input id="TableCopied" type="hidden" />
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
@@ -371,12 +374,41 @@
                 }
             });
         });
-      $(document).ready(function () {
+        $(document).ready(function () {
 
-          $("#ConnectionString,#MySqlConnectionString")
-       .blur(fillTables)
-       .keyup(fillTables)
-       .change(fillTables);
+
+            var $TextBox_Filter = $('#TextBox_Filter');
+            var $ddl = $('#SelectedTable');
+            var $items = $('select[id$=SelectedTable] option');
+
+            $("#TextBox_Filter")
+    .blur(filter)
+    .keyup(filter)
+    .change(filter);
+
+          
+            function filter() {
+                var keyword = $TextBox_Filter.val();
+                if (isEmpty(keyword)) {
+                    $('#SelectedTable').find('option').remove();
+                    $('#SelectedTable').append($('#TableCopied').val());
+                    return;
+                }
+                 
+
+                var select = $ddl[0];
+                for (var i = 0; i < select.length; i++) {
+                    var txt = select.options[i].text;
+                    if (txt.toLowerCase().indexOf(keyword.toLowerCase()) == -1) {
+                        $(select.options[i]).attr('disabled', 'disabled').hide();
+                    } else {
+                        $(select.options[i]).removeAttr('disabled').show();
+                    }
+                }
+            }
+
+
+
 
           $("#RetrieveTables").click(function () {
               fillTables();
@@ -396,6 +428,7 @@
                           listitems += '<option ' + isSelected + ' value=' + item.DatabaseTableName + '>'
                               + item.TableNameWithSchema + '</option>';
                       });
+                      $('#TableCopied').val(listitems);
                       $('#SelectedTable').append(listitems);
                   });
               }

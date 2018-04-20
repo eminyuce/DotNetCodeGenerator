@@ -124,7 +124,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
         public static string GetEntityPrefixName(string m)
         {
             String k = "";
-            if (!String.IsNullOrEmpty(m))
+            if (!String.IsNullOrEmpty(m) && m.Contains("_"))
             {
                 var parts = m.Split(new string[] { "_" }, StringSplitOptions.None);
                 if (parts.Length > 1)

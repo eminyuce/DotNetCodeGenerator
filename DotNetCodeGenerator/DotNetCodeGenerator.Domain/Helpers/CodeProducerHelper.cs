@@ -33,14 +33,14 @@ namespace DotNetCodeGenerator.Domain.Helpers
             foreach (TableRowMetaData item in kontrolList)
             {
                 var sqlParameter = GeneralHelper.GetUrlString(item.ColumnName);
-                if (item.DataType.IndexOf("xml") > -1 || item.DataType.IndexOf("varchar") > -1)
+                if (item.DataType.IndexOf("xml") > -1 || item.DataType.IndexOf("varchar") > -1 || item.DataType.IndexOf("text") > -1)
                 {
-                    method.AppendLine("parameterList.Add(new MySqlParameter(\"@" + sqlParameter + "\", item." +
+                    method.AppendLine("parameterList.Add(new MySqlParameter(\"@" + item.ColumnName + "\", item." +
                                       item.ColumnName + ".ToStr()));");
                 }
                 else
                 {
-                    method.AppendLine(" parameterList.Add(new MySqlParameter(\"@" + sqlParameter + "\", item." + item.ColumnName + "));");
+                    method.AppendLine(" parameterList.Add(new MySqlParameter(\"@" + item.ColumnName + "\", item." + item.ColumnName + "));");
                 }
 
             }
@@ -120,7 +120,14 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 entityPrefix = (String.IsNullOrEmpty(entityPrefix) ? "" : entityPrefix + "_");
                 method.AppendLine("public " + staticText + " int SaveOrUpdate" + modelName + "( " + modelName + " item)");
                 method.AppendLine(" {");
-                GetMySqlDatabaseUtilityParameters(DatabaseMetadata.SelectedTable.TableRowMetaDataList, method, entityPrefix + "SaveOrUpdate" + modifiedTableName, true);
+
+                //  String commandText = @"CALL IN Id int,,IN Name varchar(45),{1}({0})SaveOrUpdateNwmTest";
+                string spName = "SaveOrUpdate" + modifiedTableName;
+                spName = String.Format("{1}({0})", 
+                    String.Join(",", 
+                    kontrolList.Select(t => 
+                    String.Format("@{0}",t.ColumnName))), spName);
+                GetMySqlDatabaseUtilityParameters(DatabaseMetadata.SelectedTable.TableRowMetaDataList, method, spName, true);
                 method.AppendLine(" int id = MySqlHelper.ExecuteScalar(ConnectionString, commandText, parameterList.ToArray()).ToInt();");
                 method.AppendLine(" return id;");
                 method.AppendLine(" }");
@@ -156,7 +163,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
 
                 built = new StringBuilder();
-                built.AppendLine("CREATE PROCEDURE  " + entityPrefix + "SaveOrUpdate" + modifiedTableName + "(");
+                built.AppendLine("CREATE PROCEDURE SaveOrUpdate" + modifiedTableName + "(");
                 for (int i = 0; i < list.Count; i++)
                 {
                     var item = list[i];
@@ -186,7 +193,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                     var item = list[i];
                     var comma = (i != (list.Count - 1) ? "," : "");
                     if (!item.PrimaryKey)
-                        built.AppendLine("COALESCE(@" + item.ColumnName + "," + item.ColumnDefaultValue + ")" + comma);
+                        built.AppendLine("COALESCE(" + item.ColumnName + "," + item.ColumnDefaultValue + ")" + comma);
                 }
 
                 built.AppendLine(");");
@@ -200,7 +207,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                     var comma = (i != (list.Count - 1) ? "," : "");
                     if (!item.PrimaryKey)
                     {
-                        built.AppendLine(String.Format("`{0}`", item.ColumnName) + " = COALESCE(@" + GeneralHelper.GetUrlString(item.ColumnName) + "," + item.ColumnDefaultValue + ")"+ comma);
+                        built.AppendLine(String.Format("`{0}`", item.ColumnName) + " = COALESCE(" + GeneralHelper.GetUrlString(item.ColumnName) + "," + item.ColumnDefaultValue + ")"+ comma);
                     }
                 }
                 

@@ -35,6 +35,10 @@ namespace DotNetCodeGenerator.Domain.Entities
                 {
                     m = "''";
                 }
+                else if (DataType.IndexOf("char") > -1)
+                {
+                    m = "''";
+                }
                 else if (DataType.IndexOf("int") > -1)
                 {
                     m = "0";

@@ -15,8 +15,19 @@ namespace DotNetCodeGenerator.Domain.Repositories
     public class TestRepository
     {
 
-        public static string ConnectionStringKey = "";
-        public string ConnectionString = ""; //ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;
+        public static string ConnectionStringKey = "MysqlConnectionString";
+        public string ConnectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;
+
+
+        public int SaveOrUpdateNwmTest(NwmTest item)
+        {
+            String commandText = @"CALL SaveOrUpdateNwmTest(@Id,@Name)";
+            var parameterList = new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@Id", item.Id));
+            parameterList.Add(new MySqlParameter("@Name", item.Name.ToStr()));
+            int id = MySqlHelper.ExecuteScalar(ConnectionString, commandText, parameterList.ToArray()).ToInt();
+            return id;
+        }
 
 
         public List<NwmCurrencyConfig> GetNwmCurrencyConfigs()
@@ -91,6 +102,80 @@ namespace DotNetCodeGenerator.Domain.Repositories
             parameterList.Add(new MySqlParameter("@bot_user", item.bot_user));
             int id = MySqlHelper.ExecuteScalar(ConnectionString, commandText, parameterList.ToArray()).ToInt();
             return id;
+        }
+
+
+
+        public List<NwmAyarlar> GetNwmAyarlars()
+        {
+            var list = new List<NwmAyarlar>();
+            String commandText = @"SELECT * FROM db_kodyazan.ayarlar ORDER BY id DESC";
+            var parameterList = new List<MySqlParameter>();
+            DataSet dataSet = MySqlHelper.ExecuteDataset(ConnectionString, commandText, parameterList.ToArray());
+            if (dataSet.Tables.Count > 0)
+            {
+                list = dataSet.Tables[0].ToList<NwmAyarlar>();
+            }
+            return list;
+        }
+        public void DeleteNwmAyarlar(int id)
+        {
+            String commandText = @"DELETE FROM db_kodyazan.ayarlar WHERE id=@id";
+            var parameterList = new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@id", id));
+            MySqlHelper.ExecuteNonQuery(ConnectionString, commandText, parameterList.ToArray());
+        }
+
+        public NwmAyarlar GetNwmAyarlar(int id)
+        {
+            var resultEntity = new NwmAyarlar();
+            String commandText = @"SELECT * FROM db_kodyazan.ayarlar WHERE id=@id";
+            var parameterList = new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@id", id));
+            DataSet dataSet = MySqlHelper.ExecuteDataset(ConnectionString, commandText, parameterList.ToArray());
+            resultEntity = dataSet.Tables[0].ToList<NwmAyarlar>().FirstOrDefault();
+            return resultEntity;
+        }
+
+        public NwmAyarlar SaveOrUpdateNwmAyarlar(NwmAyarlar item)
+        {
+            var resultEntity = new NwmAyarlar();
+            String commandText = @"CALL SaveOrUpdateNwmAyarlar(@id,@siteBasligi,@anahtarKelimeler,@google,@siteAciklamasi,@firmaAdi,@telefon,@telefon2,@faks,@eposta,@adres,@yetkili,@username,@password,@logKayit,@durum,@siteUrl,@panelUrl,@smtpSunucu,@smtpPort,@smtpKullanici,@smtpSifre,@smtpAd,@smtpMetod,@smtpDurum,@facebook,@twitter,@gplus,@foursquare,@map)";
+            var parameterList = new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@id", item.id));
+            parameterList.Add(new MySqlParameter("@siteBasligi", item.siteBasligi.ToStr()));
+            parameterList.Add(new MySqlParameter("@anahtarKelimeler", item.anahtarKelimeler.ToStr()));
+            parameterList.Add(new MySqlParameter("@google", item.google.ToStr()));
+            parameterList.Add(new MySqlParameter("@siteAciklamasi", item.siteAciklamasi.ToStr()));
+            parameterList.Add(new MySqlParameter("@firmaAdi", item.firmaAdi.ToStr()));
+            parameterList.Add(new MySqlParameter("@telefon", item.telefon.ToStr()));
+            parameterList.Add(new MySqlParameter("@telefon2", item.telefon2.ToStr()));
+            parameterList.Add(new MySqlParameter("@faks", item.faks.ToStr()));
+            parameterList.Add(new MySqlParameter("@eposta", item.eposta.ToStr()));
+            parameterList.Add(new MySqlParameter("@adres", item.adres.ToStr()));
+            parameterList.Add(new MySqlParameter("@yetkili", item.yetkili.ToStr()));
+            parameterList.Add(new MySqlParameter("@username", item.username.ToStr()));
+            parameterList.Add(new MySqlParameter("@password", item.password.ToStr()));
+            parameterList.Add(new MySqlParameter("@logKayit", item.logKayit));
+            parameterList.Add(new MySqlParameter("@durum", item.durum));
+            parameterList.Add(new MySqlParameter("@siteUrl", item.siteUrl.ToStr()));
+            parameterList.Add(new MySqlParameter("@panelUrl", item.panelUrl.ToStr()));
+            parameterList.Add(new MySqlParameter("@smtpSunucu", item.smtpSunucu.ToStr()));
+            parameterList.Add(new MySqlParameter("@smtpPort", item.smtpPort.ToStr()));
+            parameterList.Add(new MySqlParameter("@smtpKullanici", item.smtpKullanici.ToStr()));
+            parameterList.Add(new MySqlParameter("@smtpSifre", item.smtpSifre.ToStr()));
+            parameterList.Add(new MySqlParameter("@smtpAd", item.smtpAd.ToStr()));
+            parameterList.Add(new MySqlParameter("@smtpMetod", item.smtpMetod.ToStr()));
+            parameterList.Add(new MySqlParameter("@smtpDurum", item.smtpDurum.ToStr()));
+            parameterList.Add(new MySqlParameter("@facebook", item.facebook.ToStr()));
+            parameterList.Add(new MySqlParameter("@twitter", item.twitter.ToStr()));
+            parameterList.Add(new MySqlParameter("@gplus", item.gplus.ToStr()));
+            parameterList.Add(new MySqlParameter("@foursquare", item.foursquare.ToStr()));
+            parameterList.Add(new MySqlParameter("@map", item.map.ToStr()));
+            DataSet dataSet = MySqlHelper.ExecuteDataset(ConnectionString, commandText, parameterList.ToArray());
+            var dt = dataSet.Tables[0];
+            resultEntity = dt.ToList<NwmAyarlar>().FirstOrDefault();
+            return resultEntity;
         }
 
     }
