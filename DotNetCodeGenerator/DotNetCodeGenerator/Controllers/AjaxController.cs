@@ -12,7 +12,7 @@ namespace DotNetCodeGenerator.Controllers
     public class AjaxController : BaseController
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        public ActionResult GetTables(String connectionString="", string mySqlConnectionString = "")
+        public ActionResult GetTables(String connectionString = "", string mySqlConnectionString = "")
         {
             if (String.IsNullOrEmpty(connectionString) && String.IsNullOrEmpty(mySqlConnectionString))
             {
@@ -21,25 +21,30 @@ namespace DotNetCodeGenerator.Controllers
             if (!String.IsNullOrEmpty(connectionString))
             {
                 var allTablesMetaData = TableService.GetAllTablesFromCache(connectionString);
-                var resultHtml = from t in allTablesMetaData.Tables
+                var resultHtml = (from t in allTablesMetaData.Tables
                                  select new
                                  {
                                      TableNameWithSchema = t.TableNameWithSchema,
                                      DatabaseTableName = t.DatabaseTableName
-                                 };
+                                 }).ToList();
+
+                resultHtml.Insert(0, new { TableNameWithSchema = "Select a Table from SqlServer", DatabaseTableName = "" });
                 return Json(resultHtml, JsonRequestBehavior.AllowGet);
             }
             else if (!String.IsNullOrEmpty(mySqlConnectionString))
             {
                 var allTablesMetaData = TableService.GetAllMySqlTables(mySqlConnectionString);
-                var resultHtml = from t in allTablesMetaData.Tables
-                                 select new
-                                 {
-                                     TableNameWithSchema = t.TableNameWithSchema,
-                                     DatabaseTableName = t.DatabaseTableName
-                                 };
+                var resultHtml = (from t in allTablesMetaData.Tables
+                                  select new
+                                  {
+                                      TableNameWithSchema = t.TableNameWithSchema,
+                                      DatabaseTableName = t.DatabaseTableName
+                                  }).ToList();
+
+                resultHtml.Insert(0, new { TableNameWithSchema = "Select a Table From MySql", DatabaseTableName = "" });
                 return Json(resultHtml, JsonRequestBehavior.AllowGet);
             }
+
             return Json("", JsonRequestBehavior.AllowGet);
 
         }

@@ -133,6 +133,7 @@
     <Compile Include="Entities\Enums\UserMessageState.cs" />
     <Compile Include="Entities\NwmCurrencyConfig.cs" />
     <Compile Include="Helpers\DataConverter.cs" />
+    <Compile Include="Helpers\Extensions\StringBuilderExtensions.cs" />
     <Compile Include="Helpers\TableRowMetaDataHelper.cs" />
     <Compile Include="Repositories\TableRepository.cs" />
     <Compile Include="Entities\CodeGeneratorResult.cs" />
@@ -152,9 +153,6 @@
     <None Include="app.config" />
     <None Include="mysqlAssembly\MySql.Data.InstallState" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="mysqlAssembly\MySql.Data.dll" />

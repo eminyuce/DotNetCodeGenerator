@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using DotNetCodeGenerator.Domain.Services;
 using Ninject;
 using NLog;
+using DotNetCodeGenerator.Domain.Helpers.Extensions;
 
 namespace DotNetCodeGenerator.Domain.Helpers
 {
@@ -156,11 +157,13 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
                 built = new StringBuilder();
                 built.AppendLine("CREATE PROCEDURE  " + entityPrefix + "SaveOrUpdate" + modifiedTableName + "(");
-                foreach (var item in list)
+                for (int i = 0; i < list.Count; i++)
                 {
-                    built.AppendLine("IN " + item.ColumnName + " " + item.DataTypeMaxChar  + " ,");
+                    var item = list[i];
+                    var comma = (i != (list.Count - 1) ? "," : "");
+                    built.AppendLine("IN " + item.ColumnName + " " + item.DataTypeMaxChar + comma);
                 }
-                built = built.Remove(built.Length - 3, 3);
+          
                 built.Append(")");
                 built.AppendLine("");
                 built.AppendLine("BEGIN");
@@ -168,32 +171,39 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 built.AppendLine("IF NOT EXISTS(SELECT  " + prKey.ColumnName + " FROM " + selectedTable + " WHERE " + prKey.ColumnName + "=@" + prKey.ColumnName + ") THEN ");
                 built.AppendLine("  SET SQL_MODE = '';");
                 built.AppendLine("INSERT INTO " + selectedTable + "(");
-                foreach (var item in list)
+
+                for (int i = 0; i < list.Count; i++)
                 {
+                    var item = list[i];
+
                     if (!item.PrimaryKey)
-                        built.Append(String.Format("`{0}`,", item.ColumnName));
+                        built.AppendLine(String.Format("`{0}`{1}", item.ColumnName, (i != (list.Count - 1) ? "," : "")));
                 }
-                built = built.Remove(built.Length - 1, 1);
+
                 built.AppendLine(") VALUES (");
-                foreach (var item in list)
+                for (int i = 0; i < list.Count; i++)
                 {
+                    var item = list[i];
+                    var comma = (i != (list.Count - 1) ? "," : "");
                     if (!item.PrimaryKey)
-                        built.Append("COALESCE(@" + item.ColumnName + ","+item.ColumnDefaultValue+"),");
+                        built.AppendLine("COALESCE(@" + item.ColumnName + "," + item.ColumnDefaultValue + ")" + comma);
                 }
-                built = built.Remove(built.Length - 1, 1);
+
                 built.AppendLine(");");
                 built.AppendLine("");
                 built.AppendLine(" SELECT LAST_INSERT_ID();");
                 built.AppendLine("ELSE");
                 built.AppendLine("UPDATE " + selectedTable + " SET");
-                foreach (var item in list)
+                for (int i = 0; i < list.Count; i++)
                 {
+                    var item = list[i];
+                    var comma = (i != (list.Count - 1) ? "," : "");
                     if (!item.PrimaryKey)
                     {
-                        built.AppendLine(String.Format("`{0}`", item.ColumnName) + " = COALESCE(@" + GeneralHelper.GetUrlString(item.ColumnName) + "," + item.ColumnDefaultValue + "),");
+                        built.AppendLine(String.Format("`{0}`", item.ColumnName) + " = COALESCE(@" + GeneralHelper.GetUrlString(item.ColumnName) + "," + item.ColumnDefaultValue + ")"+ comma);
                     }
                 }
-                built = built.Remove(built.Length - 3, 2);
+                
                 built.AppendLine("WHERE " + String.Format("`{0}`", prKey.ColumnName) + "=@" + prKey.ColumnName + ";");
                 built.AppendLine(" END IF;");
                 built.AppendLine("COMMIT;");
@@ -230,30 +240,36 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
                 built = new StringBuilder();
                 built.AppendLine("CREATE PROCEDURE  " + entityPrefix + "SaveOrUpdate" + modifiedTableName + "(");
-                foreach (var item in list)
+                for (int i = 0; i < list.Count; i++)
                 {
-                    built.AppendLine("@" + GeneralHelper.GetUrlString(item.ColumnName) + " " + item.DataTypeMaxChar + " = " + (String.IsNullOrEmpty(item.ColumnDefaultValue) ? "NULL" : item.ColumnDefaultValue) + " ,");
+                    var item = list[i];
+                    var comma = (i != (list.Count - 1) ? "," : "");
+                    built.AppendLine("@" + GeneralHelper.GetUrlString(item.ColumnName) + " " + item.DataTypeMaxChar + " = " + (String.IsNullOrEmpty(item.ColumnDefaultValue) ? "NULL" : item.ColumnDefaultValue) + comma);
                 }
-                built = built.Remove(built.Length - 3, 3);
+ 
                 built.Append(")");
                 built.AppendLine("AS");
                 built.AppendLine("BEGIN");
                 built.AppendLine("IF NOT EXISTS(SELECT  " + prKey.ColumnName + " FROM " + selectedTable + " WHERE " + prKey.ColumnName + "=@" + prKey.ColumnName + ") ");
                 built.AppendLine("BEGIN");
                 built.AppendLine("INSERT INTO " + selectedTable + "(");
-                foreach (var item in list)
+                for (int i = 0; i < list.Count; i++)
                 {
+                    var item = list[i];
+                    var comma = (i != (list.Count - 1) ? "," : "");
                     if (!item.PrimaryKey)
-                        built.Append(String.Format("[{0}],", item.ColumnName));
+                        built.AppendLine(String.Format("[{0}]{1}", item.ColumnName, comma));
                 }
-                built = built.Remove(built.Length - 1, 1);
+
                 built.AppendLine(") VALUES (");
-                foreach (var item in list)
+                for (int i = 0; i < list.Count; i++)
                 {
+                    var item = list[i];
+                    var comma = (i != (list.Count - 1) ? "," : "");
                     if (!item.PrimaryKey)
-                        built.Append("@" + GeneralHelper.GetUrlString(item.ColumnName) + ",");
+                        built.AppendLine("@" + GeneralHelper.GetUrlString(item.ColumnName) + comma);
                 }
-                built = built.Remove(built.Length - 1, 1);
+
                 built.AppendLine(")");
                 built.AppendLine("");
                 built.AppendLine("SET @" + prKey.ColumnName + "=SCOPE_IDENTITY()");
@@ -261,14 +277,16 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 built.AppendLine("ELSE");
                 built.AppendLine("BEGIN");
                 built.AppendLine("UPDATE " + selectedTable + " SET");
-                foreach (var item in list)
+                for (int i = 0; i < list.Count; i++)
                 {
+                    var item = list[i];
+                    var comma = (i != (list.Count - 1) ? "," : "");
                     if (!item.PrimaryKey)
                     {
-                        built.AppendLine(String.Format("[{0}]", item.ColumnName) + " = @" + GeneralHelper.GetUrlString(item.ColumnName) + ",");
+                        built.AppendLine(String.Format("[{0}]", item.ColumnName) + " = @" + GeneralHelper.GetUrlString(item.ColumnName) + comma);
                     }
                 }
-                built = built.Remove(built.Length - 3, 2);
+                built.AppendLine("");
                 built.AppendLine("WHERE " + String.Format("[{0}]", prKey.ColumnName) + "=@" + prKey.ColumnName + ";");
                 built.AppendLine("END");
                 built.AppendLine("SELECT @" + prKey.ColumnName + " as " + prKey.ColumnName + "");
@@ -282,7 +300,180 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 CodeGeneratorResult.SqlSaveOrUpdateStoredProc = ex.Message;
             }
         }
+        public void GenerateWebApiController()
+        {
+            List<TableRowMetaData> kontrolList = DatabaseMetadata.SelectedTable.TableRowMetaDataList;
+            StringBuilder method = new StringBuilder();
+            String realEntityName = CodeGeneratorResult.SelectedTable;
+            String modelName = CodeGeneratorResult.ModifiedTableName;
+            String modifiedTableName = CodeGeneratorResult.ModifiedTableName.ToStr().Trim();
+            String nameSpace = CodeGeneratorResult.NameSpace;
+            string selectedTable = DatabaseMetadata.SelectedTable.TableNameWithSchema;
+            String entityPrefix = GeneralHelper.GetEntityPrefixName(realEntityName);
+            String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(kontrolList);
+            string primaryKeyOrginal = primaryKey;
+            String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
 
+            try
+            {
+
+                method.AppendLine("using System;");
+                method.AppendLine("using System.Collections.Generic;");
+                method.AppendLine("using System.Linq;");
+                method.AppendLine("using System.Web.Http;");
+                method.AppendLine("using System.Web.Http.Description;");
+                method.AppendLine("using JobManager_Back.Models;");
+                method.AppendLine("using JobManager_Back.Services;\r\n");
+
+                method.AppendLine("namespace " + nameSpace + ".Controllers");
+                method.AppendLine("{");
+
+                //Documentation
+                method.AppendLine("\t///<summary>");
+                method.AppendLine("\t/// Controller for the " + modifiedTableName + "");
+                method.AppendLine("\t///</summary>");
+
+                method.AppendLine("\t[RoutePrefix(\"api/" + modifiedTableName + "\")]");
+                method.AppendLine("\tpublic class " + modifiedTableName + "Controller : BaseController");
+                method.AppendLine("\t{");
+
+                method.AppendLine("\t\tprotected " + modifiedTableName + "Service GetService()");
+                method.AppendLine("\t\t{");
+                method.AppendLine("\t\t\treturn new " + modifiedTableName + "Service(GetRequestUserHostAddress(), GetRequestUserHostName());");
+                method.AppendLine("\t\t}\r\n");
+
+                ////List by Guids
+                //foreach (Property p in m.Properties)
+                //{
+                //    if (p.Type == "Guid" && p.Name != "id")
+                //    {
+                //        //Documentation
+                //        method.AppendLine("\t\t///<summary>");
+                //        method.AppendLine("\t\t/// LIST all " +modifiedTableName + "s connected with the specifics " + UppercaseFirst(p.Name) + "");
+                //        method.AppendLine("\t\t///</summary>");
+                //        method.AppendLine("\t\t///<param name=\"ids\">List of " + UppercaseFirst(p.Name) + " Ids</param>");
+                //        method.AppendLine("\t\t///<param name=\"all\">Include the inactive or not</param>");
+                //        method.AppendLine("\t\t///<returns>200 - List of " +modifiedTableName + "</returns>");
+
+                //        method.AppendLine("\t\t[HttpPost, Route(\"Get" +modifiedTableName + "By" + UppercaseFirst(p.Name) + "\"),  ResponseType(typeof(IEnumerable<" +modifiedTableName + ">))]");
+                //        method.AppendLine("\t\tpublic IHttpActionResult Get" +modifiedTableName + "By" + UppercaseFirst(p.Name) + "([FromBody]IEnumerable<Guid> ids, [FromUri]Boolean all = false)");
+                //        method.AppendLine("\t\t{");
+
+                //        method.AppendLine("\t\t\ttry { return Ok(GetService().GetByIds<" +modifiedTableName + ">(ids, all, \"" + UppercaseFirst(p.Name) + "\")); }");
+                //        method.AppendLine("\t\t\tcatch (Exception ex) { return base.ThreatExceptions(ex); }");
+
+                //        method.AppendLine("\t\t}\r\n");
+                //    }
+                //}
+
+
+                //Documentation
+                method.AppendLine("\t\t///<summary>");
+                method.AppendLine("\t\t///GET a specific " + modifiedTableName + "");
+                method.AppendLine("\t\t///</summary>");
+                method.AppendLine("\t\t///<param name=\"id\">" + modifiedTableName + " Id</param>");
+                method.AppendLine("\t\t///<returns>200 - List of " + modifiedTableName + "</returns>");
+
+                //Get
+                method.AppendLine("\t\t[HttpGet,  ResponseType(typeof(" + modifiedTableName + "))]");
+                method.AppendLine("\t\tpublic IHttpActionResult Get([FromUri]Guid id)");
+                method.AppendLine("\t\t{");
+
+                method.AppendLine("\t\t\ttry { return Ok(GetService().Get<" + modifiedTableName + ">(id)); }");
+                method.AppendLine("\t\t\tcatch (Exception ex) { return base.ThreatExceptions(ex); }");
+
+                method.AppendLine("\t\t}\r\n");
+
+
+                //Documentation
+                method.AppendLine("\t\t///<summary>");
+                method.AppendLine("\t\t///GET all " + modifiedTableName + "s on Database");
+                method.AppendLine("\t\t///</summary>");
+                method.AppendLine("\t\t///<param name=\"all\">Include the inactive or not</param>");
+                method.AppendLine("\t\t///<returns>200 - List of " + modifiedTableName + "</returns>");
+
+                //List
+                method.AppendLine("\t\t[HttpGet,  ResponseType(typeof(IEnumerable<" + modifiedTableName + ">))]");
+                method.AppendLine("\t\tpublic IHttpActionResult Get([FromUri]Boolean all = false)");
+                method.AppendLine("\t\t{");
+
+                method.AppendLine("\t\t\ttry { return Ok(GetService().Get<" + modifiedTableName + ">(all)); }");
+                method.AppendLine("\t\t\tcatch (Exception ex) { return base.ThreatExceptions(ex); }");
+
+                method.AppendLine("\t\t}\r\n");
+
+
+                //Documentation
+                method.AppendLine("\t\t///<summary>");
+                method.AppendLine("\t\t///POST a " + modifiedTableName + "");
+                method.AppendLine("\t\t///</summary>");
+                method.AppendLine("\t\t///<param name=\"value\">" + modifiedTableName + " to Post</param>");
+                method.AppendLine("\t\t///<returns>200 - " + modifiedTableName + "</returns>");
+
+                //Post
+                method.AppendLine("\t\tpublic IHttpActionResult Post([FromBody]" + modifiedTableName + " value)");
+                method.AppendLine("\t\t{");
+
+                method.AppendLine("\t\t\tif (!ModelState.IsValid)");
+                method.AppendLine("\t\t\t\treturn BadRequest(ModelState);\r\n");
+
+                method.AppendLine("\t\t\ttry { return Created(\"Database\", GetService().Post(value)); }");
+                method.AppendLine("\t\t\tcatch (Exception ex) { return base.ThreatExceptions(ex); }");
+
+                method.AppendLine("\t\t}\r\n");
+
+
+                //Documentation
+                method.AppendLine("\t\t///<summary>");
+                method.AppendLine("\t\t///PUT a " + modifiedTableName + "");
+                method.AppendLine("\t\t///</summary>");
+                method.AppendLine("\t\t///<param name=\"value\">" + modifiedTableName + " to Update</param>");
+                method.AppendLine("\t\t///<returns>200 - " + modifiedTableName + "</returns>");
+
+
+                //Put
+                method.AppendLine("\t\tpublic IHttpActionResult Put([FromBody]" + modifiedTableName + " value)");
+                method.AppendLine("\t\t{");
+
+                method.AppendLine("\t\t\tif (!ModelState.IsValid)");
+                method.AppendLine("\t\t\t\treturn BadRequest(ModelState);\r\n");
+
+                //method.AppendLine("\t\t\ttry { return Ok(GetService().Put<" +modifiedTableName + ">(value, new List<String>() { \"" + m.Properties[1].Name + "\", \"" + m.Properties[2].Name + "\" })); }");
+                method.AppendLine("\t\t\tcatch (Exception ex) { return base.ThreatExceptions(ex); }");
+
+                method.AppendLine("\t\t}\r\n");
+
+
+
+                //Documentation
+                method.AppendLine("\t\t///<summary>");
+                method.AppendLine("\t\t///Delete a " + modifiedTableName + ". A " + modifiedTableName + " is always soft deleted");
+                method.AppendLine("\t\t///</summary>");
+                method.AppendLine("\t\t///<param name=\"id\">" + modifiedTableName + " to Delete</param>");
+                method.AppendLine("\t\t///<returns>200</returns>");
+
+                //Delete
+                method.AppendLine("\t\tpublic IHttpActionResult Delete([FromUri]Guid id)");
+                method.AppendLine("\t\t{");
+
+                method.AppendLine("\t\t\ttry { return Ok(GetService().Delete<" + modifiedTableName + ">(id)); }");
+                method.AppendLine("\t\t\tcatch (Exception ex) { return base.ThreatExceptions(ex); }");
+
+                method.AppendLine("\t\t}");
+
+
+                method.AppendLine("\t\t}");
+                method.AppendLine("}");
+                CodeGeneratorResult.WebApiController = method.ToStr();
+
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, ex.Message);
+                CodeGeneratorResult.WebApiController = ex.Message;
+            }
+
+        }
         public void GenereateSqlDatabaseOperation()
         {
 

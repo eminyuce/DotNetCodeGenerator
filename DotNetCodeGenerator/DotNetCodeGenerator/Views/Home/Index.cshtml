@@ -227,6 +227,7 @@
 
                         <div class="form-group">
                             <div class="col-md-12">
+                                <a target="_blank" href="http://www.format-sql.com" class="btn btn-info">Format Sql</a>
                                 @Html.TextAreaFor(model => model.SqlSaveOrUpdateStoredProc, htmlAttributes: new { @class = "form-control text-box multi-line", @rows = 50 })
                             </div>
                         </div>
@@ -319,6 +320,7 @@
                         </div>
                         <div class="form-group">
                             <div class="col-md-12">
+                                <a target="_blank" href="http://www.dpriver.com/pp/sqlformat.htm" class="btn btn-info">Format MySql</a>
                                 @Html.TextAreaFor(model => model.MySqlSaveOrUpdateStoredProc, htmlAttributes: new { @class = "form-control text-box multi-line", @rows = 50 })
                             </div>
                         </div>
@@ -326,6 +328,27 @@
                 </div>
             </div>
 
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 data-toggle="collapse" data-parent="#accordion"
+                        href="#collapse7" class="panel-title expand">
+                        <div class="right-arrow pull-right">+</div>
+                        <a href="#">Web Api Controller</a>
+                    </h4>
+                </div>
+                <div id="collapse7" class="panel-collapse collapse">
+                    <div class="panel-body">
+
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                @Html.TextAreaFor(model => model.WebApiController, htmlAttributes: new { @class = "form-control text-box multi-line", @rows = 50 })
+                            </div>
+                        </div>
+                       
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -350,7 +373,7 @@
         });
       $(document).ready(function () {
 
-          $("#ConnectionString")
+          $("#ConnectionString,#MySqlConnectionString")
        .blur(fillTables)
        .keyup(fillTables)
        .change(fillTables);

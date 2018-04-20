@@ -42,6 +42,11 @@ namespace DotNetCodeGenerator.Domain.Helpers
             {
                 result = String.Format(result, "Xml");
             }
+            else
+            {
+                result = GeneralHelper.ConvertTypeToSQL(item.DataType);
+
+            }
 
 
             return result;
@@ -77,6 +82,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
             return result.Trim();
         }
+       
         public static string GetPrimaryKeys(List<TableRowMetaData> tableRowMetaDataList)
         {
             var firstOrDefault = GetPrimaryKeysObj(tableRowMetaDataList);

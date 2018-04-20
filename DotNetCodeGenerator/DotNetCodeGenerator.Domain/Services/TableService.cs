@@ -93,7 +93,7 @@ namespace DotNetCodeGenerator.Domain.Services
             CodeProducerHelper.CodeGeneratorResult = codeGeneratorResult;
             CodeProducerHelper.DatabaseMetadata = databaseMetaData;
 
-
+            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateWebApiController(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateMySqlSaveOrUpdateStoredProcedure(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateSaveOrUpdateStoredProcedure(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenereateMySqlDatabaseOperation(); }));

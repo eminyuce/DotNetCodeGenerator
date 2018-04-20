@@ -12,18 +12,23 @@ namespace DotNetCodeGenerator.Domain.Entities
     public class CodeGeneratorResult
     {
         public DatabaseMetadata DatabaseMetadata { get; set; }
+        [Display(Name = "SqlServer Connection String")]
         public string ConnectionString { get; set; }
+        [Display(Name = "MySql Connection String")]
         public string MySqlConnectionString { get; set; }
 
         [Required]
+        [Display(Name = "Table Name to Generate Code")]
         public string SelectedTable { get; set; }
         [AllowHtml]
         [Required]
+        [Display(Name = "Entity Name")]
         public string ModifiedTableName { get; set; }
         [AllowHtml]
         public string StringCodePattern { get; set; }
 
         [AllowHtml]
+        [Display(Name = "NameSpace")]
         public string NameSpace { get; set; }
 
         public bool IsMethodStatic { get;  set; }
@@ -35,16 +40,16 @@ namespace DotNetCodeGenerator.Domain.Entities
         [Display(Name = "Stored Proc Exec Code")]
         [AllowHtml]
         public string StoredProcExecCode { get; set; }
-        [Display(Name = "StoredProcExecModel")]
+        [Display(Name = "Stored Proc Model")]
         [AllowHtml]
         [DataType(DataType.MultilineText)]
         public string StoredProcExecModel { get; set; }
-        [Display(Name = "StoredProcExecModelDataReader")]
+        [Display(Name = "Stored Proc Model Reader")]
         [AllowHtml]
         [DataType(DataType.MultilineText)]
         public string StoredProcExecModelDataReader { get; set; }
  
-        [Display(Name = "TableRepository")]
+        [Display(Name = "Entity Repository")]
         [AllowHtml]
         [DataType(DataType.MultilineText)]
         public string TableRepository { get;  set; }
@@ -67,6 +72,8 @@ namespace DotNetCodeGenerator.Domain.Entities
         public string MySqlDatabaseOperation { get; set; }
         [AllowHtml]
         public string MySqlSaveOrUpdateStoredProc { get; set; }
+        [AllowHtml]
+        public string WebApiController { get; set; }
 
     }
 }

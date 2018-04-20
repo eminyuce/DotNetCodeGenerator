@@ -27,8 +27,11 @@ namespace DotNetCodeGenerator.Domain.Entities
             {
 
                 String m = "";
-
-                if (DataType.IndexOf("varchar") > -1)
+                if (DataType.IndexOf("text") > -1)
+                {
+                    m = "''";
+                }
+                else if (DataType.IndexOf("varchar") > -1)
                 {
                     m = "''";
                 }
