@@ -34,18 +34,16 @@ namespace DotNetCodeGenerator.Tests.Controllers
         public void Index222()
         {
             var pp = new TestRepository();
-            int id=pp.SaveOrUpdateNwmTest(new NwmTest { Id=100,Name="Test" });
-
 
             var item = new NwmAyarlar();
 
             item.id = 1;
             item.siteBasligi = "siteBasligi";
-            item.anahtarKelimeler = "";
-            item.google = "";
-            item.siteAciklamasi = "";
-            item.firmaAdi = "";
-            item.telefon = "";
+            item.anahtarKelimeler = "anahtarKelimeler";
+            item.google = "google 22";
+            item.siteAciklamasi = "siteAciklamasi";
+            item.firmaAdi = "firmaAdi";
+            item.telefon = "telefon";
             item.telefon2 = "";
             item.faks = "";
             item.eposta = "";
@@ -70,8 +68,9 @@ namespace DotNetCodeGenerator.Tests.Controllers
             item.foursquare = "";
             item.map = "";
             var result1= pp.SaveOrUpdateNwmAyarlar(item);
+            var ayarlarItem = pp.GetNwmAyarlar(result1);
 
-            Console.WriteLine(result1.id);
+            Console.WriteLine(ayarlarItem.google);
         }
         [TestMethod]
         public void Index()

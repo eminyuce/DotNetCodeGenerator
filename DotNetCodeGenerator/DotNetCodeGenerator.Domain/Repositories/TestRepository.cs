@@ -136,10 +136,8 @@ namespace DotNetCodeGenerator.Domain.Repositories
             resultEntity = dataSet.Tables[0].ToList<NwmAyarlar>().FirstOrDefault();
             return resultEntity;
         }
-
-        public NwmAyarlar SaveOrUpdateNwmAyarlar(NwmAyarlar item)
+        public int SaveOrUpdateNwmAyarlar(NwmAyarlar item)
         {
-            var resultEntity = new NwmAyarlar();
             String commandText = @"CALL SaveOrUpdateNwmAyarlar(@id,@siteBasligi,@anahtarKelimeler,@google,@siteAciklamasi,@firmaAdi,@telefon,@telefon2,@faks,@eposta,@adres,@yetkili,@username,@password,@logKayit,@durum,@siteUrl,@panelUrl,@smtpSunucu,@smtpPort,@smtpKullanici,@smtpSifre,@smtpAd,@smtpMetod,@smtpDurum,@facebook,@twitter,@gplus,@foursquare,@map)";
             var parameterList = new List<MySqlParameter>();
             parameterList.Add(new MySqlParameter("@id", item.id));
@@ -172,11 +170,10 @@ namespace DotNetCodeGenerator.Domain.Repositories
             parameterList.Add(new MySqlParameter("@gplus", item.gplus.ToStr()));
             parameterList.Add(new MySqlParameter("@foursquare", item.foursquare.ToStr()));
             parameterList.Add(new MySqlParameter("@map", item.map.ToStr()));
-            DataSet dataSet = MySqlHelper.ExecuteDataset(ConnectionString, commandText, parameterList.ToArray());
-            var dt = dataSet.Tables[0];
-            resultEntity = dt.ToList<NwmAyarlar>().FirstOrDefault();
-            return resultEntity;
+            int id = MySqlHelper.ExecuteScalar(ConnectionString, commandText, parameterList.ToArray()).ToInt();
+            return id;
         }
+
 
     }
 
