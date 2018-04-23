@@ -165,7 +165,6 @@
     <Content Include="mysqlAssembly\MySql.Data.xml" />
     <Content Include="mysqlAssembly\MySql.Web.dll" />
     <Content Include="mysqlAssembly\MySql.Web.xml" />
-    <Content Include="mySqlSaveOrUpdate.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

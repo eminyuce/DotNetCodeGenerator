@@ -35,12 +35,12 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 var sqlParameter = GeneralHelper.GetUrlString(item.ColumnName);
                 if (item.DataType.IndexOf("xml") > -1 || item.DataType.IndexOf("varchar") > -1 || item.DataType.IndexOf("text") > -1)
                 {
-                    method.AppendLine("parameterList.Add(new MySqlParameter(\"@" + item.ColumnName + "\", item." +
+                    method.AppendLine("parameterList.Add(new MySqlParameter(\"@" + item.ColumnNameInput + "\", item." +
                                       item.ColumnName + ".ToStr()));");
                 }
                 else
                 {
-                    method.AppendLine(" parameterList.Add(new MySqlParameter(\"@" + item.ColumnName + "\", item." + item.ColumnName + "));");
+                    method.AppendLine(" parameterList.Add(new MySqlParameter(\"@" + item.ColumnNameInput + "\", item." + item.ColumnName + "));");
                 }
 
             }
@@ -121,12 +121,11 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 method.AppendLine("public " + staticText + " int SaveOrUpdate" + modelName + "( " + modelName + " item)");
                 method.AppendLine(" {");
 
-                //  String commandText = @"CALL IN Id int,,IN Name varchar(45),{1}({0})SaveOrUpdateNwmTest";
                 string spName = "SaveOrUpdate" + modifiedTableName;
                 spName = String.Format("{1}({0})", 
                     String.Join(",", 
                     kontrolList.Select(t => 
-                    String.Format("@{0}",t.ColumnName))), spName);
+                    String.Format("@{0}",t.ColumnNameInput))), spName);
                 GetMySqlDatabaseUtilityParameters(DatabaseMetadata.SelectedTable.TableRowMetaDataList, method, spName, true);
                 method.AppendLine(" int id = MySqlHelper.ExecuteScalar(ConnectionString, commandText, parameterList.ToArray()).ToInt();");
                 method.AppendLine(" return id;");
@@ -140,6 +139,8 @@ namespace DotNetCodeGenerator.Domain.Helpers
             }
 
         }
+
+ 
         public void GenerateMySqlSaveOrUpdateStoredProcedure()
         {
 
@@ -168,14 +169,23 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 {
                     var item = list[i];
                     var comma = (i != (list.Count - 1) ? "," : "");
-                    built.AppendLine("IN " + item.ColumnName + " " + item.DataTypeMaxChar + comma);
+                    built.AppendLine(item.ColumnNameInput + " " + item.DataTypeMaxChar + comma);
                 }
           
                 built.Append(")");
                 built.AppendLine("");
                 built.AppendLine("BEGIN");
+
+
+                built.AppendLine(" DECLARE MyId int;");
+                built.AppendLine("       DECLARE CheckExists int;");
+                built.AppendLine("");
                 built.AppendLine("START TRANSACTION;");
-                built.AppendLine("IF NOT EXISTS(SELECT  " + prKey.ColumnName + " FROM " + selectedTable + " WHERE " + prKey.ColumnName + "=@" + prKey.ColumnName + ") THEN ");
+                built.AppendLine("SET CheckExists = 0;");
+                built.AppendLine("SET MyId = "+ prKey.ColumnNameInput +";");
+                // SELECT count(*) INTO CheckExists from db_kodyazan.Test WHERE Id = MyId;
+                built.AppendLine("SELECT COUNT(*) INTO CheckExists FROM " + selectedTable + " WHERE Id = MyId;");
+                built.AppendLine("IF(CheckExists = 0) THEN ");
                 built.AppendLine("  SET SQL_MODE = '';");
                 built.AppendLine("INSERT INTO " + selectedTable + "(");
 
@@ -193,7 +203,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                     var item = list[i];
                     var comma = (i != (list.Count - 1) ? "," : "");
                     if (!item.PrimaryKey)
-                        built.AppendLine("COALESCE(" + item.ColumnName + "," + item.ColumnDefaultValue + ")" + comma);
+                        built.AppendLine("COALESCE(" + item.ColumnNameInput + "," + item.ColumnDefaultValue + ")" + comma);
                 }
 
                 built.AppendLine(");");
@@ -207,11 +217,11 @@ namespace DotNetCodeGenerator.Domain.Helpers
                     var comma = (i != (list.Count - 1) ? "," : "");
                     if (!item.PrimaryKey)
                     {
-                        built.AppendLine(String.Format("`{0}`", item.ColumnName) + " = COALESCE(" + GeneralHelper.GetUrlString(item.ColumnName) + "," + item.ColumnDefaultValue + ")"+ comma);
+                        built.AppendLine(String.Format("`{0}`", item.ColumnName) + " = COALESCE(" + item.ColumnNameInput + "," + item.ColumnDefaultValue + ")"+ comma);
                     }
                 }
                 
-                built.AppendLine("WHERE " + String.Format("`{0}`", prKey.ColumnName) + "=@" + prKey.ColumnName + ";");
+                built.AppendLine("WHERE " + String.Format("`{0}`", prKey.ColumnName) + "=MyId;");
                 built.AppendLine(" END IF;");
                 built.AppendLine("COMMIT;");
                 built.AppendLine("END");

@@ -108,7 +108,7 @@ namespace DotNetCodeGenerator.Domain.Services
 
             codeGeneratorResult = CodeProducerHelper.CodeGeneratorResult;
             codeGeneratorResult.DatabaseMetadata = databaseMetaData;
-            codeGeneratorResult.UserMessage = codeGeneratorResult.SelectedTable+" table codes are created. You made it dude, Congratulation :)";
+            codeGeneratorResult.UserMessage = codeGeneratorResult.SelectedTable + " table codes are created. You made it dude, Congratulation :)";
             codeGeneratorResult.UserMessageState = UserMessageState.Success;
         }
     }

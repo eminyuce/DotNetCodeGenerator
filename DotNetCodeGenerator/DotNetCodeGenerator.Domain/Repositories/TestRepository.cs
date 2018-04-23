@@ -19,6 +19,73 @@ namespace DotNetCodeGenerator.Domain.Repositories
         public string ConnectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;
 
 
+
+        public List<NwmHaberler> GetNwmHaberlers()
+        {
+            var list = new List<NwmHaberler>();
+            String commandText = @"SELECT * FROM db_kodyazan.haberler ORDER BY id DESC";
+            var parameterList = new List<MySqlParameter>();
+            DataSet dataSet = MySqlHelper.ExecuteDataset(ConnectionString, commandText, parameterList.ToArray());
+            if (dataSet.Tables.Count > 0)
+            {
+                list = dataSet.Tables[0].ToList<NwmHaberler>();
+            }
+            return list;
+        }
+        public void DeleteNwmHaberler(int id)
+        {
+            String commandText = @"DELETE FROM db_kodyazan.haberler WHERE id=@id";
+            var parameterList = new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@id", id));
+            MySqlHelper.ExecuteNonQuery(ConnectionString, commandText, parameterList.ToArray());
+        }
+
+        public NwmHaberler GetNwmHaberler(int id)
+        {
+            var resultEntity = new NwmHaberler();
+            String commandText = @"SELECT * FROM db_kodyazan.haberler WHERE id=@id";
+            var parameterList = new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@id", id));
+            DataSet dataSet = MySqlHelper.ExecuteDataset(ConnectionString, commandText, parameterList.ToArray());
+            resultEntity = dataSet.Tables[0].ToList<NwmHaberler>().FirstOrDefault();
+            return resultEntity;
+        }
+        public int SaveOrUpdateNwmHaberler(NwmHaberler item)
+        {
+            String commandText = @"CALL SaveOrUpdateNwmHaberler(@id_IN,@sira_IN,@tarih_IN,@durum_IN,@seo_IN,@link_IN,@baslik_tr_IN,@keywords_tr_IN,@ozet_tr_IN,@detay_tr_IN,@baslik_en_IN,@keywords_en_IN,@ozet_en_IN,@detay_en_IN,@haberTarihi_IN,@baslik_de_IN,@keywords_de_IN,@ozet_de_IN,@detay_de_IN,@tip_IN,@baslik_ar_IN,@keywords_ar_IN,@ozet_ar_IN,@detay_ar_IN,@yorum_tr_IN,@yorum_en_IN)";
+            var parameterList = new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@id_IN", item.id));
+            parameterList.Add(new MySqlParameter("@sira_IN", item.sira));
+            parameterList.Add(new MySqlParameter("@tarih_IN", item.tarih));
+            parameterList.Add(new MySqlParameter("@durum_IN", item.durum));
+            parameterList.Add(new MySqlParameter("@seo_IN", item.seo.ToStr()));
+            parameterList.Add(new MySqlParameter("@link_IN", item.link.ToStr()));
+            parameterList.Add(new MySqlParameter("@baslik_tr_IN", item.baslik_tr.ToStr()));
+            parameterList.Add(new MySqlParameter("@keywords_tr_IN", item.keywords_tr.ToStr()));
+            parameterList.Add(new MySqlParameter("@ozet_tr_IN", item.ozet_tr.ToStr()));
+            parameterList.Add(new MySqlParameter("@detay_tr_IN", item.detay_tr.ToStr()));
+            parameterList.Add(new MySqlParameter("@baslik_en_IN", item.baslik_en.ToStr()));
+            parameterList.Add(new MySqlParameter("@keywords_en_IN", item.keywords_en.ToStr()));
+            parameterList.Add(new MySqlParameter("@ozet_en_IN", item.ozet_en.ToStr()));
+            parameterList.Add(new MySqlParameter("@detay_en_IN", item.detay_en.ToStr()));
+            parameterList.Add(new MySqlParameter("@haberTarihi_IN", item.haberTarihi));
+            parameterList.Add(new MySqlParameter("@baslik_de_IN", item.baslik_de.ToStr()));
+            parameterList.Add(new MySqlParameter("@keywords_de_IN", item.keywords_de.ToStr()));
+            parameterList.Add(new MySqlParameter("@ozet_de_IN", item.ozet_de.ToStr()));
+            parameterList.Add(new MySqlParameter("@detay_de_IN", item.detay_de.ToStr()));
+            parameterList.Add(new MySqlParameter("@tip_IN", item.tip));
+            parameterList.Add(new MySqlParameter("@baslik_ar_IN", item.baslik_ar.ToStr()));
+            parameterList.Add(new MySqlParameter("@keywords_ar_IN", item.keywords_ar.ToStr()));
+            parameterList.Add(new MySqlParameter("@ozet_ar_IN", item.ozet_ar.ToStr()));
+            parameterList.Add(new MySqlParameter("@detay_ar_IN", item.detay_ar.ToStr()));
+            parameterList.Add(new MySqlParameter("@yorum_tr_IN", item.yorum_tr.ToStr()));
+            parameterList.Add(new MySqlParameter("@yorum_en_IN", item.yorum_en.ToStr()));
+            int id = MySqlHelper.ExecuteScalar(ConnectionString, commandText, parameterList.ToArray()).ToInt();
+            return id;
+        }
+
+
+
         public int SaveOrUpdateNwmTest(NwmTest item)
         {
             String commandText = @"CALL SaveOrUpdateNwmTest(@Id,@Name)";
@@ -138,7 +205,18 @@ namespace DotNetCodeGenerator.Domain.Repositories
         }
         public int SaveOrUpdateNwmAyarlar(NwmAyarlar item)
         {
-            String commandText = @"CALL SaveOrUpdateNwmAyarlar(@id,@siteBasligi,@anahtarKelimeler,@google,@siteAciklamasi,@firmaAdi,@telefon,@telefon2,@faks,@eposta,@adres,@yetkili,@username,@password,@logKayit,@durum,@siteUrl,@panelUrl,@smtpSunucu,@smtpPort,@smtpKullanici,@smtpSifre,@smtpAd,@smtpMetod,@smtpDurum,@facebook,@twitter,@gplus,@foursquare,@map)";
+            String commandText = @"CALL SaveOrUpdateNwmAyarlar(@id,
+@siteBasligi,
+@anahtarKelimeler,
+@google,
+@siteAciklamasi,
+@firmaAdi,@telefon,@telefon2,
+@faks,@eposta,@adres,@yetkili,
+@username,@password,@logKayit,
+@durum,@siteUrl,@panelUrl,@smtpSunucu,
+@smtpPort,@smtpKullanici,@smtpSifre,
+@smtpAd,@smtpMetod,@smtpDurum,
+@facebook,@twitter,@gplus,@foursquare,@map)";
             var parameterList = new List<MySqlParameter>();
             parameterList.Add(new MySqlParameter("@id", item.id));
             parameterList.Add(new MySqlParameter("@siteBasligi", item.siteBasligi.ToStr()));

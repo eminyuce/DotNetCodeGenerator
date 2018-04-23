@@ -30,11 +30,56 @@ namespace DotNetCodeGenerator.Tests.Controllers
             //var kernel = NinjectWebCommon.CreatePublicKernel();
             //_sut = kernel.Resolve<HomeController>();
         }
+
+        [TestMethod]
+        public void TestItem()
+        {
+            var pp = new TestRepository();
+            pp.SaveOrUpdateNwmTest(new NwmTest() { Id = 1, Name = "NwmTest" });
+        }
+        [TestMethod]
+        public void NwmHaberlerTest()
+        {
+            var item = new NwmHaberler();
+            var pp = new TestRepository();
+            item.id = 1;
+            item.sira = 1;
+            item.tarih = DateTime.Now;
+            item.durum = 1;
+            item.seo = "Maritime reporter 55";
+            item.link = "link 2";
+            item.baslik_tr = "baslik_tr 2";
+            item.keywords_tr = "keywords_tr 2";
+            item.ozet_tr = "ozet_tr";
+            item.detay_tr = "detay_tr";
+            item.baslik_en = "baslik_en";
+            item.keywords_en = "keywords_en";
+            item.ozet_en = "ozet_en";
+            item.detay_en = "detay_en";
+            item.haberTarihi = DateTime.Now;
+            item.baslik_de = "baslik_de";
+            item.keywords_de = "keywords_de";
+            item.ozet_de = "ozet_de";
+            item.detay_de = "detay_de";
+            item.tip = 1;
+            item.baslik_ar = "baslik_ar";
+            item.keywords_ar = "keywords_ar";
+            item.ozet_ar = "ozet_ar";
+            item.detay_ar = "detay_ar";
+            item.yorum_tr = "yorum_tr";
+            item.yorum_en = "yorum_en";
+            var result1 = pp.SaveOrUpdateNwmHaberler(item);
+            Console.WriteLine(result1);
+        }
+
         [TestMethod]
         public void Index222()
         {
             var pp = new TestRepository();
-
+            for (int i = 0; i < 10000; i++)
+            {
+                pp.SaveOrUpdateNwmTest(new NwmTest() { Name = (i+100) + Guid.NewGuid().ToStr() });
+            }
             var item = new NwmAyarlar();
 
             item.id = 1;
@@ -67,10 +112,10 @@ namespace DotNetCodeGenerator.Tests.Controllers
             item.gplus = "";
             item.foursquare = "";
             item.map = "";
-            var result1= pp.SaveOrUpdateNwmAyarlar(item);
-            var ayarlarItem = pp.GetNwmAyarlar(result1);
+           // var result1= pp.SaveOrUpdateNwmAyarlar(item);
+           // var ayarlarItem = pp.GetNwmAyarlar(result1);
 
-            Console.WriteLine(ayarlarItem.google);
+           // Console.WriteLine(ayarlarItem.google);
         }
         [TestMethod]
         public void Index()
@@ -119,26 +164,18 @@ namespace DotNetCodeGenerator.Tests.Controllers
 
             //IP / Port	: 37.230.108.236 / 3306
 
-            MySqlConnectionStringBuilder conn_string = new MySqlConnectionStringBuilder();
-            conn_string.Server = "mysql06.trwww.com";
-            conn_string.UserID = "otokoduret";
-            conn_string.Password = "7mX^0XPW";
-            conn_string.Database = "test";
-            conn_string.Port = 3306;
-
-            string connectionString = "Server=174.128.194.106;Database=polbot2;Uid=emin;Pwd=145145145Aa;Port=3306";
-            connectionString = conn_string.ToStr();
+         
             string cmdText = "call sp_test(@n, @f);";
             //var mySqlParameters = new List<MySqlParameter>();
             //mySqlParameters.Add(new MySqlParameter("@n", "steve"));
             //mySqlParameters.Add(new MySqlParameter("@f", @"d:\temp\test.txt"));
             //MySqlHelper.ExecuteNonQuery(connectionString, cmdText, mySqlParameters.ToArray());
 
-            Console.WriteLine("connectionString:" + connectionString);
+            Console.WriteLine("connectionString:" + ConnectionString);
             //cmdText = "select 1;";
             //DataSet dataSetResult = MySqlHelper.ExecuteDataset(connectionString, cmdText, null);
             //Console.WriteLine("total" + dataSetResult.Tables.Count);
-            var databaseMetaData = tableRepository.GetAllMySqlTables("server=mysql06.trwww.com;user id=otokoduret;password=7mX^0XPW;database=test;port=3306");
+            var databaseMetaData = tableRepository.GetAllMySqlTables(ConnectionString);
             Console.WriteLine("total" + databaseMetaData.Tables.Count);
             tableRepository.GetSelectedMysqlTableMetaData(databaseMetaData, "def.test.urunler");
 

@@ -11,6 +11,7 @@ namespace DotNetCodeGenerator.Domain.Entities
     {
         public DatabaseType DatabaseType { set; get; }
         public String ColumnName { set; get; }
+        public String ColumnNameInput { get { return String.Format("{0}_IN", ColumnName); }  }
         public String IsNull { set; get; }
         public String DataType { set; get; }
         public String MaxChar { set; get; }
