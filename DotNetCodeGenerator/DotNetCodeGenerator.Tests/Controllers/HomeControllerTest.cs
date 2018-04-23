@@ -35,14 +35,14 @@ namespace DotNetCodeGenerator.Tests.Controllers
         public void TestItem()
         {
             var pp = new TestRepository();
-            pp.SaveOrUpdateNwmTest(new NwmTest() { Id = 1, Name = "NwmTest" });
+            Console.Write(pp.SaveOrUpdateNwmTest(new NwmTest() { Id = 5, Name = "NwmTest444" }));
         }
         [TestMethod]
         public void NwmHaberlerTest()
         {
             var item = new NwmHaberler();
             var pp = new TestRepository();
-            item.id = 1;
+            item.id = 3;
             item.sira = 1;
             item.tarih = DateTime.Now;
             item.durum = 1;

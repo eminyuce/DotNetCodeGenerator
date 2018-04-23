@@ -225,6 +225,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 }
 
                 built.AppendLine("WHERE " + String.Format("`{0}`", prKey.ColumnName) + "=MyId;");
+                built.AppendLine(" SELECT MyId;");
                 built.AppendLine(" END IF;");
                 built.AppendLine("COMMIT;");
                 built.AppendLine("END");
