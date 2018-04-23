@@ -50,7 +50,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
         }
 
 
-        public void GenereateMySqlDatabaseOperation()
+        public void GenereateMySqlRepository()
         {
             List<TableRowMetaData> kontrolList = DatabaseMetadata.SelectedTable.TableRowMetaDataList;
             StringBuilder method = new StringBuilder();
@@ -1137,7 +1137,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
         }
 
 
-        public void GenerateSPModel()
+        public void GenerateStoredProcExecutionCode()
         {
 
             try
