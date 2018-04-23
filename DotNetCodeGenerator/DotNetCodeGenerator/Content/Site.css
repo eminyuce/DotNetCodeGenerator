@@ -20,3 +20,6 @@ select,
 textarea {
  
 }
+.codeEditorDiv{
+    min-height:800px;
+}

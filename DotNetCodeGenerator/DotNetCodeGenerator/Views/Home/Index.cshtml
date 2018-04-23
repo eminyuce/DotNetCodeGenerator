@@ -194,7 +194,8 @@
                     <div class="panel-body">
                         <div class="form-group">
                             <div class="col-md-12">
-                                @Html.TextAreaFor(model => model.AspMvcControllerClass, htmlAttributes: new { @class= "form-control text-box multi-line", @rows = 50 })
+                                <div class="codeEditorDiv" id="AspMvcControllerClass_Editor"></div>
+                                <input type="hidden" data-code-result-hidden="AspMvcControllerClass" id="AspMvcControllerClass" value="@Model.AspMvcControllerClass" />
                             </div>
                         </div>
                     </div>
@@ -214,7 +215,9 @@
                      
                             <div class="form-group">
                                 <div class="col-md-12">
-                                    @Html.TextAreaFor(model => model.TableRepository, htmlAttributes: new { @class = "form-control text-box multi-line", @rows = 50 })
+
+                                    <div class="codeEditorDiv" id="TableRepository_Editor"></div>
+                                    <input type="hidden" data-code-result-hidden="TableRepository" id="TableRepository" value="@Model.TableRepository" />
                                 </div>
                         </div>
 
@@ -223,7 +226,10 @@
 
                             <div class="form-group">
                                 <div class="col-md-12">
-                                    @Html.TextAreaFor(model => model.SqlDatabaseOperation, htmlAttributes: new { @class = "form-control text-box multi-line", @rows = 50 })
+
+                                    <div class="codeEditorDiv" id="SqlDatabaseOperation_Editor"></div>
+                                    <input type="hidden" data-code-result-hidden="SqlDatabaseOperation" id="SqlDatabaseOperation" value="@Model.SqlDatabaseOperation" />
+                                
                                 </div>
                             </div>
 
@@ -231,7 +237,10 @@
                         <div class="form-group">
                             <div class="col-md-12">
                                 <a target="_blank" href="http://www.format-sql.com" class="btn btn-info">Format Sql</a>
-                                @Html.TextAreaFor(model => model.SqlSaveOrUpdateStoredProc, htmlAttributes: new { @class = "form-control text-box multi-line", @rows = 50 })
+
+                                <div class="codeEditorDiv" id="SqlSaveOrUpdateStoredProc_Editor"></div>
+                                <input type="hidden" data-code-result-hidden="SqlSaveOrUpdateStoredProc" data-code-result-language="sql" id="SqlSaveOrUpdateStoredProc" value="@Model.SqlSaveOrUpdateStoredProc" />
+                            
                             </div>
                         </div>
 
@@ -254,14 +263,16 @@
 
                             <div class="form-group">
                                 <div class="col-md-12">
-                                    @Html.TextAreaFor(model => model.TableClassItem, htmlAttributes: new { @class = "form-control text-box multi-line", @rows = 50 })
+                                    <div class="codeEditorDiv" id="TableClassItem_Editor"></div>
+                                    <input type="hidden" data-code-result-hidden="TableClassItem" id="TableClassItem" value="@Model.TableClassItem"  />
                                 </div>
                             </div>
 
                         
                             <div class="form-group">
                                 <div class="col-md-12">
-                                    @Html.TextAreaFor(model => model.TableClassInstance, htmlAttributes: new { @class = "form-control text-box multi-line", @rows = 50 })
+                                    <div class="codeEditorDiv" id="TableClassInstance_Editor"></div>
+                                    <input type="hidden" data-code-result-hidden="TableClassInstance" id="TableClassInstance" value="@Model.TableClassInstance" />
                             </div>
                         </div>
 
@@ -282,7 +293,8 @@
                     <div class="panel-body">
                             <div class="form-group">
                                 <div class="col-md-12">
-                                    @Html.TextAreaFor(model => model.StoredProcExec, htmlAttributes: new { @class = "form-control text-box multi-line", @rows = 50 })
+                                    <div class="codeEditorDiv" id="StoredProcExec_Editor"></div>
+                                    <input type="hidden" data-code-result-hidden="StoredProcExec" id="StoredProcExec" value="@Model.StoredProcExec" />
                                 </div>
                         </div>
 
@@ -290,14 +302,16 @@
 
                             <div class="form-group">
                                 <div class="col-md-12">
-                                    @Html.TextAreaFor(model => model.StoredProcExecModel, htmlAttributes: new { @class = "form-control text-box multi-line", @rows = 50 })
+                                    <div class="codeEditorDiv" id="StoredProcExecModel_Editor"></div>
+                                    <input type="hidden" data-code-result-hidden="StoredProcExecModel" id="StoredProcExecModel" value="@Model.StoredProcExecModel" />
                                 </div>
                             </div>
 
 
                         <div class="form-group">
                             <div class="col-md-12">
-                                @Html.TextAreaFor(model => model.StoredProcExecModelDataReader, htmlAttributes: new { @class = "form-control text-box multi-line", @rows = 50 })
+                                <div class="codeEditorDiv" id="StoredProcExecModelDataReader_Editor"></div>
+                                <input type="hidden" data-code-result-hidden="StoredProcExecModelDataReader" id="StoredProcExecModelDataReader" value="@Model.StoredProcExecModelDataReader" />
                             </div>
                         </div>
 
@@ -318,13 +332,15 @@
 
                         <div class="form-group">
                             <div class="col-md-12">
-                                @Html.TextAreaFor(model => model.MySqlDatabaseOperation, htmlAttributes: new { @class = "form-control text-box multi-line", @rows = 50 })
+                                <div class="codeEditorDiv" id="MySqlDatabaseOperation_Editor"></div>
+                                <input type="hidden" data-code-result-hidden="MySqlDatabaseOperation" id="MySqlDatabaseOperation" value="@Model.MySqlDatabaseOperation" />
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="col-md-12">
                                 <a target="_blank" href="http://www.dpriver.com/pp/sqlformat.htm" class="btn btn-info">Format MySql</a>
-                                @Html.TextAreaFor(model => model.MySqlSaveOrUpdateStoredProc, htmlAttributes: new { @class = "form-control text-box multi-line", @rows = 50 })
+                                <div class="codeEditorDiv" id="MySqlSaveOrUpdateStoredProc_Editor"></div>
+                                <input type="hidden" data-code-result-hidden="MySqlSaveOrUpdateStoredProc" data-code-result-language="sql" id="MySqlSaveOrUpdateStoredProc" value="@Model.MySqlSaveOrUpdateStoredProc" />
                             </div>
                         </div>
                     </div>
@@ -345,7 +361,8 @@
 
                         <div class="form-group">
                             <div class="col-md-12">
-                                @Html.TextAreaFor(model => model.WebApiController, htmlAttributes: new { @class = "form-control text-box multi-line", @rows = 50 })
+                                <div class="codeEditorDiv" id="WebApiController_Editor"></div>
+                                <input type="hidden" data-code-result-hidden="WebApiController" id="WebApiController" value="@Model.WebApiController" />
                             </div>
                         </div>
                        
@@ -355,8 +372,10 @@
         </div>
     </div>
 </div>
-<input id="TableCopied" type="hidden" />
 
+
+<input id="TableCopied" type="hidden" />
+<script src="/Content/vs/loader.js"></script>
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
 
@@ -439,9 +458,38 @@
 
       });
 
+        require.config({ paths: { 'vs': '/Content/vs' } });
+
+        $('[data-code-result-hidden]').each(function () {
+            var editorId = $(this).attr("data-code-result-hidden");
+            var editorValue = $(this).val();
+            var resultLanguage = $(this).attr("data-code-result-language");
+            var myLanguage = "csharp";
+            if (typeof resultLanguage !== typeof undefined && resultLanguage !== false) {
+                myLanguage = resultLanguage;
+            }
+            console.log(editorId + "  " + myLanguage);
+            createEditor(editorId, editorValue, myLanguage)
+        });
+ 
+        function createEditor(editorId, editorValue,myLanguage) {
+
+            require(['vs/editor/editor.main'], function () {
+                window.meditor = monaco.editor.create(document.getElementById(editorId+"_Editor"), {
+                    value: editorValue,
+                    language: myLanguage,
+                    automaticLayout: true,
+                    wordWrap: 'wordWrapColumn',
+                    wordWrapColumn: 300,
+                    wrappingIndent: "indent",
+                    scrollbar: {
+                        vertical: 'auto',
+                        horizontal: 'auto'
+                    }
+                });
+            });
+        }
+	 
+    
     </script>
 }
-@*spring.datasource.url=jdbc:mysql://localhost:3306/polbot2?useSSL=false
-# Username and password
-spring.datasource.username=polbot
-spring.datasource.password=145145145*@
