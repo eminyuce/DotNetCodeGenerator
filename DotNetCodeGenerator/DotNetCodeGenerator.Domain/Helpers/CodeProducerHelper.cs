@@ -19,6 +19,9 @@ namespace DotNetCodeGenerator.Domain.Helpers
         [Inject]
         public TableService TableService { get; set; }
 
+        public const string DEFAULT_NAMESPACE = "Test";
+
+
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public CodeGeneratorResult CodeGeneratorResult { get; set; }
         public DatabaseMetadata DatabaseMetadata { get; set; }
@@ -64,7 +67,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(kontrolList);
                 string primaryKeyOrginal = primaryKey;
                 String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
-                method.AppendLine(" public string ConnectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
+                method.AppendLine(" public string ConnectionString = ConfigurationManager.ConnectionStrings[\"ConnectionStringKey\"].ConnectionString;");
                 method.AppendLine("");
                 method.AppendLine("");
                 method.AppendLine("");
@@ -122,10 +125,10 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 method.AppendLine(" {");
 
                 string spName = "SaveOrUpdate" + modifiedTableName;
-                spName = String.Format("{1}({0})", 
-                    String.Join(",", 
-                    kontrolList.Select(t => 
-                    String.Format("@{0}",t.ColumnNameInput))), spName);
+                spName = String.Format("{1}({0})",
+                    String.Join(",",
+                    kontrolList.Select(t =>
+                    String.Format("@{0}", t.ColumnNameInput))), spName);
                 GetMySqlDatabaseUtilityParameters(DatabaseMetadata.SelectedTable.TableRowMetaDataList, method, spName, true);
                 method.AppendLine(" int id = MySqlHelper.ExecuteScalar(ConnectionString, commandText, parameterList.ToArray()).ToInt();");
                 method.AppendLine(" return id;");
@@ -140,7 +143,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
         }
 
- 
+
         public void GenerateMySqlSaveOrUpdateStoredProcedure()
         {
 
@@ -171,7 +174,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                     var comma = (i != (list.Count - 1) ? "," : "");
                     built.AppendLine(item.ColumnNameInput + " " + item.DataTypeMaxChar + comma);
                 }
-          
+
                 built.Append(")");
                 built.AppendLine("");
                 built.AppendLine("BEGIN");
@@ -182,7 +185,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 built.AppendLine("");
                 built.AppendLine("START TRANSACTION;");
                 built.AppendLine("SET CheckExists = 0;");
-                built.AppendLine("SET MyId = "+ prKey.ColumnNameInput +";");
+                built.AppendLine("SET MyId = " + prKey.ColumnNameInput + ";");
                 // SELECT count(*) INTO CheckExists from db_kodyazan.Test WHERE Id = MyId;
                 built.AppendLine("SELECT COUNT(*) INTO CheckExists FROM " + selectedTable + " WHERE Id = MyId;");
                 built.AppendLine("IF(CheckExists = 0) THEN ");
@@ -217,10 +220,10 @@ namespace DotNetCodeGenerator.Domain.Helpers
                     var comma = (i != (list.Count - 1) ? "," : "");
                     if (!item.PrimaryKey)
                     {
-                        built.AppendLine(String.Format("`{0}`", item.ColumnName) + " = COALESCE(" + item.ColumnNameInput + "," + item.ColumnDefaultValue + ")"+ comma);
+                        built.AppendLine(String.Format("`{0}`", item.ColumnName) + " = COALESCE(" + item.ColumnNameInput + "," + item.ColumnDefaultValue + ")" + comma);
                     }
                 }
-                
+
                 built.AppendLine("WHERE " + String.Format("`{0}`", prKey.ColumnName) + "=MyId;");
                 built.AppendLine(" END IF;");
                 built.AppendLine("COMMIT;");
@@ -263,7 +266,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                     var comma = (i != (list.Count - 1) ? "," : "");
                     built.AppendLine("@" + GeneralHelper.GetUrlString(item.ColumnName) + " " + item.DataTypeMaxChar + " = " + (String.IsNullOrEmpty(item.ColumnDefaultValue) ? "NULL" : item.ColumnDefaultValue) + comma);
                 }
- 
+
                 built.Append(")");
                 built.AppendLine("AS");
                 built.AppendLine("BEGIN");
@@ -324,7 +327,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
             String realEntityName = CodeGeneratorResult.SelectedTable;
             String modelName = CodeGeneratorResult.ModifiedTableName;
             String modifiedTableName = CodeGeneratorResult.ModifiedTableName.ToStr().Trim();
-            String nameSpace = CodeGeneratorResult.NameSpace;
+            String nameSpace = CodeGeneratorResult.NameSpace.ToStr(DEFAULT_NAMESPACE);
             string selectedTable = DatabaseMetadata.SelectedTable.TableNameWithSchema;
             String entityPrefix = GeneralHelper.GetEntityPrefixName(realEntityName);
             String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(kontrolList);
@@ -491,7 +494,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
             }
 
         }
-        public void GenereateSqlDatabaseOperation()
+        public void GenerateSqlRepository()
         {
 
             List<TableRowMetaData> kontrolList = DatabaseMetadata.SelectedTable.TableRowMetaDataList;
@@ -509,6 +512,37 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(kontrolList);
                 string primaryKeyOrginal = primaryKey;
                 String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
+                String nameSpace = CodeGeneratorResult.NameSpace.ToStr(DEFAULT_NAMESPACE);
+
+                String repositoryName = CodeGeneratorResult.IsMethodStatic ?
+          String.Format("{0}Repository", modelName) :
+          String.Format("_{0}Repository", GeneralHelper.FirstCharacterToLower(modelName));
+
+                method.AppendLine(String.Format("using {0}.DB;", nameSpace));
+                method.AppendLine(String.Format("using {0}.Entities;", nameSpace));
+                method.AppendLine("using System;");
+                method.AppendLine("using System.Linq;");
+                method.AppendLine("using System.Runtime.Caching;");
+                method.AppendLine("using System.Text;");
+                method.AppendLine("using System.NLog;");
+                method.AppendLine("using System.Threading.Tasks;");
+                method.AppendLine("");
+                method.AppendLine(String.Format("namespace {0}.Repositories", nameSpace));
+                method.AppendLine("{");
+                method.AppendLine(String.Format("public class {0}Repository", modelName));
+                method.AppendLine("{");
+                method.AppendLine("private static readonly Logger Logger = LogManager.GetCurrentClassLogger();");
+                method.AppendLine("private static string CacheKeyAllItems = \"" + modelName + "Cache\";");
+                method.AppendLine("");
+                if (!CodeGeneratorResult.IsMethodStatic)
+                {
+                    method.AppendLine(String.Format("public {0}Repository()", modelName.Replace("Nwm", "")));
+                    method.AppendLine("{");
+                    method.AppendLine("}");
+                }
+
+                method.AppendLine("");
+                method.AppendLine("public string ConnectionString = ConfigurationManager.ConnectionStrings[\"ConnectionStringKey\"].ConnectionString;");
                 method.AppendLine("public " + staticText + " List<" + modelName + "> Get" + modelName + "s()");
                 method.AppendLine(" {");
                 method.AppendLine(" var list = new List<" + modelName + ">();");
@@ -516,7 +550,6 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 // GetDatabaseUtilityParameters(kontrolList, method, commandText, false);
                 method.AppendLine(String.Format(" String commandText = @\"{0}\";", commandText));
                 method.AppendLine(" var parameterList = new List<SqlParameter>();");
-                method.AppendLine(" string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
                 method.AppendLine(" var commandType = CommandType.Text;");
                 GetDataSetCodeText(method);
 
@@ -532,7 +565,6 @@ namespace DotNetCodeGenerator.Domain.Helpers
                         method.AppendLine(" {");
                         method.AppendLine(" var list = new List<" + modelName + ">();");
                         commandText = "SELECT * FROM " + selectedTable + " WHERE " + ki.ColumnName + "=@" + ki.ColumnName + " ORDER BY " + primaryKey + " DESC";
-                        method.AppendLine(" string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
                         method.AppendLine(String.Format(" String commandText = @\"{0}\";", commandText));
                         method.AppendLine(" var parameterList = new List<SqlParameter>();");
                         method.AppendLine(" var commandType = CommandType.Text;");
@@ -544,23 +576,21 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 method.AppendLine("public " + staticText + " void Delete" + modelName + "(int " + GeneralHelper.FirstCharacterToLower(primaryKey) + ")");
                 method.AppendLine(" {");
                 commandText = "DELETE FROM " + selectedTable + " WHERE " + primaryKey + "=@" + primaryKey;
-                method.AppendLine(" string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
                 method.AppendLine(String.Format(" String commandText = @\"{0}\";", commandText));
                 method.AppendLine(" var parameterList = new List<SqlParameter>();");
                 method.AppendLine(" var commandType = CommandType.Text;");
                 method.AppendLine(" parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + primaryKey + "\", " + GeneralHelper.FirstCharacterToLower(primaryKey) + ",SqlDbType.Int));");
-                method.AppendLine(" DatabaseUtility.ExecuteNonQuery(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray());");
+                method.AppendLine(" DatabaseUtility.ExecuteNonQuery(new SqlConnection(ConnectionString), commandText, commandType, parameterList.ToArray());");
                 method.AppendLine(" }");
                 method.AppendLine("");
                 method.AppendLine(" public " + staticText + " " + modelName + " Get" + modelName + "(int " + primaryKey + ")");
                 method.AppendLine(" {");
                 commandText = "SELECT * FROM " + selectedTable + " WHERE " + primaryKey + "=@" + primaryKey;
-                method.AppendLine(" string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
                 method.AppendLine(String.Format("String commandText = @\"{0}\";", commandText));
                 method.AppendLine(" var parameterList = new List<SqlParameter>();");
                 method.AppendLine(" var commandType = CommandType.Text;");
                 method.AppendLine(" parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + primaryKey + "\", " + primaryKey + ",SqlDbType.Int));");
-                method.AppendLine(" DataSet dataSet = DatabaseUtility.ExecuteDataSet(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray());");
+                method.AppendLine(" DataSet dataSet = DatabaseUtility.ExecuteDataSet(new SqlConnection(ConnectionString), commandText, commandType, parameterList.ToArray());");
                 method.AppendLine(" if (dataSet.Tables.Count > 0)");
                 method.AppendLine(" {");
                 method.AppendLine(" using (DataTable dt = dataSet.Tables[0])");
@@ -579,8 +609,10 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 method.AppendLine("public " + staticText + " int SaveOrUpdate" + modelName + "( " + modelName + " item)");
                 method.AppendLine(" {");
                 GetDatabaseUtilityParameters(DatabaseMetadata.SelectedTable.TableRowMetaDataList, method, entityPrefix + "SaveOrUpdate" + modifiedTableName, true);
-                method.AppendLine(" int id = DatabaseUtility.ExecuteScalar(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray()).ToInt();");
+                method.AppendLine(" int id = DatabaseUtility.ExecuteScalar(new SqlConnection(ConnectionString), commandText, commandType, parameterList.ToArray()).ToInt();");
                 method.AppendLine(" return id;");
+                method.AppendLine(" }");
+                method.AppendLine(" }");
                 method.AppendLine(" }");
                 CodeGeneratorResult.SqlDatabaseOperation = method.ToString();
             }
@@ -612,7 +644,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
         private void GetDataSetCodeText(StringBuilder method)
         {
             method.AppendLine(
-                " DataSet dataSet = DatabaseUtility.ExecuteDataSet(new SqlConnection(connectionString), commandText, commandType, parameterList.ToArray());");
+                " DataSet dataSet = DatabaseUtility.ExecuteDataSet(new SqlConnection(ConnectionString), commandText, commandType, parameterList.ToArray());");
             ConvertToDataTableToEntity(method);
         }
 
@@ -920,34 +952,49 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
         }
 
-        public void GenerateTableRepository()
+        public void GenerateTableServices()
         {
             List<TableRowMetaData> linkedList = DatabaseMetadata.SelectedTable.TableRowMetaDataList;
             StringBuilder method = new StringBuilder();
             String realEntityName = CodeGeneratorResult.SelectedTable;
             String modelName = CodeGeneratorResult.ModifiedTableName;
             String modifiedTableName = CodeGeneratorResult.ModifiedTableName;
-            String nameSpace = CodeGeneratorResult.NameSpace.ToStr("Test");
+            String nameSpace = CodeGeneratorResult.NameSpace.ToStr(DEFAULT_NAMESPACE);
             String entityPrefix = GeneralHelper.GetEntityPrefixName(realEntityName);
             String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(linkedList);
             string primaryKeyOrginal = primaryKey;
             primaryKey = GeneralHelper.FirstCharacterToLower(primaryKey);
             String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
+            String repositoryName = CodeGeneratorResult.IsMethodStatic ?
+                String.Format("{0}Repository", modelName) : 
+                String.Format("_{0}Repository", GeneralHelper.FirstCharacterToLower(modelName));
 
-            method.AppendLine(String.Format("using {0}.Domain.DB;", nameSpace));
-            method.AppendLine(String.Format("using {0}.Domain.Entities;", nameSpace));
+            method.AppendLine(String.Format("using {0}.DB;", nameSpace));
+            method.AppendLine(String.Format("using {0}.Entities;", nameSpace));
+            method.AppendLine(String.Format("using {0}.Repositories;", nameSpace));
             method.AppendLine("using System;");
             method.AppendLine("using System.Linq;");
             method.AppendLine("using System.Runtime.Caching;");
             method.AppendLine("using System.Text;");
+            method.AppendLine("using System.NLog;");
             method.AppendLine("using System.Threading.Tasks;");
             method.AppendLine("");
-            method.AppendLine(String.Format("namespace {0}.Repositories", nameSpace));
+            method.AppendLine(String.Format("namespace {0}.Services", nameSpace));
             method.AppendLine("{");
-            method.AppendLine(String.Format("public class {0}Repository", modelName.Replace("Nwm", "")));
+            method.AppendLine(String.Format("public class {0}Service", modelName.Replace("Nwm", "")));
             method.AppendLine("{");
             method.AppendLine("private static readonly Logger Logger = LogManager.GetCurrentClassLogger();");
             method.AppendLine("private static string CacheKeyAllItems = \"" + modelName + "Cache\";");
+            method.AppendLine("");
+            if (!CodeGeneratorResult.IsMethodStatic)
+            {
+                method.AppendLine(String.Format("private {1}Repository _{0}Repository;", GeneralHelper.FirstCharacterToLower(modelName), modelName));
+                method.AppendLine(String.Format("public {0}Service()", modelName.Replace("Nwm", "")));
+                method.AppendLine("{");
+                method.AppendLine(String.Format("_{0}Repository=new {1}Repository();",GeneralHelper.FirstCharacterToLower(modelName),modelName));
+                method.AppendLine("}");
+            }
+      
             method.AppendLine("");
             method.AppendLine("public " + staticText + " List<" + modelName + "> Get" + modelName + "sFromCache()");
             method.AppendLine("{");
@@ -969,7 +1016,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
             method.AppendLine("      var " + modelName.ToLower() + "Result = new  List <" + modelName + ">();");
             method.AppendLine("try");
             method.AppendLine("{");
-            method.AppendLine("      " + modelName.ToLower() + "Result = DBDirectory.Get" + modelName + "s();");
+            method.AppendLine("      " + modelName.ToLower() + "Result = "+ repositoryName + ".Get" + modelName + "s();");
             method.AppendLine("}catch(Exception ex)");
             method.AppendLine("{");
             method.AppendLine("Logger.Error(ex, ex.Message);");
@@ -981,7 +1028,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
             method.AppendLine("try");
             method.AppendLine("{");
             method.AppendLine("     RemoveCache();");
-            method.AppendLine("     return DBDirectory.SaveOrUpdate" + modelName + "(item);");
+            method.AppendLine("     return " + repositoryName + ".SaveOrUpdate" + modelName + "(item);");
             method.AppendLine("}catch(Exception ex)");
             method.AppendLine("{");
             method.AppendLine("Logger.Error(ex, ex.Message);");
@@ -995,7 +1042,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
             method.AppendLine("{");
             method.AppendLine("item = Get" + modelName + "sFromCache().FirstOrDefault(r => r." + primaryKeyOrginal + " == " + primaryKey + ");");
             method.AppendLine("if (item != null) return item;");
-            method.AppendLine("     item = DBDirectory.Get" + modelName + "(" + primaryKey + ");");
+            method.AppendLine("     item = " + repositoryName + ".Get" + modelName + "(" + primaryKey + ");");
             method.AppendLine("}catch(Exception ex)");
             method.AppendLine("{");
             method.AppendLine("Logger.Error(ex, ex.Message);");
@@ -1007,7 +1054,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
             method.AppendLine("try");
             method.AppendLine("{");
             method.AppendLine("     RemoveCache();");
-            method.AppendLine("     DBDirectory.Delete" + modelName + "(" + primaryKey + ");");
+            method.AppendLine("     " + repositoryName + ".Delete" + modelName + "(" + primaryKey + ");");
             method.AppendLine("}catch(Exception ex)");
             method.AppendLine("{");
             method.AppendLine("Logger.Error(ex, ex.Message);");
@@ -1026,7 +1073,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                     method.AppendLine("//" + ki.ColumnName);
                     method.AppendLine("public " + staticText + "  List<" + modelName + "> Get" + modelName + "By" + ki.ColumnName + "(" + cSharpType + " " + GeneralHelper.FirstCharacterToLower(ki.ColumnName) + ")");
                     method.AppendLine("{");
-                    method.AppendLine("   return  DBDirectory.Get" + modelName + "By" + ki.ColumnName + "(" + GeneralHelper.FirstCharacterToLower(ki.ColumnName) + ");");
+                    method.AppendLine("   return  " + repositoryName + ".Get" + modelName + "By" + ki.ColumnName + "(" + GeneralHelper.FirstCharacterToLower(ki.ColumnName) + ");");
                     method.AppendLine("}");
                 }
             }
@@ -1040,8 +1087,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
         private void GetDatabaseUtilityParameters(List<TableRowMetaData> kontrolList, StringBuilder method, String commandText = "", bool isSp = false)
         {
             String realEntityName = CodeGeneratorResult.SelectedTable;
-            method.AppendLine(
-                " string connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringKey].ConnectionString;");
+ 
             method.AppendLine(String.Format(" String commandText = @\"{0}\";", commandText));
             method.AppendLine(" var parameterList = new List<SqlParameter>();");
             method.AppendLine(!isSp ? "var commandType = CommandType.Text;" : "var commandType = CommandType.StoredProcedure;");
@@ -1535,7 +1581,8 @@ namespace DotNetCodeGenerator.Domain.Helpers
             List<TableRowMetaData> kontrolList = DatabaseMetadata.SelectedTable.TableRowMetaDataList;
             String realEntityName = CodeGeneratorResult.SelectedTable;
             String modelName = CodeGeneratorResult.ModifiedTableName;
-            String modifiedTableName = CodeGeneratorResult.ModifiedTableName;
+            String modifiedTableName = CodeGeneratorResult.ModifiedTableName.ToStr();
+            String nameSpace = CodeGeneratorResult.NameSpace.ToStr(DEFAULT_NAMESPACE);
             string selectedTable = DatabaseMetadata.SelectedTable.TableNameWithSchema;
             String entityPrefix = GeneralHelper.GetEntityPrefixName(realEntityName);
             String primaryKey = TableRowMetaDataHelper.GetPrimaryKeys(kontrolList);
@@ -1543,6 +1590,26 @@ namespace DotNetCodeGenerator.Domain.Helpers
             String staticText = CodeGeneratorResult.IsMethodStatic ? "static" : "";
 
             var built = new StringBuilder();
+
+            
+
+            built.AppendLine(" using System;");
+            built.AppendLine(" using System.Collections.Generic;");
+            built.AppendLine(" using System.Linq;");
+            built.AppendLine(" using System.Web;");
+            built.AppendLine(" using System.Web.Mvc;");
+            built.AppendLine("  using NLog;");
+            built.AppendLine(String.Format("using {0}.Entities;", nameSpace));
+            built.AppendLine(String.Format("using {0}.Helpers;", nameSpace));
+            built.AppendLine(String.Format("using {0}.Services;", nameSpace));
+            built.AppendLine(" ");
+            built.AppendLine(" ");
+
+            built.AppendLine(String.Format("namespace {0}.Controllers", nameSpace));
+            built.AppendLine(" {");
+            built.AppendLine(" public class HomeController : Controller");
+            built.AppendLine(" {");
+            built.AppendLine(" private static readonly Logger Logger = LogManager.GetCurrentClassLogger();");
 
             built.AppendLine("//[OutputCache(CacheProfile = \"Cache1Hour\")]");
             built.AppendLine("public ActionResult Index()");
@@ -1587,7 +1654,8 @@ namespace DotNetCodeGenerator.Domain.Helpers
             built.AppendLine(String.Format("return RedirectToAction(\"Index\");"));
             built.AppendLine("}");
 
-
+            built.AppendLine("}");
+            built.AppendLine("}");
 
             CodeGeneratorResult.AspMvcControllerClass = built.ToString();
         }

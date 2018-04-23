@@ -98,10 +98,10 @@ namespace DotNetCodeGenerator.Domain.Services
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateSaveOrUpdateStoredProcedure(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenereateMySqlDatabaseOperation(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateSPModel(); }));
-            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateTableRepository(); }));
+            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateTableServices(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateTableItem(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateNewInstance(); }));
-            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenereateSqlDatabaseOperation(); }));
+            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateSqlRepository(); }));
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateAspMvcControllerClass(); }));
             await Task.WhenAll(tasks);
 

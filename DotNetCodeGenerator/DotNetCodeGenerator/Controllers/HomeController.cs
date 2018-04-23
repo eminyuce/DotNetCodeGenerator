@@ -5,11 +5,12 @@ using System.Web;
 using System.Web.Mvc;
 using DotNetCodeGenerator.Domain.Entities;
 using DotNetCodeGenerator.Domain.Helpers;
-using Ninject;
+using DotNetCodeGenerator.Domain.Entities.Enums;
 using DotNetCodeGenerator.Domain.Services;
+using Ninject;
 using System.Threading.Tasks;
 using NLog;
-using DotNetCodeGenerator.Domain.Entities.Enums;
+
 
 namespace DotNetCodeGenerator.Controllers
 {
