@@ -16,7 +16,7 @@ namespace DotNetCodeGenerator.Domain.Entities
         public string ConnectionString { get; set; }
         [Display(Name = "MySql Connection String")]
         public string MySqlConnectionString { get; set; }
-
+        public string SqlCreateTableStatement { get; set; }
         [Required]
         [Display(Name = "Table Name to Generate Code")]
         public string SelectedTable { get; set; }
@@ -32,9 +32,9 @@ namespace DotNetCodeGenerator.Domain.Entities
         public string NameSpace { get; set; }
 
         public bool IsMethodStatic { get;  set; }
-       
+        public bool IsModelAttributesVisible { get; set; }
 
-   
+
         [DataType(DataType.MultilineText)]
         public string StoredProcExec { get; set; }
         [Display(Name = "Stored Proc Exec Code")]
@@ -53,7 +53,7 @@ namespace DotNetCodeGenerator.Domain.Entities
         [AllowHtml]
         [DataType(DataType.MultilineText)]
         public string TableRepository { get;  set; }
-        public bool IsModelAttributesVisible { get; set; }
+ 
         [AllowHtml]
         public string TableClassItem { get; set; }
         [AllowHtml]

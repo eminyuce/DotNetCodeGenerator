@@ -172,7 +172,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 {
                     var item = list[i];
                     var comma = (i != (list.Count - 1) ? "," : "");
-                    built.AppendLine(item.ColumnNameInput + " " + item.DataTypeMaxChar + comma);
+                    built.AppendLine("IN "+item.ColumnNameInput + " " + item.DataTypeMaxChar + comma);
                 }
 
                 built.Append(")");
@@ -181,7 +181,14 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
 
                 built.AppendLine(" DECLARE MyId int;");
-                built.AppendLine("       DECLARE CheckExists int;");
+                built.AppendLine(" DECLARE CheckExists int;");
+
+                built.AppendLine("  DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING");
+                built.AppendLine("  BEGIN");
+                built.AppendLine("  ROLLBACK;");
+                built.AppendLine("  RESIGNAL;");
+                built.AppendLine("  END;");
+
                 built.AppendLine("");
                 built.AppendLine("START TRANSACTION;");
                 built.AppendLine("SET CheckExists = 0;");
@@ -211,7 +218,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
                 built.AppendLine(");");
                 built.AppendLine("");
-                built.AppendLine(" SELECT LAST_INSERT_ID();");
+                built.AppendLine(" SET MyId = LAST_INSERT_ID();");
                 built.AppendLine("ELSE");
                 built.AppendLine("UPDATE " + selectedTable + " SET");
                 for (int i = 0; i < list.Count; i++)
@@ -225,9 +232,10 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 }
 
                 built.AppendLine("WHERE " + String.Format("`{0}`", prKey.ColumnName) + "=MyId;");
-                built.AppendLine(" SELECT MyId;");
+   
                 built.AppendLine(" END IF;");
                 built.AppendLine("COMMIT;");
+                built.AppendLine(" SELECT MyId;");
                 built.AppendLine("END");
                 CodeGeneratorResult.MySqlSaveOrUpdateStoredProc = built.ToString();
             }
@@ -343,8 +351,8 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 method.AppendLine("using System.Linq;");
                 method.AppendLine("using System.Web.Http;");
                 method.AppendLine("using System.Web.Http.Description;");
-                method.AppendLine("using JobManager_Back.Models;");
-                method.AppendLine("using JobManager_Back.Services;\r\n");
+                method.AppendLine(String.Format("using {0}.Models;", nameSpace));
+                method.AppendLine(String.Format("using {0}.Services;", nameSpace));
 
                 method.AppendLine("namespace " + nameSpace + ".Controllers");
                 method.AppendLine("{");
@@ -1594,12 +1602,12 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
             
 
-            built.AppendLine(" using System;");
-            built.AppendLine(" using System.Collections.Generic;");
-            built.AppendLine(" using System.Linq;");
-            built.AppendLine(" using System.Web;");
-            built.AppendLine(" using System.Web.Mvc;");
-            built.AppendLine("  using NLog;");
+            built.AppendLine("using System;");
+            built.AppendLine("using System.Collections.Generic;");
+            built.AppendLine("using System.Linq;");
+            built.AppendLine("using System.Web;");
+            built.AppendLine("using System.Web.Mvc;");
+            built.AppendLine("using NLog;");
             built.AppendLine(String.Format("using {0}.Entities;", nameSpace));
             built.AppendLine(String.Format("using {0}.Helpers;", nameSpace));
             built.AppendLine(String.Format("using {0}.Services;", nameSpace));

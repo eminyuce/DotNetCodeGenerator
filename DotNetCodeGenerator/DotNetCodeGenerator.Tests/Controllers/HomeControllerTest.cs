@@ -42,11 +42,11 @@ namespace DotNetCodeGenerator.Tests.Controllers
         {
             var item = new NwmHaberler();
             var pp = new TestRepository();
-            item.id = 3;
+            item.id = 99;
             item.sira = 1;
             item.tarih = DateTime.Now;
             item.durum = 1;
-            item.seo = "Maritime reporter 55";
+            item.seo = "Maritime reporter New SPeeedd";
             item.link = "link 2";
             item.baslik_tr = "baslik_tr 2";
             item.keywords_tr = "keywords_tr 2";
