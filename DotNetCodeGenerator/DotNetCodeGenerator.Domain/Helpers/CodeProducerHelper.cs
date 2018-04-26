@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using DotNetCodeGenerator.Domain.Services;
 using Ninject;
 using NLog;
-using DotNetCodeGenerator.Domain.Helpers.Extensions;
 
 namespace DotNetCodeGenerator.Domain.Helpers
 {
@@ -23,6 +22,9 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+
+
         public CodeGeneratorResult CodeGeneratorResult { get; set; }
         public DatabaseMetadata DatabaseMetadata { get; set; }
 
@@ -1668,5 +1670,8 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
             CodeGeneratorResult.AspMvcControllerClass = built.ToString();
         }
+      
+    
+    
     }
 }

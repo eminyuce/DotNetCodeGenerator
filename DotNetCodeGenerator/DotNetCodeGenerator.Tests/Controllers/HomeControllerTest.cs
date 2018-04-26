@@ -30,7 +30,58 @@ namespace DotNetCodeGenerator.Tests.Controllers
             //var kernel = NinjectWebCommon.CreatePublicKernel();
             //_sut = kernel.Resolve<HomeController>();
         }
+        [TestMethod]
+        public void ParseSqlStatement()
+        {
+            string txt = @"CREATE TABLE [dbo].[Products](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[StoreId] [int] NULL,
+	[ProductCategoryId] [int] NOT NULL,
+	[BrandId] [int] NULL,
+	[RetailerId] [int] NULL,
+	[ProductCode] [nvarchar](50) NULL,
+	[Name] [nvarchar](500) NOT NULL,
+	[Description] [nvarchar](max) NULL,
+	[Type] [nvarchar](50) NULL,
+	[MainPage] [bit] NULL,
+	[State] [bit] NULL,
+	[Ordering] [int] NULL,
+	[CreatedDate] [datetime2](7) NOT NULL CONSTRAINT [DF_Products_CreatedDate]  DEFAULT (getdate()),
+	[ImageState] [bit] NULL,
+	[UpdatedDate] [datetime2](7) NOT NULL CONSTRAINT [DF_Products_UpdatedDate]  DEFAULT (getdate()),
+	[Price] [float] NOT NULL,
+	[Discount] [float] NOT NULL,
+	[UnitsInStock] [int] NULL,
+	[TotalRating] [int] NULL,
+	[VideoUrl] [nvarchar](1500) NULL,
+ CONSTRAINT [PK_Products_1] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+";
 
+
+            String mySql = @"CREATE TABLE `trade_history_record` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `buy_vol` double DEFAULT NULL,
+  `currency_pair` varchar(255) DEFAULT NULL,
+  `sell_vol` double DEFAULT NULL,
+  `start` bigint(20) DEFAULT NULL,
+  `close` decimal(19,8) DEFAULT NULL,
+  `high` decimal(19,8) DEFAULT NULL,
+  `low` decimal(19,8) DEFAULT NULL,
+  `open` decimal(19,8) DEFAULT NULL,
+  `buyqvol` double DEFAULT NULL,
+  `sellqvol` double DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+";
+
+            SqlParserHelper.ParseSqlCreateStatement(txt);
+
+        }
         [TestMethod]
         public void TestItem()
         {
