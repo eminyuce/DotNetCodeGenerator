@@ -63,23 +63,72 @@ GO
 ";
 
 
-            String mySql = @"CREATE TABLE `trade_history_record` (
+            String mySql = @"
+CREATE TABLE `urunler` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `buy_vol` double DEFAULT NULL,
-  `currency_pair` varchar(255) DEFAULT NULL,
-  `sell_vol` double DEFAULT NULL,
-  `start` bigint(20) DEFAULT NULL,
-  `close` decimal(19,8) DEFAULT NULL,
-  `high` decimal(19,8) DEFAULT NULL,
-  `low` decimal(19,8) DEFAULT NULL,
-  `open` decimal(19,8) DEFAULT NULL,
-  `buyqvol` double DEFAULT NULL,
-  `sellqvol` double DEFAULT NULL,
+  `baslik_tr` varchar(255) DEFAULT NULL,
+  `keywords_tr` varchar(255) DEFAULT NULL,
+  `katID` varchar(11) DEFAULT '0',
+  `ozet_tr` text,
+  `detay_tr` text,
+  `sira` int(11) DEFAULT '1000',
+  `tarih` datetime DEFAULT NULL,
+  `durum` tinyint(1) DEFAULT NULL,
+  `baslik_en` varchar(255) DEFAULT NULL,
+  `keywords_en` varchar(255) DEFAULT NULL,
+  `ozet_en` text,
+  `detay_en` text,
+  `seo` varchar(255) DEFAULT NULL,
+  `tip` int(4) DEFAULT '1' COMMENT '1: motor, 2: yelken',
+  `link` varchar(255) DEFAULT NULL,
+  `vitrin` int(1) DEFAULT '0',
+  `image` varchar(255) DEFAULT NULL,
+  `youtube` varchar(255) DEFAULT NULL,
+  `fiyat` double DEFAULT NULL,
+  `tamam` varchar(255) CHARACTER SET utf8 COLLATE utf8_turkish_ci DEFAULT NULL,
+  `baslik_de` varchar(255) DEFAULT NULL,
+  `keywords_de` varchar(255) DEFAULT NULL,
+  `ozet_de` text,
+  `detay_de` text,
+  `adres_de` text,
+  `online` tinyint(1) DEFAULT NULL,
+  `ColorID` int(11) DEFAULT NULL,
+  `RegionID` int(11) DEFAULT NULL,
+  `GrapeID` int(11) DEFAULT NULL,
+  `yemek_tercihi_tr` text,
+  `haftanin` tinyint(1) DEFAULT NULL,
+  `yemek_tercihi_en` text,
+  `stok` varchar(255) DEFAULT NULL,
+  `yeni` tinyint(1) DEFAULT NULL,
+  `yil` varchar(255) DEFAULT NULL,
+  `miktar` varchar(255) DEFAULT NULL,
+  `eski_fiyat` varchar(255) DEFAULT NULL,
+  `alkol_orani` varchar(255) DEFAULT NULL,
+  `kdv` varchar(255) DEFAULT NULL,
+  `encok` tinyint(1) DEFAULT NULL,
+  `harita` text CHARACTER SET utf8 COLLATE utf8_turkish_ci NOT NULL,
+  `baslik_ar` varchar(255) DEFAULT NULL,
+  `keywords_ar` varchar(255) DEFAULT NULL,
+  `ozet_ar` text,
+  `detay_ar` text,
+  `baslik_ru` varchar(255) DEFAULT NULL,
+  `keywords_ru` varchar(255) DEFAULT NULL,
+  `ozet_ru` text,
+  `detay_ru` text,
+  `teknik` text,
+  `renk` varchar(255) DEFAULT NULL,
+  `kilit` varchar(255) DEFAULT NULL,
+  `kaplama` varchar(255) DEFAULT NULL,
+  `aksesuar` varchar(255) DEFAULT NULL,
+  `aksesuarr` varchar(255) DEFAULT NULL,
+  `markaID` int(11) DEFAULT NULL,
+  `sektorID` int(11) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+
 ";
 
-            SqlParserHelper.ParseSqlCreateStatement(txt);
+            SqlParserHelper.ParseSqlCreateStatement(mySql);
 
         }
         [TestMethod]

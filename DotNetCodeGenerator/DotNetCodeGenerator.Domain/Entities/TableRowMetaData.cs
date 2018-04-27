@@ -61,5 +61,10 @@ namespace DotNetCodeGenerator.Domain.Entities
 
             }
         }
+
+        public override string ToString()
+        {
+            return String.Format("{0} {1} {2} {3} {4}", ColumnName, DataType, DataTypeMaxChar, MaxChar, IsNull);
+        }
     }
 }
