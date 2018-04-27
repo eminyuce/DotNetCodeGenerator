@@ -8,6 +8,7 @@ namespace DotNetCodeGenerator.Domain.Entities.Enums
 {
     public enum DatabaseType
     {
+        UnKnown=0,
         MsSql=1,
         MySql=2
     }
