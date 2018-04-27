@@ -109,7 +109,7 @@ namespace DotNetCodeGenerator.Domain.Repositories
         {
             var result = new DatabaseMetadata();
             MySqlConnection con =        new MySqlConnection(connectionString);
-
+            result.DatabaseType = DatabaseType.MySql;
 
             try
             {
@@ -174,7 +174,7 @@ namespace DotNetCodeGenerator.Domain.Repositories
             var result = new DatabaseMetadata();
             SqlConnection con =
                           new SqlConnection(connectionString);
-
+            result.DatabaseType = DatabaseType.MsSql;
 
             try
             {

@@ -40,7 +40,6 @@
     <Reference Include="Microsoft.SqlServer.Dac.Extensions">
       <HintPath>..\packages\SqlSharpener.1.0.10\tools\Microsoft.SqlServer.Dac.Extensions.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.SqlServer.Management.SqlParser, Version=14.100.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.SqlServer.TransactSql.ScriptDom, Version=13.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\SqlSharpener.1.0.10\tools\Microsoft.SqlServer.TransactSql.ScriptDom.dll</HintPath>

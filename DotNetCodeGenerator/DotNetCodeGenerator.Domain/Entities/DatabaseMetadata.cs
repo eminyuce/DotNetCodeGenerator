@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DotNetCodeGenerator.Domain.Entities.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,7 @@ namespace DotNetCodeGenerator.Domain.Entities
     [Serializable]
     public class DatabaseMetadata
     {
+        public DatabaseType DatabaseType { get; set; }
         public string ConnectionString { get; set; }
         public string DatabaseName { get; set; }
         public List<TableMetaData> Tables { get; set; }

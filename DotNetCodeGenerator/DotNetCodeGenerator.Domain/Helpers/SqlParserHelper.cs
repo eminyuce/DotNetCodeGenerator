@@ -16,19 +16,19 @@ namespace DotNetCodeGenerator.Domain.Helpers
     {
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        public static string RemoveBrackets(String m)
+        private static string RemoveBrackets(String m)
         {
             return m.Replace("[", "").Replace("]", "");
         }
-        public static string RemoveParatheses(String m)
+        private static string RemoveParatheses(String m)
         {
             return m.Replace("(", "").Replace(")", "");
         }
-        public static string RemoveNail(String m)
+        private static string RemoveNail(String m)
         {
             return m.Replace("`", "");
         }
-        public static void ParseSqlCreateStatement(string txt = "")
+        public static DatabaseMetadata ParseSqlCreateStatement(string txt = "")
         {
             DatabaseMetadata databaseMetaData = new DatabaseMetadata();
             string tableName = "";
@@ -37,6 +37,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
             var paranthesesRegex = @"\((.*?)\)";
             var mysqlQuoteRegex = @"\`(.*?)\`";
             DatabaseType databaseType = DatabaseType.UnKnown;
+  
             String databaseName = "UNKNOWN";
             databaseMetaData.DatabaseName = databaseName;
             var tableMetaDataList = new List<TableRowMetaData>();
@@ -137,16 +138,20 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
                                 Regex r = new Regex(bracketsRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
                                 var matches = r.Matches(line);
-
-                                r = new Regex(paranthesesRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                                var matches3 = r.Matches(line);
+                                if(line.IndexOf("(") > -1 && line.IndexOf(")") > -1)
+                                {
+                                    r = new Regex(paranthesesRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                                    var matches3 = r.Matches(line);
+                                    p.MaxChar = matches3[0].Groups[0].ToStr();
+                                }
+                             
                                 p.ColumnName = RemoveBrackets(matches[0].Groups[0].ToStr());
-                                p.MaxChar = matches3[0].Groups[0].ToStr();
+                       
                                 p.PrimaryKey = false;
                                 p.ID = counter++;
                                 p.Order = counter++;
                                 p.DataType = RemoveBrackets(matches[1].Groups[0].ToStr());
-                                p.DataTypeMaxChar = p.DataType + matches3[0].Groups[0].ToStr();
+                                p.DataTypeMaxChar = p.DataType + p.MaxChar.ToStr();
                                 p.DatabaseType = DatabaseType.MsSql;
 
                             }
@@ -194,12 +199,14 @@ namespace DotNetCodeGenerator.Domain.Helpers
             databaseMetaData.SelectedTable.TableSchema = tableSchema;
 
             Console.WriteLine(XmlParserHelper.ToXml(databaseMetaData));
+            databaseMetaData.DatabaseType = databaseType;
+            return databaseMetaData;
         }
 
 
 
 
-        public static List<String> MySqlDataTypeList
+        private static List<String> MySqlDataTypeList
         {
             get
             {
@@ -250,11 +257,11 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
             }
         }
-        public static bool IsLineColumnFieldLine(string line)
+        private static bool IsLineColumnFieldLine(string line)
         {
             return IsMySqlDataType(line) || IsSqlDataType(line);
         }
-        public static bool IsMySqlDataType(string line)
+        private static bool IsMySqlDataType(string line)
         {
             var sqlDataType = MySqlDataTypeList;
             foreach (var item in sqlDataType)
@@ -267,7 +274,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
             return false;
         }
-        public static List<String> SqlServerDataTypes
+        private static List<String> SqlServerDataTypes
         {
             get
             {
@@ -305,7 +312,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 return sqlDataType;
             }
         }
-        public static bool IsSqlDataType(string line)
+        private static bool IsSqlDataType(string line)
         {
             var sqlDataType = SqlServerDataTypes;
             foreach (var item in sqlDataType)

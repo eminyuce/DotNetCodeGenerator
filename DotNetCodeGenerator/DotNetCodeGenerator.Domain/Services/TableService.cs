@@ -89,22 +89,27 @@ namespace DotNetCodeGenerator.Domain.Services
                 databaseMetaData = this.GetAllMySqlTables(codeGeneratorResult.MySqlConnectionString);
                 TableRepository.GetSelectedMysqlTableMetaData(databaseMetaData, codeGeneratorResult.SelectedTable);
             }
+            else if (!String.IsNullOrEmpty(codeGeneratorResult.SqlCreateTableStatement))
+            {
+                databaseMetaData = SqlParserHelper.ParseSqlCreateStatement(codeGeneratorResult.SqlCreateTableStatement);
+
+            }
 
             CodeProducerHelper.CodeGeneratorResult = codeGeneratorResult;
             CodeProducerHelper.DatabaseMetadata = databaseMetaData;
 
             // Database related code.
-            if (!String.IsNullOrEmpty(codeGeneratorResult.ConnectionString))
-            {
+            //if (databaseMetaData.DatabaseType == DatabaseType.MsSql)
+            //{
                 tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateSaveOrUpdateStoredProcedure(); }));
                 tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateSqlRepository(); }));
                 tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateStoredProcExecutionCode(); }));
-            }
-            else if (!String.IsNullOrEmpty(codeGeneratorResult.MySqlConnectionString))
-            {
+            //}
+            //else if (databaseMetaData.DatabaseType == DatabaseType.MySql)
+            //{
                 tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateMySqlSaveOrUpdateStoredProcedure(); }));
                 tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenereateMySqlRepository(); }));
-            }
+            //}
 
             // c# code for both database.
             tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateWebApiController(); }));

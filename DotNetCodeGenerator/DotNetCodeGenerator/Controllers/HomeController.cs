@@ -28,6 +28,26 @@ namespace DotNetCodeGenerator.Controllers
         [HttpPost]
         public async Task<ActionResult> Index(CodeGeneratorResult codeGeneratorResult, string btnAction="")
         {
+            if(!String.IsNullOrEmpty(codeGeneratorResult.ConnectionString.ToStr().Trim()) 
+                || !String.IsNullOrEmpty(codeGeneratorResult.MySqlConnectionString.ToStr().Trim()))
+            {
+                if(String.IsNullOrEmpty(codeGeneratorResult.SelectedTable.ToStr().Trim()))
+                {
+                    ModelState.AddModelError("SelectedTable", "Selected Table is required.");
+                    return View(codeGeneratorResult);
+                }
+                else if (String.IsNullOrEmpty(codeGeneratorResult.ModifiedTableName.ToStr().Trim()))
+                {
+                    ModelState.AddModelError("ModifiedTableName", "Entity Name is required.");
+                    return View(codeGeneratorResult);
+                }
+            }
+            else if (String.IsNullOrEmpty(codeGeneratorResult.SqlCreateTableStatement.ToStr().Trim()))
+            {
+                ModelState.AddModelError("SqlCreateTableStatement", "Sql Create Table Statement is required.");
+                return View(codeGeneratorResult);
+            }
+
             if (btnAction.Equals("Generate Code", StringComparison.InvariantCultureIgnoreCase))
             {
                 await TableService.GenerateCode(codeGeneratorResult);

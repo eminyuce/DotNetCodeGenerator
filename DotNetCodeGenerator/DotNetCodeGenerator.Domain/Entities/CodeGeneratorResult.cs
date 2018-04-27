@@ -17,7 +17,6 @@ namespace DotNetCodeGenerator.Domain.Entities
         [Display(Name = "MySql Connection String")]
         public string MySqlConnectionString { get; set; }
         public string SqlCreateTableStatement { get; set; }
-        [Required]
         [Display(Name = "Table Name to Generate Code")]
         public string SelectedTable { get; set; }
         [AllowHtml]

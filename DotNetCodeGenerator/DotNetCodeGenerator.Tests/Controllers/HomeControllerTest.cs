@@ -128,8 +128,13 @@ CREATE TABLE `urunler` (
 
 ";
 
-            SqlParserHelper.ParseSqlCreateStatement(mySql);
-
+            var metadata =  SqlParserHelper.ParseSqlCreateStatement(txt);
+            var r = new CodeGeneratorResult();
+            r.ModifiedTableName = "NwmProducts";
+            CodeProducerHelper CodeProducerHelper = new CodeProducerHelper();
+            CodeProducerHelper.DatabaseMetadata = metadata;
+            CodeProducerHelper.CodeGeneratorResult = r;
+            CodeProducerHelper.GenerateSaveOrUpdateStoredProcedure();
         }
         [TestMethod]
         public void TestItem()
