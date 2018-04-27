@@ -136,6 +136,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 method.AppendLine(" return id;");
                 method.AppendLine(" }");
                 CodeGeneratorResult.MySqlDatabaseOperation = method.ToString();
+                Logger.Trace("CodeGeneratorResult.MySqlDatabaseOperation:" + method.ToString());
             }
             catch (Exception ex)
             {
@@ -240,6 +241,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 built.AppendLine(" SELECT MyId;");
                 built.AppendLine("END");
                 CodeGeneratorResult.MySqlSaveOrUpdateStoredProc = built.ToString();
+                Logger.Trace("CodeGeneratorResult.MySqlSaveOrUpdateStoredProc:" + built.ToString());
             }
             catch (Exception ex)
             {
@@ -324,6 +326,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 built.AppendLine("END");
 
                 CodeGeneratorResult.SqlSaveOrUpdateStoredProc = built.ToString();
+                Logger.Trace("CodeGeneratorResult.SqlSaveOrUpdateStoredProc:" + built.ToString());
             }
             catch (Exception ex)
             {
@@ -626,6 +629,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 method.AppendLine(" }");
                 method.AppendLine(" }");
                 CodeGeneratorResult.SqlDatabaseOperation = method.ToString();
+                Logger.Trace("CodeGeneratorResult.SqlDatabaseOperation:" + method.ToString());
             }
             catch (Exception ex)
             {
@@ -848,6 +852,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
 
             CodeGeneratorResult.TableClassItem = method2.ToString();
+            Logger.Trace("CodeGeneratorResult.TableClassItem:" + method2.ToString());
         }
 
         public string GenerateNewInstance()

@@ -20,8 +20,8 @@ namespace DotNetCodeGenerator.Tests.Controllers
     public class HomeControllerTest
     {
 
-        public string MySqlConnectionString = ConfigurationManager.ConnectionStrings["MysqlConnectionString"].ConnectionString;
-        public string ConnectionString = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+        public string MySqlConnectionString = ConfigurationManager.ConnectionStrings["MysqlConnectionString"].ConnectionString.ToStr();
+        public string ConnectionString = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString.ToStr();
 
 
         [TestInitialize]
@@ -135,6 +135,8 @@ CREATE TABLE `urunler` (
             CodeProducerHelper.DatabaseMetadata = metadata;
             CodeProducerHelper.CodeGeneratorResult = r;
             CodeProducerHelper.GenerateSaveOrUpdateStoredProcedure();
+
+            Console.WriteLine(r.SqlSaveOrUpdateStoredProc);
         }
         [TestMethod]
         public void TestItem()

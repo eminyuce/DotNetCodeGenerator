@@ -235,9 +235,7 @@
                      
                             <div class="form-group">
                                 <div class="col-md-12">
-
-                                    <div class="codeEditorDiv" id="TableRepository_Editor"></div>
-                                    <input type="hidden" data-code-result-hidden="TableRepository" id="TableRepository" value="@Model.TableRepository" />
+                                    @CreateCodeEditorTag("TableRepository", Model.TableRepository)
                                 </div>
                         </div>
 
@@ -246,9 +244,7 @@
 
                             <div class="form-group">
                                 <div class="col-md-12">
-
-                                    <div class="codeEditorDiv" id="SqlDatabaseOperation_Editor"></div>
-                                    <input type="hidden" data-code-result-hidden="SqlDatabaseOperation" id="SqlDatabaseOperation" value="@Model.SqlDatabaseOperation" />
+                                    @CreateCodeEditorTag("SqlDatabaseOperation", Model.SqlDatabaseOperation)
                                 
                                 </div>
                             </div>
@@ -257,9 +253,7 @@
                         <div class="form-group">
                             <div class="col-md-12">
                                 <a target="_blank" href="http://www.format-sql.com" class="btn btn-info">Go To Sql Server Formatter (Copy And Paste Sql Server Code)</a>
-                                <div class="codeEditorDiv" id="SqlSaveOrUpdateStoredProc_Editor"></div>
-                                <input type="hidden" data-code-result-hidden="SqlSaveOrUpdateStoredProc" data-code-result-language="sql" id="SqlSaveOrUpdateStoredProc" value="@Model.SqlSaveOrUpdateStoredProc" />
-                            
+                                @CreateCodeEditorTag("SqlSaveOrUpdateStoredProc", Model.SqlSaveOrUpdateStoredProc,"sql")
                             </div>
                         </div>
 
@@ -282,16 +276,15 @@
 
                             <div class="form-group">
                                 <div class="col-md-12">
-                                    <div class="codeEditorDiv" id="TableClassItem_Editor"></div>
-                                    <input type="hidden" data-code-result-hidden="TableClassItem" id="TableClassItem" value="@Model.TableClassItem"  />
+                                    @CreateCodeEditorTag("TableClassItem", Model.TableClassItem)
+
                                 </div>
                             </div>
 
                         
                             <div class="form-group">
                                 <div class="col-md-12">
-                                    <div class="codeEditorDiv" id="TableClassInstance_Editor"></div>
-                                    <input type="hidden" data-code-result-hidden="TableClassInstance" id="TableClassInstance" value="@Model.TableClassInstance" />
+                                    @CreateCodeEditorTag("TableClassInstance", Model.TableClassInstance)
                             </div>
                         </div>
 
@@ -312,8 +305,7 @@
                     <div class="panel-body">
                             <div class="form-group">
                                 <div class="col-md-12">
-                                    <div class="codeEditorDiv" id="StoredProcExec_Editor"></div>
-                                    <input type="hidden" data-code-result-hidden="StoredProcExec" id="StoredProcExec" value="@Model.StoredProcExec" />
+                                    @CreateCodeEditorTag("StoredProcExec", Model.StoredProcExec)
                                 </div>
                         </div>
 
@@ -321,16 +313,14 @@
 
                             <div class="form-group">
                                 <div class="col-md-12">
-                                    <div class="codeEditorDiv" id="StoredProcExecModel_Editor"></div>
-                                    <input type="hidden" data-code-result-hidden="StoredProcExecModel" id="StoredProcExecModel" value="@Model.StoredProcExecModel" />
+                                    @CreateCodeEditorTag("StoredProcExecModel", Model.StoredProcExecModel)
                                 </div>
                             </div>
 
 
                         <div class="form-group">
                             <div class="col-md-12">
-                                <div class="codeEditorDiv" id="StoredProcExecModelDataReader_Editor"></div>
-                                <input type="hidden" data-code-result-hidden="StoredProcExecModelDataReader" id="StoredProcExecModelDataReader" value="@Model.StoredProcExecModelDataReader" />
+                                @CreateCodeEditorTag("StoredProcExecModelDataReader", Model.StoredProcExecModelDataReader)
                             </div>
                         </div>
 
@@ -351,15 +341,13 @@
 
                         <div class="form-group">
                             <div class="col-md-12">
-                                <div class="codeEditorDiv" id="MySqlDatabaseOperation_Editor"></div>
-                                <input type="hidden" data-code-result-hidden="MySqlDatabaseOperation" id="MySqlDatabaseOperation" value="@Model.MySqlDatabaseOperation" />
+                                @CreateCodeEditorTag("MySqlDatabaseOperation", Model.MySqlDatabaseOperation) 
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="col-md-12">
                                 <a target="_blank" href="https://www.cleancss.com/sql-beautify/" class="btn btn-info">Go To MySql Formatter (Copy And Paste Mysql Code)</a>
-                                <div class="codeEditorDiv" id="MySqlSaveOrUpdateStoredProc_Editor"></div>
-                                <input type="hidden" data-code-result-hidden="MySqlSaveOrUpdateStoredProc" data-code-result-language="sql" id="MySqlSaveOrUpdateStoredProc" value="@Model.MySqlSaveOrUpdateStoredProc" />
+                                @CreateCodeEditorTag("MySqlSaveOrUpdateStoredProc", Model.MySqlSaveOrUpdateStoredProc, "sql")
                             </div>
                         </div>
                     </div>
@@ -391,7 +379,12 @@
         </div>
     </div>
 </div>
+@helper CreateCodeEditorTag(String name, String value, string resultLanguage="csharp") {
 
+    <div class="codeEditorDiv" id="@String.Format("{0}_Editor",name)"></div>
+    <input type="hidden" data-code-result-hidden="@name" id="@name" data-code-result-language="@resultLanguage" value="@value" />
+
+}
 
 <input id="TableCopied" type="hidden" />
 <script src="/Content/vs/loader.js"></script>
