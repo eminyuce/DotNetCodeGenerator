@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace DotNetCodeGenerator.Domain.Helpers
 {
@@ -52,6 +53,20 @@ namespace DotNetCodeGenerator.Domain.Helpers
                     return "";
             }
         }
+
+        public static string FormatXml(string xml)
+        {
+            try
+            {
+                XDocument doc = XDocument.Parse(xml);
+                return doc.ToString();
+            }
+            catch (Exception)
+            {
+                return xml;
+            }
+        }
+
         public static String getObject(String name)
         {
             return name.Replace("id", "").Replace("Id", "");

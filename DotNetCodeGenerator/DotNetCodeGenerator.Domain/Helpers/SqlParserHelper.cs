@@ -21,14 +21,19 @@ namespace DotNetCodeGenerator.Domain.Helpers
         }
         public static void ParseSqlCreateStatement(string txt = "")
         {
-
+            DatabaseMetadata databaseMetaData = new DatabaseMetadata();
             string tableName = "";
             string primaryKey = "";
             var bracketsRegex = @"\[(.*?)\]";
             var paranthesesRegex = @"\((.*?)\)";
             var mysqlQuoteRegex = @"\`(.*?)\`";
-
+            DatabaseType databaseType = DatabaseType.MySql;
+            String databaseName = "UNKNOWN";
+            databaseMetaData.DatabaseName = databaseName;
             var tableMetaDataList = new List<TableRowMetaData>();
+            databaseMetaData.SelectedTable = new TableMetaData();
+        
+            databaseMetaData.SelectedTable.TableRowMetaDataList = tableMetaDataList;
             int i = 0;
             using (StringReader reader = new StringReader(txt))
             {
@@ -64,13 +69,14 @@ namespace DotNetCodeGenerator.Domain.Helpers
                             try
                             {
                                 var isNotNull = line.ToLower().Contains("not null");
-                                p.IsNull = isNotNull.ToStr();
+                                p.IsNull = isNotNull ? "NO":"YES";
                                 string tbl = isNotNull ? "not null" : "null";
                                 var f = lineLower.IndexOf(tbl);
                                 string s1 = line.Substring(0, f).ToStr();
 
                                 if (line.StartsWith("["))
                                 {
+
                                     Regex r = new Regex(bracketsRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
                                     var matches = r.Matches(line);
 
@@ -84,6 +90,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                                     p.DataType = RemoveBrackets(matches[1].Groups[0].ToStr());
                                     p.DataTypeMaxChar = p.DataType + matches3[0].Groups[0].ToStr();
                                     p.DatabaseType = DatabaseType.MsSql;
+                                    databaseType = DatabaseType.MsSql;
                                 }
                                 else if (line[0]== 32)
                                 {
@@ -93,7 +100,8 @@ namespace DotNetCodeGenerator.Domain.Helpers
                                     p.PrimaryKey = false;
                                     p.ID = i++;
                                     p.Order = i++;
-                                    p.DatabaseType = DatabaseType.MsSql;
+                                    p.DatabaseType = DatabaseType.MySql;
+                                    databaseType = DatabaseType.MySql;
                                 }
                              
 
@@ -141,6 +149,17 @@ namespace DotNetCodeGenerator.Domain.Helpers
             }
             Console.WriteLine("tableName:" + tableName);
             Console.WriteLine("primaryKey:" + primaryKey);
+            string tableSchema = "";
+            if (tableName.Contains("."))
+            {
+                tableSchema = tableName.Split(".".ToCharArray()).FirstOrDefault().ToStr();
+            }
+            databaseMetaData.SelectedTable.TableName = tableName;
+            databaseMetaData.SelectedTable.TableCatalog = databaseName;
+            databaseMetaData.SelectedTable.TableType = "";
+            databaseMetaData.SelectedTable.TableSchema = tableSchema;
+
+            Console.WriteLine(XmlParserHelper.ToXml(databaseMetaData));
         }
         public static bool IsSqlDataType(string line)
         {

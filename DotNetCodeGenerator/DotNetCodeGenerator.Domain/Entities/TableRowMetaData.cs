@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace DotNetCodeGenerator.Domain.Entities
 {
+    [Serializable]
     public class TableRowMetaData
     {
         public DatabaseType DatabaseType { set; get; }

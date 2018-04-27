@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace DotNetCodeGenerator.Domain.Entities
 {
+    [Serializable]
     public class DatabaseMetadata
     {
         public string ConnectionString { get; set; }

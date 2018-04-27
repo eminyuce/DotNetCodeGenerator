@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace DotNetCodeGenerator.Domain.Entities
 {
+    [Serializable]
     public class TableMetaData
     {
         public string TableCatalog { get; set; }
