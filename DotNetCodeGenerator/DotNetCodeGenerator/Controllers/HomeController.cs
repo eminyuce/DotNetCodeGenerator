@@ -56,7 +56,7 @@ namespace DotNetCodeGenerator.Controllers
             {
                 await TableService.FillGridView(codeGeneratorResult);
             }
-
+            //Logger.Trace("XmlParserHelper.ToXml codeGeneratorResult " + XmlParserHelper.ToXml(codeGeneratorResult));
             return View(codeGeneratorResult);
         }
         public ActionResult About()

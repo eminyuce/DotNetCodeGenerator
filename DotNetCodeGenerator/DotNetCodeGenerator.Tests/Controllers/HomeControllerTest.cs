@@ -135,8 +135,11 @@ CREATE TABLE `urunler` (
             CodeProducerHelper.DatabaseMetadata = metadata;
             CodeProducerHelper.CodeGeneratorResult = r;
             CodeProducerHelper.GenerateSaveOrUpdateStoredProcedure();
-
+            CodeProducerHelper.GenerateSqlRepository();
+            CodeProducerHelper.GenerateStoredProcExecutionCode();
             Console.WriteLine(r.SqlSaveOrUpdateStoredProc);
+            Console.WriteLine(r.SqlDatabaseOperation);
+            Console.WriteLine(r.StoredProcExec);
         }
         [TestMethod]
         public void TestItem()
