@@ -163,6 +163,14 @@ CREATE TABLE `urunler` (
 
 ";
 
+            mySql=@"CREATE TABLE Persons (
+    PersonID int,
+    LastName varchar(255),
+    FirstName varchar(255),
+    Address varchar(255),
+    City varchar(255) 
+); ";
+
             var metadata = SqlParserHelper.ParseSqlCreateStatement(mySql);
             var r = new CodeGeneratorResult();
             r.ModifiedTableName = "NwmProducts";

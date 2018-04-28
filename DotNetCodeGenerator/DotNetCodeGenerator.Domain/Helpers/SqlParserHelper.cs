@@ -36,7 +36,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
             var bracketsRegex = @"\[(.*?)\]";
             var paranthesesRegex = @"\((.*?)\)";
             var mysqlQuoteRegex = @"\`(.*?)\`";
-            DatabaseType databaseType = DatabaseType.UnKnown;
+            DatabaseType databaseType = DatabaseType.UnDefined;
 
             String databaseName = "UNKNOWN";
             databaseMetaData.DatabaseName = databaseName;
@@ -75,6 +75,11 @@ namespace DotNetCodeGenerator.Domain.Helpers
                         }
                     }
                 }
+            }
+
+            if (databaseType == DatabaseType.UnDefined)
+            {
+                databaseType = DatabaseType.UnKnown;
             }
 
             for (int i = 0; i < textLines.Count; i++)
@@ -117,6 +122,10 @@ namespace DotNetCodeGenerator.Domain.Helpers
                         Logger.Error(ex, ex.Message, line);
 
                     }
+                }
+                else if (databaseType == DatabaseType.MySql)
+                {
+
                 }
 
             }
@@ -164,8 +173,6 @@ namespace DotNetCodeGenerator.Domain.Helpers
                             var isNotNull = lineLower.Contains("not null");
                             p.IsNull = isNotNull ? "NO" : "YES";
                             string tbl = isNotNull ? "not null" : "null";
-                            var f = lineLower.IndexOf(tbl);
-                            string s1 = line.Substring(0, f).ToStr();
 
 
                             if (databaseType == DatabaseType.MsSql)
@@ -226,11 +233,17 @@ namespace DotNetCodeGenerator.Domain.Helpers
                                 {
                                     Logger.Error(ex, ex.Message, line);
                                 }
-
                             }
-
-
-
+                            else if (databaseType == DatabaseType.UnKnown)
+                            {
+                                p.ColumnName = lineParts[0];
+                                p.DataType = lineParts[1];
+                                p.DataTypeMaxChar = lineParts[1];
+                                p.PrimaryKey = false;
+                                p.ID = counter++;
+                                p.Order = counter++;
+                                p.DatabaseType = DatabaseType.MySql;
+                            }
 
                             tableMetaDataList.Add(p);
                         }
