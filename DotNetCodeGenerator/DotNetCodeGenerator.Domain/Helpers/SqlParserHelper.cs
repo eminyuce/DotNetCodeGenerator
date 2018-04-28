@@ -169,6 +169,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
                         try
                         {
+                            line=line.TrimEnd(',').ToStr();
                             var lineParts = Regex.Split(line, @"\s+").Select(r => r.Trim()).Where(s => !String.IsNullOrEmpty(s)).ToList();
                             var isNotNull = lineLower.Contains("not null");
                             p.IsNull = isNotNull ? "NO" : "YES";
