@@ -13,6 +13,7 @@ using DotNetCodeGenerator.Domain.Repositories;
 using DotNetCodeGenerator.Domain.Services;
 using MySql.Data.MySqlClient;
 using System.Data;
+using System.Diagnostics;
 
 namespace DotNetCodeGenerator.Tests.Controllers
 {
@@ -171,7 +172,22 @@ CREATE TABLE `urunler` (
     City varchar(255) 
 ); ";
 
-            var metadata = SqlParserHelper.ParseSqlCreateStatement(mySql);
+ 
+
+            // Create new stopwatch.
+            Stopwatch stopwatch = new Stopwatch();
+
+            // Begin timing.
+            stopwatch.Start();
+
+            var metadata = SqlParserHelper.ParseSqlCreateStatement(txt);
+            // Stop timing.
+            stopwatch.Stop();
+
+            // Write result.
+            Console.WriteLine("Time elapsed: {0}", stopwatch.ElapsedMilliseconds);
+
+
             var r = new CodeGeneratorResult();
             r.ModifiedTableName = "NwmProducts";
             CodeProducerHelper CodeProducerHelper = new CodeProducerHelper();

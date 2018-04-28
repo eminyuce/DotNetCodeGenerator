@@ -75,10 +75,49 @@ namespace DotNetCodeGenerator.Domain.Services
         public async Task GenerateCode(CodeGeneratorResult codeGeneratorResult)
         {
             DatabaseMetadata databaseMetaData = new DatabaseMetadata();
+
+            databaseMetaData = GetDatabaseMetaData(codeGeneratorResult, databaseMetaData);
+
+            CodeProducerHelper.CodeGeneratorResult = codeGeneratorResult;
+            CodeProducerHelper.DatabaseMetadata = databaseMetaData;
+
+
             var tasks = new List<Task>();
+            // Database related code.
+            if (databaseMetaData.DatabaseType == DatabaseType.MsSql || databaseMetaData.DatabaseType == DatabaseType.UnKnown)
+            {
+                tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateSaveOrUpdateStoredProcedure(); }));
+                tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateSqlRepository(); }));
+                tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateStoredProcExecutionCode(); }));
+            }
+            else if (databaseMetaData.DatabaseType == DatabaseType.MySql)
+            {
+                tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateMySqlSaveOrUpdateStoredProcedure(); }));
+                tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenereateMySqlRepository(); }));
+            }
+
+            // c# code for both database.
+            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateWebApiController(); }));
+            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateTableServices(); }));
+            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateTableItem(); }));
+            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateNewInstance(); }));
+            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateAspMvcControllerClass(); }));
 
 
 
+
+            await Task.WhenAll(tasks);
+
+            var tableName = codeGeneratorResult.ModifiedTableName.ToStr(codeGeneratorResult.SelectedTable);
+            codeGeneratorResult = CodeProducerHelper.CodeGeneratorResult;
+            codeGeneratorResult.DatabaseMetadata = databaseMetaData;
+            codeGeneratorResult.UserMessage = tableName + " table codes are created. You made it dude, Congratulation :)";
+            codeGeneratorResult.UserMessageState = UserMessageState.Success;
+        }
+        private DatabaseMetadata GetDatabaseMetaData(CodeGeneratorResult codeGeneratorResult, DatabaseMetadata databaseMetaData)
+        {
+
+            CodeProducerHelper.GenerateSaveOrUpdateStoredProcedure();
             if (!String.IsNullOrEmpty(codeGeneratorResult.ConnectionString))
             {
                 databaseMetaData = this.GetAllTablesFromCache(codeGeneratorResult.ConnectionString);
@@ -92,42 +131,37 @@ namespace DotNetCodeGenerator.Domain.Services
             else if (!String.IsNullOrEmpty(codeGeneratorResult.SqlCreateTableStatement))
             {
                 databaseMetaData = SqlParserHelper.ParseSqlCreateStatement(codeGeneratorResult.SqlCreateTableStatement);
-
             }
 
-            CodeProducerHelper.CodeGeneratorResult = codeGeneratorResult;
-            CodeProducerHelper.DatabaseMetadata = databaseMetaData;
-
-            // Database related code.
-            //if (databaseMetaData.DatabaseType == DatabaseType.MsSql)
-            //{
-                tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateSaveOrUpdateStoredProcedure(); }));
-                tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateSqlRepository(); }));
-                tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateStoredProcExecutionCode(); }));
-            //}
-            //else if (databaseMetaData.DatabaseType == DatabaseType.MySql)
-            //{
-                tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateMySqlSaveOrUpdateStoredProcedure(); }));
-                tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenereateMySqlRepository(); }));
-            //}
-
-            // c# code for both database.
-            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateWebApiController(); }));
-            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateTableServices(); }));
-            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateTableItem(); }));
-            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateNewInstance(); }));
-            tasks.Add(Task.Factory.StartNew(() => { CodeProducerHelper.GenerateAspMvcControllerClass(); }));
-
-            
+            return databaseMetaData;
 
 
-            await Task.WhenAll(tasks);
+        }
+        private async Task<DatabaseMetadata> GetDatabaseMetaDataAsync(CodeGeneratorResult codeGeneratorResult, DatabaseMetadata databaseMetaData)
+        {
+            var t = Task<DatabaseMetadata>.Factory.StartNew(() =>
+           {
+               CodeProducerHelper.GenerateSaveOrUpdateStoredProcedure();
+               if (!String.IsNullOrEmpty(codeGeneratorResult.ConnectionString))
+               {
+                   databaseMetaData = this.GetAllTablesFromCache(codeGeneratorResult.ConnectionString);
+                   TableRepository.GetSelectedTableMetaData(databaseMetaData, codeGeneratorResult.SelectedTable);
+               }
+               else if (!String.IsNullOrEmpty(codeGeneratorResult.MySqlConnectionString))
+               {
+                   databaseMetaData = this.GetAllMySqlTables(codeGeneratorResult.MySqlConnectionString);
+                   TableRepository.GetSelectedMysqlTableMetaData(databaseMetaData, codeGeneratorResult.SelectedTable);
+               }
+               else if (!String.IsNullOrEmpty(codeGeneratorResult.SqlCreateTableStatement))
+               {
+                   databaseMetaData = SqlParserHelper.ParseSqlCreateStatement(codeGeneratorResult.SqlCreateTableStatement);
+               }
 
-            var tableName = codeGeneratorResult.ModifiedTableName.ToStr(codeGeneratorResult.SelectedTable);
-            codeGeneratorResult = CodeProducerHelper.CodeGeneratorResult;
-            codeGeneratorResult.DatabaseMetadata = databaseMetaData;
-            codeGeneratorResult.UserMessage = tableName + " table codes are created. You made it dude, Congratulation :)";
-            codeGeneratorResult.UserMessageState = UserMessageState.Success;
+               return databaseMetaData;
+
+           });
+            await t;
+            return t.Result;
         }
     }
 }
