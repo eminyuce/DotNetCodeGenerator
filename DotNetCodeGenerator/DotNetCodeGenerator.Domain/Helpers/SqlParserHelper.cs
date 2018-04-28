@@ -37,7 +37,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
             var paranthesesRegex = @"\((.*?)\)";
             var mysqlQuoteRegex = @"\`(.*?)\`";
             DatabaseType databaseType = DatabaseType.UnKnown;
-  
+
             String databaseName = "UNKNOWN";
             databaseMetaData.DatabaseName = databaseName;
             var tableMetaDataList = new List<TableRowMetaData>();
@@ -53,44 +53,72 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 string line;
                 while ((line = reader.ReadLine()) != null)
                 {
-                    textLines.Add(line);
-                    string lineLower = line.ToLower();
-                    try
+                    if (!String.IsNullOrEmpty(line.Trim()))
                     {
-                        if (lineLower.IndexOf("identity") > -1 || lineLower.IndexOf("pad_index") > -1 || lineLower.IndexOf("primary key clustered") > -1)
+                        textLines.Add(line);
+                        string lineLower = line.ToLower();
+                        try
                         {
-                            databaseType = DatabaseType.MsSql;
-                        }
-                        else if (lineLower.IndexOf("auto_increment") > -1 || lineLower.IndexOf("primary key") > -1 || lineLower.IndexOf("engine") > -1)
-                        {
-                            databaseType = DatabaseType.MySql;
-                        }
+                            if (lineLower.IndexOf("identity") > -1 || lineLower.IndexOf("pad_index") > -1 || lineLower.IndexOf("primary key clustered") > -1)
+                            {
+                                databaseType = DatabaseType.MsSql;
+                            }
+                            else if (lineLower.IndexOf("auto_increment") > -1 || lineLower.IndexOf("primary key") > -1 || lineLower.IndexOf("engine") > -1)
+                            {
+                                databaseType = DatabaseType.MySql;
+                            }
 
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Error(ex, ex.Message, txt);
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Error(ex, ex.Message, txt);
+                        }
                     }
                 }
             }
-            
+
             for (int i = 0; i < textLines.Count; i++)
             {
                 string line = textLines[i];
                 string lineLower = line.ToLower();
                 if (databaseType == DatabaseType.MsSql)
                 {
-                  
+                    try
+                    {
+                        if (lineLower.IndexOf("primary key clustered") > -1)
+                        {
+                            string linePrimaryKey = RemoveBrackets(textLines[i + 2]);
+                            var regex = new Regex("asc", RegexOptions.IgnoreCase);
+                            linePrimaryKey = regex.Replace(linePrimaryKey, "");
+                            regex = new Regex("desc", RegexOptions.IgnoreCase);
+                            primaryKey = regex.Replace(linePrimaryKey, "").ToStr().Trim();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex, ex.Message, line);
+
+                    }
+
                 }
                 else if (databaseType == DatabaseType.MySql)
                 {
-                    if (lineLower.IndexOf("primary key") > -1)
+                    try
                     {
-                        Regex r = r = new Regex(paranthesesRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                        var matches3 = r.Matches(line);
-                        primaryKey = RemoveParatheses(RemoveNail(matches3[0].Groups[0].ToStr()));
+                        if (lineLower.IndexOf("primary key") > -1)
+                        {
+                            Regex r = r = new Regex(paranthesesRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                            var matches3 = r.Matches(line);
+                            primaryKey = RemoveParatheses(RemoveNail(matches3[0].Groups[0].ToStr()));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex, ex.Message, line);
+
                     }
                 }
+
             }
 
 
@@ -103,7 +131,13 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 try
                 {
                     // Do something with the line
-                    if (line.ToLower().Contains("create table"))
+                    var lineRemovedBracket = RemoveBrackets(line);
+                    if (lineRemovedBracket.ToLower().StartsWith("use"))
+                    {
+                        var regex = new Regex("use", RegexOptions.IgnoreCase);
+                        databaseName = regex.Replace(lineRemovedBracket, "");
+                    }
+                    else if (line.ToLower().Contains("create table"))
                     {
 
                         try
@@ -115,7 +149,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                         }
                         catch (Exception ex)
                         {
-                            Logger.Error(ex, ex.Message, txt);
+                            Logger.Error(ex, ex.Message, line);
                         }
 
 
@@ -135,35 +169,50 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
                             if (databaseType == DatabaseType.MsSql)
                             {
-
-                                Regex r = new Regex(bracketsRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                                var matches = r.Matches(line);
-                                if(line.IndexOf("(") > -1 && line.IndexOf(")") > -1)
+                                try
                                 {
-                                    r = new Regex(paranthesesRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                                    var matches3 = r.Matches(line);
-                                    p.MaxChar = matches3[0].Groups[0].ToStr();
+                                    Regex r = new Regex(bracketsRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                                    var matches = r.Matches(line);
+                                    if (line.IndexOf("(") > -1 && line.IndexOf(")") > -1)
+                                    {
+                                        r = new Regex(paranthesesRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                                        var matches3 = r.Matches(line);
+                                        p.MaxChar = matches3[0].Groups[0].ToStr();
+                                    }
+
+                                    p.ColumnName = RemoveBrackets(matches[0].Groups[0].ToStr());
+
+                                    p.PrimaryKey = false;
+                                    p.ID = counter++;
+                                    p.Order = counter++;
+                                    p.DataType = RemoveBrackets(matches[1].Groups[0].ToStr());
+                                    p.DataTypeMaxChar = p.DataType + p.MaxChar.ToStr();
+                                    p.DatabaseType = DatabaseType.MsSql;
+
                                 }
-                             
-                                p.ColumnName = RemoveBrackets(matches[0].Groups[0].ToStr());
-                       
-                                p.PrimaryKey = false;
-                                p.ID = counter++;
-                                p.Order = counter++;
-                                p.DataType = RemoveBrackets(matches[1].Groups[0].ToStr());
-                                p.DataTypeMaxChar = p.DataType + p.MaxChar.ToStr();
-                                p.DatabaseType = DatabaseType.MsSql;
+                                catch (Exception ex)
+                                {
+                                    Logger.Error(ex, ex.Message, line);
+                                }
 
                             }
                             else if (databaseType == DatabaseType.MySql)
                             {
-                                Regex r = new Regex(mysqlQuoteRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                                var matches = r.Matches(line);
-                                p.ColumnName = RemoveNail(matches[0].Groups[0].ToStr());
-                                p.PrimaryKey = false;
-                                p.ID = counter++;
-                                p.Order = counter++;
-                                p.DatabaseType = DatabaseType.MySql;
+                                try
+                                {
+                                    Regex r = new Regex(mysqlQuoteRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                                    var matches = r.Matches(line);
+                                    p.ColumnName = RemoveNail(matches[0].Groups[0].ToStr());
+                                    p.PrimaryKey = false;
+                                    p.ID = counter++;
+                                    p.Order = counter++;
+                                    p.DatabaseType = DatabaseType.MySql;
+
+                                }
+                                catch (Exception ex)
+                                {
+                                    Logger.Error(ex, ex.Message, line);
+                                }
 
                             }
 
@@ -174,18 +223,18 @@ namespace DotNetCodeGenerator.Domain.Helpers
                         }
                         catch (Exception ex)
                         {
-                            Logger.Error(ex, ex.Message, txt);
+                            Logger.Error(ex, ex.Message, line);
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-
+                    Logger.Error(ex, ex.Message, line);
 
                 }
 
             }
-
+            Console.WriteLine("databaseName:" + databaseName);
             Console.WriteLine("tableName:" + tableName);
             Console.WriteLine("primaryKey:" + primaryKey);
             string tableSchema = "";
@@ -198,7 +247,6 @@ namespace DotNetCodeGenerator.Domain.Helpers
             databaseMetaData.SelectedTable.TableType = "";
             databaseMetaData.SelectedTable.TableSchema = tableSchema;
 
-            Console.WriteLine(XmlParserHelper.ToXml(databaseMetaData));
             databaseMetaData.DatabaseType = databaseType;
             return databaseMetaData;
         }

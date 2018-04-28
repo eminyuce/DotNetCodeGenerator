@@ -20,9 +20,23 @@ namespace DotNetCodeGenerator.Tests.Controllers
     public class HomeControllerTest
     {
 
-        public string MySqlConnectionString = ConfigurationManager.ConnectionStrings["MysqlConnectionString"].ConnectionString.ToStr();
-        public string ConnectionString = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString.ToStr();
+        public string MySqlConnectionString
+        {
 
+            get
+            {
+                return ConfigurationManager.ConnectionStrings["MysqlConnectionString"].ConnectionString.ToStr();
+            }
+        }
+
+        public string ConnectionString
+        {
+
+            get
+            {
+                return ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString.ToStr();
+            }
+        }
 
         [TestInitialize]
         public void MyTestInitialize()
@@ -33,7 +47,19 @@ namespace DotNetCodeGenerator.Tests.Controllers
         [TestMethod]
         public void ParseSqlStatement()
         {
-            string txt = @"CREATE TABLE [dbo].[Products](
+            string txt = @"
+
+USE [TestEY]
+GO
+
+/****** Object:  Table [dbo].[Products]    Script Date: 4/28/2018 12:53:17 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Products](
 	[Id] [int] IDENTITY(1,1) NOT NULL,
 	[StoreId] [int] NULL,
 	[ProductCategoryId] [int] NOT NULL,
@@ -46,9 +72,9 @@ namespace DotNetCodeGenerator.Tests.Controllers
 	[MainPage] [bit] NULL,
 	[State] [bit] NULL,
 	[Ordering] [int] NULL,
-	[CreatedDate] [datetime2](7) NOT NULL CONSTRAINT [DF_Products_CreatedDate]  DEFAULT (getdate()),
+	[CreatedDate] [datetime2](7) NOT NULL,
 	[ImageState] [bit] NULL,
-	[UpdatedDate] [datetime2](7) NOT NULL CONSTRAINT [DF_Products_UpdatedDate]  DEFAULT (getdate()),
+	[UpdatedDate] [datetime2](7) NOT NULL,
 	[Price] [float] NOT NULL,
 	[Discount] [float] NOT NULL,
 	[UnitsInStock] [int] NULL,
@@ -60,6 +86,15 @@ namespace DotNetCodeGenerator.Tests.Controllers
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
+
+ALTER TABLE [dbo].[Products] ADD  CONSTRAINT [DF_Products_CreatedDate]  DEFAULT (getdate()) FOR [CreatedDate]
+GO
+
+ALTER TABLE [dbo].[Products] ADD  CONSTRAINT [DF_Products_UpdatedDate]  DEFAULT (getdate()) FOR [UpdatedDate]
+GO
+
+
+
 ";
 
 
@@ -128,7 +163,7 @@ CREATE TABLE `urunler` (
 
 ";
 
-            var metadata =  SqlParserHelper.ParseSqlCreateStatement(txt);
+            var metadata = SqlParserHelper.ParseSqlCreateStatement(txt);
             var r = new CodeGeneratorResult();
             r.ModifiedTableName = "NwmProducts";
             CodeProducerHelper CodeProducerHelper = new CodeProducerHelper();
@@ -188,7 +223,7 @@ CREATE TABLE `urunler` (
             var pp = new TestRepository();
             for (int i = 0; i < 10000; i++)
             {
-                pp.SaveOrUpdateNwmTest(new NwmTest() { Name = (i+100) + Guid.NewGuid().ToStr() });
+                pp.SaveOrUpdateNwmTest(new NwmTest() { Name = (i + 100) + Guid.NewGuid().ToStr() });
             }
             var item = new NwmAyarlar();
 
@@ -222,10 +257,10 @@ CREATE TABLE `urunler` (
             item.gplus = "";
             item.foursquare = "";
             item.map = "";
-           // var result1= pp.SaveOrUpdateNwmAyarlar(item);
-           // var ayarlarItem = pp.GetNwmAyarlar(result1);
+            // var result1= pp.SaveOrUpdateNwmAyarlar(item);
+            // var ayarlarItem = pp.GetNwmAyarlar(result1);
 
-           // Console.WriteLine(ayarlarItem.google);
+            // Console.WriteLine(ayarlarItem.google);
         }
         [TestMethod]
         public void Index()
@@ -276,7 +311,7 @@ CREATE TABLE `urunler` (
 
             //IP / Port	: 37.230.108.236 / 3306
 
-         
+
             string cmdText = "call sp_test(@n, @f);";
             //var mySqlParameters = new List<MySqlParameter>();
             //mySqlParameters.Add(new MySqlParameter("@n", "steve"));
@@ -292,7 +327,7 @@ CREATE TABLE `urunler` (
             tableRepository.GetSelectedMysqlTableMetaData(databaseMetaData, "def.test.urunler");
 
 
-       
+
 
         }
 
@@ -319,7 +354,7 @@ CREATE TABLE `urunler` (
             item.usable_balance_percent = 1;
             item.bot_user = 3;
 
-            var id =  testRepo.SaveOrUpdateNwmCurrencyConfig(item);
+            var id = testRepo.SaveOrUpdateNwmCurrencyConfig(item);
             Console.WriteLine("id:" + id);
         }
     }
