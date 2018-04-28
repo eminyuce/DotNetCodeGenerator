@@ -215,7 +215,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                                         p.DataType = p.DataType.Replace("(" + p.MaxChar + ")", "");
                                     }
 
-                                    p.DataTypeMaxChar = p.DataType + p.MaxChar.ToStr();
+                                    p.DataTypeMaxChar = lineParts[1];
                                     p.PrimaryKey = false;
                                     p.ID = counter++;
                                     p.Order = counter++;
