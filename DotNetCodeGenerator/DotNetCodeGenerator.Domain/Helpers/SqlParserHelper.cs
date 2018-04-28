@@ -160,6 +160,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
 
                         try
                         {
+                            var lineParts = Regex.Split(line, @"\s+").Select(r => r.Trim()).Where(s => !String.IsNullOrEmpty(s)).ToList();
                             var isNotNull = lineLower.Contains("not null");
                             p.IsNull = isNotNull ? "NO" : "YES";
                             string tbl = isNotNull ? "not null" : "null";
@@ -200,9 +201,21 @@ namespace DotNetCodeGenerator.Domain.Helpers
                             {
                                 try
                                 {
+                                    //  `youtube` varchar(255) DEFAULT NULL,
                                     Regex r = new Regex(mysqlQuoteRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
                                     var matches = r.Matches(line);
                                     p.ColumnName = RemoveNail(matches[0].Groups[0].ToStr());
+                                    p.DataType = lineParts[1];
+
+                                    if (p.DataType.IndexOf("(") > -1 && p.DataType.IndexOf(")") > -1)
+                                    {
+                                        r = new Regex(paranthesesRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                                        var matches3 = r.Matches(line);
+                                        p.MaxChar = matches3[0].Groups[0].ToStr();
+                                        p.DataType = p.DataType.Replace("(" + p.MaxChar + ")", "");
+                                    }
+
+                                    p.DataTypeMaxChar = p.DataType + p.MaxChar.ToStr();
                                     p.PrimaryKey = false;
                                     p.ID = counter++;
                                     p.Order = counter++;
