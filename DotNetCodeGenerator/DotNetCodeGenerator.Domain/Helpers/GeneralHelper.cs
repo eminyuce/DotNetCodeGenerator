@@ -12,7 +12,6 @@ namespace DotNetCodeGenerator.Domain.Helpers
     public class GeneralHelper
     {
       
-
         public static string ConvertTypeToSQL(string s)
         {
             switch (s)

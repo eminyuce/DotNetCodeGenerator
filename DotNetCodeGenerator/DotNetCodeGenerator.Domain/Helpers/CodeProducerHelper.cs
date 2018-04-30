@@ -1204,8 +1204,8 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 List<string> tableNames = new List<string>();
                 try
                 {
-                    storedProcName = Regex.Split(StoredProc_Exec, @"\s+").Select(r => r.Trim()).FirstOrDefault();
-                    String[] storedProcNameParts = Regex.Split(storedProcName, @"_").Select(r => r.Trim()).ToArray();
+                    storedProcName = storedProcName.SplitString().FirstOrDefault();
+                    String[] storedProcNameParts = storedProcName.SplitString(@"_").ToArray();
                     storedProcName = storedProcNameParts != null && storedProcNameParts.Any() ? storedProcNameParts[1] : storedProcName;
                     storedProcName = GeneralHelper.ToTitleCase(storedProcName);
                     //  storedProcName = StoredProc_Exec.Split("-".ToCharArray());

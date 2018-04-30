@@ -14,7 +14,11 @@ namespace DotNetCodeGenerator.Domain.Helpers
 {
     public static class CustomConvert
     {
-       
+
+        public static List<String> SplitString(this string text, string regExp = @"\s+")
+        {
+            return Regex.Split(text, regExp).Select(r => r.Trim()).Where(t => !String.IsNullOrEmpty(t)).ToList();
+        }
         public static int GetIdWithoutDecode(this string id)
         {
             if (String.IsNullOrEmpty(id))
@@ -25,7 +29,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
             var m = id.Split("-".ToCharArray()).Last();
             return m.ToInt();
         }
-       
+
         public static string ToAlphaNumericOnly(this string input)
         {
             Regex rgx = new Regex("[^a-zA-Z0-9]");
