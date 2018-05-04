@@ -25,7 +25,7 @@ namespace DotNetCodeGenerator.Controllers
                                  select new
                                  {
                                      TableNameWithSchema = t.TableNameWithSchema,
-                                     DatabaseTableName = t.DatabaseTableName
+                                     DatabaseTableName = t.DatabaseTableName + "-" + t.SuggestedEntityName
                                  }).ToList();
 
                 resultHtml.Insert(0, new { TableNameWithSchema = "Select a Table from SqlServer", DatabaseTableName = "" });
@@ -38,7 +38,7 @@ namespace DotNetCodeGenerator.Controllers
                                   select new
                                   {
                                       TableNameWithSchema = t.TableNameWithSchema,
-                                      DatabaseTableName = t.DatabaseTableName
+                                      DatabaseTableName = t.DatabaseTableName + "-" + t.SuggestedEntityName
                                   }).ToList();
 
                 resultHtml.Insert(0, new { TableNameWithSchema = "Select a Table From MySql", DatabaseTableName = "" });

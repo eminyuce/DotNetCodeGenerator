@@ -14,6 +14,13 @@ namespace DotNetCodeGenerator.Domain.Entities
         public string TableType { get; set; }
         public string TableSchema { get; set; }
 
+        public string SuggestedEntityName
+        {
+            get
+            {
+                return String.Format("{0}", TableName);
+            }
+        }
         public string DatabaseTableName
         {
             get
