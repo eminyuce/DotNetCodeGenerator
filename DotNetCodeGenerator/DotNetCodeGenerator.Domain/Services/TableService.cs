@@ -76,7 +76,7 @@ namespace DotNetCodeGenerator.Domain.Services
         {
             DatabaseMetadata databaseMetaData = new DatabaseMetadata();
 
-            databaseMetaData = GetDatabaseMetaData(codeGeneratorResult, databaseMetaData);
+            databaseMetaData = await GetDatabaseMetaDataAsync(codeGeneratorResult, databaseMetaData);
 
             CodeProducerHelper.CodeGeneratorResult = codeGeneratorResult;
             CodeProducerHelper.DatabaseMetadata = databaseMetaData;
@@ -114,34 +114,10 @@ namespace DotNetCodeGenerator.Domain.Services
             codeGeneratorResult.UserMessage = tableName + " table codes are created. You made it dude, Congratulation :)";
             codeGeneratorResult.UserMessageState = UserMessageState.Success;
         }
-        private DatabaseMetadata GetDatabaseMetaData(CodeGeneratorResult codeGeneratorResult, DatabaseMetadata databaseMetaData)
-        {
-
-            CodeProducerHelper.GenerateSaveOrUpdateStoredProcedure();
-            if (!String.IsNullOrEmpty(codeGeneratorResult.ConnectionString))
-            {
-                databaseMetaData = this.GetAllTablesFromCache(codeGeneratorResult.ConnectionString);
-                TableRepository.GetSelectedTableMetaData(databaseMetaData, codeGeneratorResult.SelectedTable);
-            }
-            else if (!String.IsNullOrEmpty(codeGeneratorResult.MySqlConnectionString))
-            {
-                databaseMetaData = this.GetAllMySqlTables(codeGeneratorResult.MySqlConnectionString);
-                TableRepository.GetSelectedMysqlTableMetaData(databaseMetaData, codeGeneratorResult.SelectedTable);
-            }
-            else if (!String.IsNullOrEmpty(codeGeneratorResult.SqlCreateTableStatement))
-            {
-                databaseMetaData = SqlParserHelper.ParseSqlCreateStatement(codeGeneratorResult.SqlCreateTableStatement);
-            }
-
-            return databaseMetaData;
-
-
-        }
         private async Task<DatabaseMetadata> GetDatabaseMetaDataAsync(CodeGeneratorResult codeGeneratorResult, DatabaseMetadata databaseMetaData)
         {
             var t = Task<DatabaseMetadata>.Factory.StartNew(() =>
            {
-               CodeProducerHelper.GenerateSaveOrUpdateStoredProcedure();
                if (!String.IsNullOrEmpty(codeGeneratorResult.ConnectionString))
                {
                    databaseMetaData = this.GetAllTablesFromCache(codeGeneratorResult.ConnectionString);

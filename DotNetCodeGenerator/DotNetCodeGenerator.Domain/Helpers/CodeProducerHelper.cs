@@ -38,7 +38,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
             foreach (TableRowMetaData item in kontrolList)
             {
                 var sqlParameter = GeneralHelper.GetUrlString(item.ColumnName);
-                if (item.DataType.IndexOf("xml") > -1 || item.DataType.IndexOf("varchar") > -1 || item.DataType.IndexOf("text") > -1)
+                if (item.DataType.IndexOf("xml") > -1 || item.DataType.IndexOf("varchar") > -1 || item.DataType.IndexOf("text") > -1 || item.DataType.IndexOf("nchar") > -1)
                 {
                     method.AppendLine("parameterList.Add(new MySqlParameter(\"@" + item.ColumnNameInput + "\", item." +
                                       item.ColumnName + ".ToStr()));");
@@ -700,7 +700,13 @@ namespace DotNetCodeGenerator.Domain.Helpers
             method2.AppendLine("public class " + modelName + "");
             method2.AppendLine("{");
 
-
+            String testColumnName = "TestColumnName";
+            method2.AppendLine(string.Format("// Entity annotions"));
+            method2.AppendLine(string.Format("//[DataType(DataType.Text)]"));
+            method2.AppendLine(string.Format("//[StringLength({0}, ErrorMessage = \"{1} cannot be longer than {0} characters.\")]", 100, testColumnName));
+            method2.AppendLine(string.Format("//[Display(Name =\"{0}\")]", testColumnName));
+            method2.AppendLine(string.Format("//[Required(ErrorMessage =\"{0}\")]", testColumnName));
+            method2.AppendLine(string.Format("//[AllowHtml]"));
 
             foreach (TableRowMetaData item in linkedList)
             {
@@ -782,7 +788,10 @@ namespace DotNetCodeGenerator.Domain.Helpers
                 var fColumnName = GeneralHelper.FirstCharacterToLower(item.ColumnName);
                 try
                 {
-                    if (item.DataType.IndexOf("varchar") > -1 || item.DataType.IndexOf("text") > -1 || item.DataType.IndexOf("xml") > -1)
+                    if (item.DataType.IndexOf("varchar") > -1
+                        || item.DataType.IndexOf("text") > -1
+                        || item.DataType.IndexOf("xml") > -1
+                        || item.DataType.IndexOf("nchar") > -1)
                     {
                         method555.Append("string " + fColumnName + ",");
                     }
@@ -907,7 +916,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
             foreach (TableRowMetaData item in kontrolList)
             {
 
-                if (item.DataType.IndexOf("varchar") > -1)
+                if (item.DataType.IndexOf("varchar") > -1 || item.DataType.IndexOf("nchar") > -1)
                 {
                     // method.AppendLine("item." + item.ColumnName + " = (read[\"" + item.ColumnName + "\"] is DBNull) ? \"\" : read[\"" + item.ColumnName + "\"].ToString();");
                     method.AppendLine("item." + item.ColumnName + " = \"\";");
@@ -1149,7 +1158,7 @@ namespace DotNetCodeGenerator.Domain.Helpers
                     method.AppendLine("parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + sqlParameter + "\", item." +
                                       item.ColumnName + ".ToStr(),SqlDbType.Xml));");
                 }
-                else if (item.DataType.IndexOf("varchar") > -1)
+                else if (item.DataType.IndexOf("varchar") > -1 || item.DataType.IndexOf("nchar") > -1)
                 {
                     method.AppendLine("parameterList.Add(DatabaseUtility.GetSqlParameter(\"" + sqlParameter + "\", item." +
                                       item.ColumnName + ".ToStr(),SqlDbType.NVarChar));");
