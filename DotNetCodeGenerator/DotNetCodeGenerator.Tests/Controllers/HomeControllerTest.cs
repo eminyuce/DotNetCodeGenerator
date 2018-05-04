@@ -14,6 +14,7 @@ using DotNetCodeGenerator.Domain.Services;
 using MySql.Data.MySqlClient;
 using System.Data;
 using System.Diagnostics;
+using System.Data.SqlClient;
 
 namespace DotNetCodeGenerator.Tests.Controllers
 {
@@ -29,7 +30,6 @@ namespace DotNetCodeGenerator.Tests.Controllers
                 return ConfigurationManager.ConnectionStrings["MysqlConnectionString"].ConnectionString.ToStr();
             }
         }
-
         public string ConnectionString
         {
 
@@ -38,6 +38,47 @@ namespace DotNetCodeGenerator.Tests.Controllers
                 return ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString.ToStr();
             }
         }
+        public void GetAllTables(String connectionString)
+        {
+            var result = new DatabaseMetadata();
+            SqlConnection con =
+                          new SqlConnection(connectionString);
+
+            try
+            {
+
+                con.Open();
+
+
+
+                result.DatabaseName = con.Database;
+                DataTable tblDatabases =
+                                con.GetSchema(
+                                           SqlClientMetaDataCollectionNames.Tables);
+
+
+                var list = new List<TableMetaData>();
+                foreach (DataRow rowDatabase in tblDatabases.Rows)
+                {
+                    var i = new TableMetaData();
+                    i.TableCatalog = rowDatabase["table_catalog"].ToStr();
+                    i.TableSchema = rowDatabase["table_schema"].ToStr();
+                    i.TableName = rowDatabase["table_name"].ToStr();
+                    i.TableType = rowDatabase["table_type"].ToStr();
+                    list.Add(i);
+                }
+
+                con.Close();
+
+                result.ConnectionString = connectionString;
+                result.Tables = list.OrderBy(t => t.TableName).ToList();
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+      
 
         [TestInitialize]
         public void MyTestInitialize()
